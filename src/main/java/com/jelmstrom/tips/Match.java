@@ -1,68 +1,46 @@
 package com.jelmstrom.tips;
 
-
-import java.sql.Timestamp;
-import java.util.List;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.UUID;
 
 public class Match {
-    private final String homeTeam;
-    private final String awayTeam;
+    public final String homeTeam;
+    public final String awayTeam;
+    public final Date matchStart;
+    public final HashSet<Result> results;
+    public final String id;
 
-
-    private final String matchStart;
-    private final int homeGoals;
-    private final int awayGoals;
-
-    public Match(String homeTeam, String awayTeam, int homeGoals, int awayGoals, String matchStart) {
+    public Match(String homeTeam, String awayTeam, Date matchStart, String id) {
         this.homeTeam = homeTeam;
         this.awayTeam = awayTeam;
-        this.homeGoals = homeGoals;
-        this.awayGoals = awayGoals;
         this.matchStart = matchStart;
+        this.id = id;
+        results = new HashSet();
+    }
+
+    public void add(Result result){
+        results.add(result);
+
     }
 
 
-    public int winner() {
-        return Integer.signum(Integer.compare(homeGoals, awayGoals));
+    Result resultFor(String user) {
+        return results.stream().filter(result->result.user.equals(user)).findFirst().get();
     }
 
-    public String getHomeTeam() {
-        return homeTeam;
-    }
 
-    public String getAwayTeam() {
-        return awayTeam;
-    }
-
-    public int pointsFor(String team) {
-        switch (winner()){
-            case 1: return homeTeam.equals(team)?3:0;
-            case 0: return homeTeam.equals(team) || awayTeam.equals(team)?1:0;
-            case -1:return team.equals(awayTeam)?3:0;
-            default : throw new IllegalStateException("winner returned incorrect value");
+    public boolean equals(Object other){
+        if(other instanceof Match){
+            Match that = (Match) other;
+            return this.awayTeam.equals(((Match) other).awayTeam)
+                    && this.homeTeam.equals(that.homeTeam)
+                    && this.matchStart.equals(that.matchStart)
+                    && this.results.hashCode() == that.results.hashCode()
+                    && this.id.equals(that.id);
 
         }
-    }
 
-    public String getMatchStart() {
-        return matchStart;
-    }
-
-    public int goalsFor(String team) {
-        if(homeTeam.equals(team)){
-            return homeGoals;
-        } else if(awayTeam.equals(team)){
-            return awayGoals;
-        }
-        return 0;
-    }
-
-    public int goalsAgainst(String team) {
-        if(homeTeam.equals(team)){
-            return awayGoals;
-        } else if(awayTeam.equals(team)){
-            return homeGoals;
-        }
-        return 0;
+        return false;
     }
 }

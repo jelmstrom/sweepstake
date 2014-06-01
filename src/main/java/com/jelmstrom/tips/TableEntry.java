@@ -19,18 +19,24 @@ public class TableEntry implements Comparable<TableEntry>{
 
     @Override
     public int compareTo(TableEntry other) {
-        int pointDiff = Integer.compare(this.points, other.points);
+        // numbers sorted in reverse order, i.e. descending
+        int pointDiff = Integer.compare(other.points, this.points);
         if(pointDiff != 0) {
             return pointDiff;
         }
 
-        int goalDifference = Integer.compare(this.goalDifference(), other.goalDifference());
+        int goalDifference = Integer.compare(other.goalDifference(), this.goalDifference());
         if(goalDifference != 0){
             return goalDifference;
         }
 
-        return Integer.compare(this.goalsFor, other.goalsFor);
-
+        int goalsFor = Integer.compare(other.goalsFor, this.goalsFor);
+        if(goalsFor != 0){
+            return goalDifference;
+        }
+        //TODO: use the score from any match played here
+        //name sorted in normal order, i.e. ascending.
+        return team.compareToIgnoreCase(other.team);
     }
 
     public int goalDifference() {
