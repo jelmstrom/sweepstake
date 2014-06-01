@@ -38,15 +38,20 @@ public class MatchRepository {
                     .append("matchStart", match.matchStart.getTime())
                     .append("results", results)
                     .append("matchId", match.id);
-        matchCollection.insert(entry);
-
+        Match persisted = read(match.id);
+        if(persisted.id.equals(match.id)){
+            matchCollection.update(new BasicDBObject("matchId", match.id), entry);
+        } else {
+            matchCollection.insert(entry);
+        }
     }
 
     public static Match read(String matchId) {
         DBObject dbMatch = matchCollection.findOne(new BasicDBObject("matchId", matchId));
-        Match match = buildMatch(dbMatch);
-
-        return match;
+        if(dbMatch != null && null != dbMatch.get("matchId")){
+            return buildMatch(dbMatch);
+        }
+        return new Match("", "", new Date(), "");
     }
 
     public static List<Match> getAll(){

@@ -21,6 +21,7 @@ public class AcceptanceTest {
     private List<String> groupA = asList(brazil, germany, argentina, australia);
     private List<Result> results;
 
+    private Sweepstake sweepstake;
 
     @Before
     public void setup(){
@@ -43,15 +44,15 @@ public class AcceptanceTest {
 
 
 
-        results.add(new Result(matches.get(0), 2, 1, "Admin")); //2, 0 (2p)
-        results.add(new Result(matches.get(1), 2, 0, "Admin")); // 2, 0 (3p)
-        results.add(new Result(matches.get(2), 0, 0, "Admin")); // 2, 0 (1p)
+        results.add(new Result(matches.get(0), 2, 1, "Admin"));
+        results.add(new Result(matches.get(1), 2, 0, "Admin"));
+        results.add(new Result(matches.get(2), 0, 0, "Admin"));
 
-        results.add(new Result(matches.get(3), 1, 3, "Admin")); // 2, 0 (0p)
-        results.add(new Result(matches.get(4), 0, 1, "Admin")); // 0,1 (1p)
+        results.add(new Result(matches.get(3), 1, 3, "Admin"));
+        results.add(new Result(matches.get(4), 0, 1, "Admin"));
 
-        results.add(new Result(matches.get(5), 1, 2, "Admin"));  // 1, 5, (2p)
-        // 9 p
+        results.add(new Result(matches.get(5), 1, 2, "Admin"));
+
 
     }
 
