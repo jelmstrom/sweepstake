@@ -26,8 +26,8 @@ public class AcceptanceTest {
 
     @Before
     public void setup(){
-        matches = new ArrayList();
-        results = new ArrayList();
+        matches = new ArrayList<>();
+        results = new ArrayList<>();
         Date matchStart = new Date();
         matches.add( new Match(brazil, germany, matchStart, "A1"));
         matches.add( new Match(brazil, argentina, matchStart, "A2"));
@@ -62,6 +62,7 @@ public class AcceptanceTest {
     @After
     public void tearDown(){
         MatchRepository.remove(matches);
+        MatchRepository.tablePredictionCollection.drop();
     }
 
 
@@ -102,8 +103,6 @@ public class AcceptanceTest {
         List<String> userPrediction = asList(brazil, argentina, australia, germany);
         TablePrediction prediction = new TablePrediction("Johan", "GroupA", userPrediction);
         int score = sweepstake.scoreTable(prediction);
-
-
         assertThat(score, is(7));
     }
 

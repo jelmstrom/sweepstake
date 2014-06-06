@@ -1,19 +1,25 @@
 package com.jelmstrom.tips;
 
+import org.junit.After;
 import org.junit.Test;
 
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 
 public class IntegrationTest {
 
 
+    @After
+    public void tearDown(){
+        MatchRepository.matchCollection.drop();
+        MatchRepository.tablePredictionCollection.drop();
+    }
+
     @Test
-         public void matchStoredInDb(){
+    public void matchStoredInDb(){
         Match match = new Match("TeamA", "TeamB", new Date(), UUID.randomUUID().toString());
         new Result(match, 2, 1, "Johan");
         new Result(match, 2, 2, "Christian");
@@ -52,5 +58,14 @@ public class IntegrationTest {
 
         assertThat(versionTwo.equals(match), is(true));
         assertThat(versionTwo.equals(versionOne), is(false));
+    }
+
+    @Test
+    public void tablePredictionsAreStoredAndReadInCorrectOrder(){
+        TablePrediction prediction = new TablePrediction("user", "grp", Arrays.asList("teamB", "teamA", "teamC", "teamD"));
+        MatchRepository.store(prediction);
+        TablePrediction stored = MatchRepository.readPrediction(prediction.user, prediction.group);
+        assertThat(stored, equalTo(prediction));
+
     }
 }

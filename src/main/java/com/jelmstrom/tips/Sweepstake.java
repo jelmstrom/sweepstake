@@ -8,6 +8,7 @@ import static java.util.stream.Collectors.toList;
 public class Sweepstake {
 
 
+
     public List<TableEntry> calculateTableFor(List<String> group, String user) {
         List<Result> results = matchesFor(user);
         return group.stream().map(team -> recordForTeam(team, user, results)).sorted().collect(toList());
