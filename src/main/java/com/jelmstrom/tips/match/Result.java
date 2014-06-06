@@ -1,4 +1,4 @@
-package com.jelmstrom.tips;
+package com.jelmstrom.tips.match;
 
 public class Result {
 

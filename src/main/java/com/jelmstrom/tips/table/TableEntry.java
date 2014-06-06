@@ -1,4 +1,4 @@
-package com.jelmstrom.tips;
+package com.jelmstrom.tips.table;
 
 public class TableEntry implements Comparable<TableEntry>{
 

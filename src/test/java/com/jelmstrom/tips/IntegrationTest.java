@@ -1,5 +1,11 @@
 package com.jelmstrom.tips;
 
+import com.jelmstrom.tips.match.Match;
+import com.jelmstrom.tips.match.MatchRepository;
+import com.jelmstrom.tips.persistence.MongoRepository;
+import com.jelmstrom.tips.match.Result;
+import com.jelmstrom.tips.table.TablePrediction;
+import com.jelmstrom.tips.table.TableRepository;
 import org.junit.After;
 import org.junit.Test;
 
@@ -15,7 +21,7 @@ public class IntegrationTest {
     @After
     public void tearDown(){
         MatchRepository.matchCollection.drop();
-        MatchRepository.tablePredictionCollection.drop();
+        TableRepository.tablePredictionCollection.drop();
     }
 
     @Test
@@ -23,8 +29,8 @@ public class IntegrationTest {
         Match match = new Match("TeamA", "TeamB", new Date(), UUID.randomUUID().toString());
         new Result(match, 2, 1, "Johan");
         new Result(match, 2, 2, "Christian");
-        MatchRepository.store(match);
-        Match persisted = MatchRepository.read(match.id);
+        com.jelmstrom.tips.match.MatchRepository.store(match);
+        Match persisted = com.jelmstrom.tips.match.MatchRepository.read(match.id);
         assertThat(persisted.equals(match), is(true));
     }
 
@@ -37,9 +43,9 @@ public class IntegrationTest {
         Match match2 = new Match("TeamA", "TeamB", new Date(), UUID.randomUUID().toString());
         new Result(match, 2, 1, "Johan");
         new Result(match, 2, 2, "Christian");
-        MatchRepository.store(match);
-        MatchRepository.store(match2);
-        List<Match> persisted = MatchRepository.getAll();
+        com.jelmstrom.tips.match.MatchRepository.store(match);
+        com.jelmstrom.tips.match.MatchRepository.store(match2);
+        List<Match> persisted = com.jelmstrom.tips.match.MatchRepository.getAll();
         assertThat(persisted.size() > 1, is(true));
     }
 
@@ -48,13 +54,13 @@ public class IntegrationTest {
     public void saveExistingMatchUpdates(){
         Match match = new Match("TeamA", "TeamB", new Date(), UUID.randomUUID().toString());
         new Result(match, 2, 1, "Johan");
-        MatchRepository.store(match);
+        com.jelmstrom.tips.match.MatchRepository.store(match);
 
-        Match versionOne = MatchRepository.read(match.id);
+        Match versionOne = com.jelmstrom.tips.match.MatchRepository.read(match.id);
         new Result(match, 2, 2, "Christian");
-        MatchRepository.store(match);
+        com.jelmstrom.tips.match.MatchRepository.store(match);
 
-        Match versionTwo = MatchRepository.read(match.id);
+        Match versionTwo = com.jelmstrom.tips.match.MatchRepository.read(match.id);
 
         assertThat(versionTwo.equals(match), is(true));
         assertThat(versionTwo.equals(versionOne), is(false));
@@ -63,8 +69,8 @@ public class IntegrationTest {
     @Test
     public void tablePredictionsAreStoredAndReadInCorrectOrder(){
         TablePrediction prediction = new TablePrediction("user", "grp", Arrays.asList("teamB", "teamA", "teamC", "teamD"));
-        MatchRepository.store(prediction);
-        TablePrediction stored = MatchRepository.readPrediction(prediction.user, prediction.group);
+        TableRepository.store(prediction);
+        TablePrediction stored = TableRepository.readPrediction(prediction.user, prediction.group);
         assertThat(stored, equalTo(prediction));
 
     }

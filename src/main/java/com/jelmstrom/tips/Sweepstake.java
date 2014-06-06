@@ -1,5 +1,10 @@
 package com.jelmstrom.tips;
 
+import com.jelmstrom.tips.match.Match;
+import com.jelmstrom.tips.match.Result;
+import com.jelmstrom.tips.table.TableEntry;
+import com.jelmstrom.tips.table.TablePrediction;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -15,7 +20,7 @@ public class Sweepstake {
     }
 
     private List<Result> matchesFor(String user) {
-        return MatchRepository.getAll().stream().map(match -> match.resultFor(user)).filter(Objects::nonNull).collect(toList());
+        return com.jelmstrom.tips.match.MatchRepository.getAll().stream().map(match -> match.resultFor(user)).filter(Objects::nonNull).collect(toList());
     }
 
     private TableEntry recordForTeam(String team, String user, List<Result> results) {

@@ -1,4 +1,4 @@
-package com.jelmstrom.tips;
+package com.jelmstrom.tips.match;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -24,7 +24,7 @@ public class Match {
 
     }
 
-    Result resultFor(String user) {
+    public Result resultFor(String user) {
         Optional<Result> maybe = results.stream().filter(result -> result.user.equals(user)).findFirst();
         if(maybe.isPresent()){
             return maybe.get();

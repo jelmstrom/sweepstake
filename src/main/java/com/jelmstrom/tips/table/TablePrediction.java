@@ -1,4 +1,4 @@
-package com.jelmstrom.tips;
+package com.jelmstrom.tips.table;
 
 import java.util.List;
 

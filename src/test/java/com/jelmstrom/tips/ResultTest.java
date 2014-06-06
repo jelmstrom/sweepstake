@@ -1,6 +1,8 @@
 package com.jelmstrom.tips;
 
 
+import com.jelmstrom.tips.match.Match;
+import com.jelmstrom.tips.match.Result;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;

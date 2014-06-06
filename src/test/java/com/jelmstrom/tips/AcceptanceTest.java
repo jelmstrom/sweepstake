@@ -1,5 +1,9 @@
 package com.jelmstrom.tips;
 
+import com.jelmstrom.tips.match.Match;
+import com.jelmstrom.tips.match.Result;
+import com.jelmstrom.tips.table.TableEntry;
+import com.jelmstrom.tips.table.TablePrediction;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,14 +24,13 @@ public class AcceptanceTest {
     private final String argentina = "Argentina";
     private List<Match> matches;
     private List<String> groupA = asList(brazil, germany, argentina, australia);
-    private List<Result> results;
 
     private Sweepstake sweepstake = new Sweepstake();
 
     @Before
     public void setup(){
         matches = new ArrayList<>();
-        results = new ArrayList<>();
+        List<Result> results = new ArrayList<>();
         Date matchStart = new Date();
         matches.add( new Match(brazil, germany, matchStart, "A1"));
         matches.add( new Match(brazil, argentina, matchStart, "A2"));
@@ -56,13 +59,12 @@ public class AcceptanceTest {
 
         results.add(new Result(matches.get(5), 1, 2, "Admin"));
 
-        MatchRepository.store(matches);
+        com.jelmstrom.tips.match.MatchRepository.store(matches);
     }
 
     @After
     public void tearDown(){
-        MatchRepository.remove(matches);
-        MatchRepository.tablePredictionCollection.drop();
+        com.jelmstrom.tips.match.MatchRepository.remove(matches);
     }
 
 

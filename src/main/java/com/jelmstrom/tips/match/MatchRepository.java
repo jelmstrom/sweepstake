@@ -1,31 +1,22 @@
-package com.jelmstrom.tips;
+package com.jelmstrom.tips.match;
 
+import com.jelmstrom.tips.persistence.MongoRepository;
+import com.jelmstrom.tips.table.TablePrediction;
 import com.mongodb.*;
 
-import java.net.UnknownHostException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
-public class MatchRepository {
+public class MatchRepository extends MongoRepository {
 
-    private static final MongoClient mongoClient;
-
-    static {
-        try {
-            mongoClient = new MongoClient("127.0.0.1", 27017);
-        } catch (UnknownHostException e) {
-            throw new IllegalStateException("Database not initialized properly");
-        }
-    }
-
-    private static final DB db = mongoClient.getDB("sweepstake");
-
-    static final DBCollection matchCollection = db.getCollection("matches");
-    static final DBCollection tablePredictionCollection = db.getCollection("tablePrediction");
+    public static final DBCollection matchCollection = getDb().getCollection("matches");
 
     public static void store(Match match) {
-        List <DBObject> results =
+        List<DBObject> results =
                 match.results.stream()
                         .map(result -> new BasicDBObject("homeGoals", result.homeGoals)
                                 .append("awayGoals", result.awayGoals)
@@ -81,8 +72,6 @@ public class MatchRepository {
         matches.stream().forEach(MatchRepository::store);
     }
 
-
-
     public static void remove(List<Match> matches) {
         matches.stream().forEach(MatchRepository::remove);
     }
@@ -93,34 +82,6 @@ public class MatchRepository {
     }
 
 
-    public static void store(TablePrediction prediction){
-            BasicDBObject dbPrediction = new BasicDBObject()
-                    .append("group", prediction.group)
-                    .append("user", prediction.user)
-                    .append("prediction", prediction.tablePrediction);
-        if(readPrediction(prediction.user, prediction.group).tablePrediction.isEmpty()){
-            tablePredictionCollection.insert(dbPrediction);
-        } else  {
-            tablePredictionCollection.update(new BasicDBObject()
-                    .append("group", prediction.group)
-                    .append("user", prediction.user)
-                    , dbPrediction);
-        }
-    }
 
-    public static TablePrediction readPrediction(String user, String group) {
-        DBObject dbPrediction = tablePredictionCollection.findOne(new BasicDBObject("user", user).append("group", group));
-        if(dbPrediction != null && null != dbPrediction.get("user")){
-            return buildTablePrediction(dbPrediction);
-        }
-        return new TablePrediction(user, group, Collections.emptyList());
-    }
-
-    private static TablePrediction buildTablePrediction(DBObject dbMatch) {
-
-        List<String> predictions = new ArrayList<>();
-        ((BasicDBList) dbMatch.get("prediction")).forEach(entry -> predictions.add((String) entry));
-        return new TablePrediction(dbMatch.get("user").toString(), dbMatch.get("group").toString(), predictions);
-    }
 
 }
