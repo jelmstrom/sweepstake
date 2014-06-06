@@ -56,7 +56,7 @@ public class MatchRepository {
     }
 
     public static List<Match> getAll(){
-        List<Match> matches = new ArrayList();
+        List<Match> matches = new ArrayList<>();
         DBCursor dbObjects = matchCollection.find();
         dbObjects.forEach(dbMatch -> matches.add(buildMatch(dbMatch)));
         return matches;
@@ -80,13 +80,13 @@ public class MatchRepository {
     }
 
     public static void store(List<Match> matches) {
-        matches.stream().forEach(match -> store(match));
+        matches.stream().forEach(MatchRepository::store);
     }
 
 
 
     public static void remove(List<Match> matches) {
-        matches.stream().forEach(match -> remove(match));
+        matches.stream().forEach(MatchRepository::remove);
     }
 
     public static void remove(Match match) {

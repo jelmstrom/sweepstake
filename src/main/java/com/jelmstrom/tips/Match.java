@@ -16,7 +16,7 @@ public class Match {
         this.awayTeam = awayTeam;
         this.matchStart = matchStart;
         this.id = id;
-        results = new HashSet();
+        results = new HashSet<>();
     }
 
     public void add(Result result){

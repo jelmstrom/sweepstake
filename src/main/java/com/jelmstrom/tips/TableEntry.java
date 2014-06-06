@@ -16,7 +16,7 @@ public class TableEntry implements Comparable<TableEntry>{
         this.points = points;
     }
 
-
+    @SuppressWarnings("NullableProblems")
     @Override
     public int compareTo(TableEntry other) {
         // numbers sorted in reverse order, i.e. descending

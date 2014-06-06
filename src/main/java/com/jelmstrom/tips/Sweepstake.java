@@ -24,8 +24,7 @@ public class Sweepstake {
                 .mapToInt(match -> match.goalsFor(team)).sum();
         int goalsAgainst =  results.stream().filter(result -> result.user.equals(user))
                 .mapToInt(match -> match.goalsAgainst(team)).sum();
-        TableEntry entry = new TableEntry(team, goalsFor, goalsAgainst, points);
-        return entry;
+        return new TableEntry(team, goalsFor, goalsAgainst, points);
     }
 
 

@@ -51,7 +51,7 @@ public class Result {
             Result that = (Result) other;
             return this.awayGoals == that.awayGoals
                     && this.homeGoals == that.homeGoals
-                    && this.user == that.user
+                    && this.user.equals(that.user)
                     && this.match.id.equals(that.match.id);
         }
         return false;
