@@ -2,7 +2,7 @@ package com.jelmstrom.tips;
 
 import java.util.Date;
 import java.util.HashSet;
-import java.util.UUID;
+import java.util.Optional;
 
 public class Match {
     public final String homeTeam;
@@ -24,9 +24,13 @@ public class Match {
 
     }
 
-
     Result resultFor(String user) {
-        return results.stream().filter(result->result.user.equals(user)).findFirst().get();
+        Optional<Result> maybe = results.stream().filter(result -> result.user.equals(user)).findFirst();
+        if(maybe.isPresent()){
+            return maybe.get();
+        } else {
+            return null;
+        }
     }
 
 

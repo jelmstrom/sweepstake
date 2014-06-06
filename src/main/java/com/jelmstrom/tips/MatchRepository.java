@@ -24,6 +24,7 @@ public class MatchRepository {
     private static final DB db = mongoClient.getDB("sweepstake");
 
     private static final DBCollection matchCollection = db.getCollection("matches");
+    private static final DBCollection tablePredictionCollection = db.getCollection("tablePrediction");
 
     public static void store(Match match) {
         List <DBObject> results =
@@ -77,4 +78,21 @@ public class MatchRepository {
         }
         return match;
     }
+
+    public static void store(List<Match> matches) {
+        matches.stream().forEach(match -> store(match));
+    }
+
+
+
+    public static void remove(List<Match> matches) {
+        matches.stream().forEach(match -> remove(match));
+    }
+
+    public static void remove(Match match) {
+        matchCollection.remove(new BasicDBObject("matchId", match.id));
+
+    }
+
+
 }
