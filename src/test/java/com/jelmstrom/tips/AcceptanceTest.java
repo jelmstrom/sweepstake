@@ -69,16 +69,16 @@ public class AcceptanceTest {
 
     @After
     public void tearDown(){
-        MatchRepository.remove(matches);
-        GroupRepository.remove(groupA.groupName);
-        TableRepository.tablePredictionCollection.drop();
+       MatchRepository.remove(matches);
+       GroupRepository.remove(groupA.groupName);
+       TableRepository.tablePredictionCollection.drop();
     }
 
 
     @Test
     public void tableForGroupAShouldBeBrazilGermanyArgentinaAustralia(){
 
-        List<TableEntry> table = sweepstake.calculateTableFor(groupA, "Johan");
+        List<TableEntry> table = sweepstake.calculateTableFor(groupA.groupName, "Johan");
 
         assertThat(table.get(0).team, is(brazil));
         assertThat(table.get(1).team, is(argentina));
@@ -91,7 +91,7 @@ public class AcceptanceTest {
     @Test
     public void tableForUserWithoutResultsShouldBeOrderedAlphabetically(){
 
-        List<TableEntry> table = sweepstake.calculateTableFor(groupA, "Christian");
+        List<TableEntry> table = sweepstake.calculateTableFor(groupA.groupName, "Christian");
 
         assertThat(table.get(0).team, is(argentina));
         assertThat(table.get(1).team, is(australia));

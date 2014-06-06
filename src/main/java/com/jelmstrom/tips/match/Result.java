@@ -1,7 +1,9 @@
 package com.jelmstrom.tips.match;
 
-public class Result {
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
+public class Result {
+    @JsonBackReference
     public final Match match;
     public final int homeGoals;
     public final int awayGoals;

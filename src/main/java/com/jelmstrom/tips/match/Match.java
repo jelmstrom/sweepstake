@@ -1,5 +1,7 @@
 package com.jelmstrom.tips.match;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Optional;
@@ -8,6 +10,7 @@ public class Match {
     public final String homeTeam;
     public final String awayTeam;
     public final Date matchStart;
+    @JsonManagedReference
     public final HashSet<Result> results;
     public final String id;
 

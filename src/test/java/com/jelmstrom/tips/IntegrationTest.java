@@ -7,6 +7,8 @@ import com.jelmstrom.tips.match.MatchRepository;
 import com.jelmstrom.tips.match.Result;
 import com.jelmstrom.tips.table.TablePrediction;
 import com.jelmstrom.tips.table.TableRepository;
+import com.jelmstrom.tips.user.User;
+import com.jelmstrom.tips.user.UserRepository;
 import org.junit.After;
 import org.junit.Test;
 
@@ -24,6 +26,7 @@ public class IntegrationTest {
         MatchRepository.matchCollection.drop();
         TableRepository.tablePredictionCollection.drop();
         GroupRepository.groupCollection.drop();
+        UserRepository.userCollection.drop();
     }
 
     @Test
@@ -47,7 +50,7 @@ public class IntegrationTest {
         new Result(match, 2, 2, "Christian");
         com.jelmstrom.tips.match.MatchRepository.store(match);
         com.jelmstrom.tips.match.MatchRepository.store(match2);
-        List<Match> persisted = com.jelmstrom.tips.match.MatchRepository.getAll();
+        List<Match> persisted = com.jelmstrom.tips.match.MatchRepository.read();
         assertThat(persisted.size() > 1, is(true));
     }
 
@@ -83,5 +86,21 @@ public class IntegrationTest {
         Group group = new Group("A", Arrays.asList("a", "b","c", "d"));
         GroupRepository.store(group);
         assertThat(GroupRepository.read("A"), is(equalTo(group)));
+    }
+
+    @Test
+    public void addUser(){
+        User newUser = new User("display", "Email", "cred");
+        UserRepository.store(newUser);
+        assertThat(UserRepository.read("Email"), is(equalTo(newUser)));
+    }
+
+    @Test
+    public void removeUser(){
+        User newUser = new User("display", "Email", "cred");
+        UserRepository.store(newUser);
+        assertThat(UserRepository.read("Email"), is(equalTo(newUser)));
+        UserRepository.remove("Email");
+        assertThat(UserRepository.read("Email").displayName, is(""));
     }
 }

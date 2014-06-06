@@ -1,11 +1,11 @@
 package com.jelmstrom.tips.match;
 
 import com.jelmstrom.tips.persistence.MongoRepository;
-import com.jelmstrom.tips.table.TablePrediction;
-import com.mongodb.*;
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -24,12 +24,12 @@ public class MatchRepository extends MongoRepository {
                         .collect(toList());
 
         DBObject entry = new BasicDBObject("homeTeam", match.homeTeam)
-                    .append("awayTeam", match.awayTeam)
-                    .append("matchStart", match.matchStart.getTime())
-                    .append("results", results)
-                    .append("matchId", match.id);
+                .append("awayTeam", match.awayTeam)
+                .append("matchStart", match.matchStart.getTime())
+                .append("results", results)
+                .append("matchId", match.id);
         Match persisted = read(match.id);
-        if(persisted.id.equals(match.id)){
+        if (persisted.id.equals(match.id)) {
             matchCollection.update(new BasicDBObject("matchId", match.id), entry);
         } else {
             matchCollection.insert(entry);
@@ -38,17 +38,14 @@ public class MatchRepository extends MongoRepository {
 
     public static Match read(String matchId) {
         DBObject dbMatch = matchCollection.findOne(new BasicDBObject("matchId", matchId));
-        if(dbMatch != null && null != dbMatch.get("matchId")){
+        if (dbMatch != null && null != dbMatch.get("matchId")) {
             return buildMatch(dbMatch);
         }
         return new Match("", "", new Date(), "");
     }
 
-    public static List<Match> getAll(){
-        List<Match> matches = new ArrayList<>();
-        DBCursor dbObjects = matchCollection.find();
-        dbObjects.forEach(dbMatch -> matches.add(buildMatch(dbMatch)));
-        return matches;
+    public static List<Match> read() {
+        return matchCollection.find().toArray().parallelStream().map(MatchRepository::buildMatch).collect(toList());
     }
 
     private static Match buildMatch(DBObject dbMatch) {
@@ -56,10 +53,10 @@ public class MatchRepository extends MongoRepository {
                 , dbMatch.get("awayTeam").toString()
                 , new Date(Long.parseLong(dbMatch.get("matchStart").toString()))
                 , dbMatch.get("matchId").toString());
-        BasicDBList dbResults= (BasicDBList) dbMatch.get("results");
-        BasicDBObject[] dbObjects = new  BasicDBObject[dbResults.size()];
+        BasicDBList dbResults = (BasicDBList) dbMatch.get("results");
+        BasicDBObject[] dbObjects = new BasicDBObject[dbResults.size()];
         dbResults.toArray(dbObjects);
-        for(BasicDBObject dbResult : dbObjects){
+        for (BasicDBObject dbResult : dbObjects) {
             new Result(match
                     , Integer.parseInt(dbResult.get("homeGoals").toString())
                     , Integer.parseInt(dbResult.get("awayGoals").toString())
@@ -80,8 +77,6 @@ public class MatchRepository extends MongoRepository {
         matchCollection.remove(new BasicDBObject("matchId", match.id));
 
     }
-
-
 
 
 }
