@@ -2,6 +2,7 @@ package com.jelmstrom.tips;
 
 import com.jelmstrom.tips.group.GroupRepository;
 import com.jelmstrom.tips.match.Match;
+import com.jelmstrom.tips.match.MatchRepository;
 import com.jelmstrom.tips.match.Result;
 import com.jelmstrom.tips.table.TableEntry;
 import com.jelmstrom.tips.table.TablePrediction;
@@ -16,11 +17,11 @@ public class Sweepstake {
 
 
     public List<TableEntry> calculateTableFor(List<String> group, String user) {
-        List<Result> results = matchesFor(user);
+        List<Result> results = resultsFor(user);
         return group.stream().map(team -> recordForTeam(team, user, results)).sorted().collect(toList());
     }
 
-    private List<Result> matchesFor(String user) {
+    private List<Result> resultsFor(String user) {
         return com.jelmstrom.tips.match.MatchRepository.getAll().stream().map(match -> match.resultFor(user)).filter(Objects::nonNull).collect(toList());
     }
 
@@ -35,12 +36,19 @@ public class Sweepstake {
     }
 
 
-    public int calculatePointsFor(String user, List<Match> matches) {
-        return matches.stream().map(
+    public int calculatePointsFor(String user) {
+        List<Match> matches = MatchRepository.getAll();
+        int matchScore =  matches.stream().map(
                 match -> match.resultFor(user))
                 .map(result -> userScore((Result) result))
                 .reduce(0, (a, b) -> a + b);
+
+        int groupScore = 0;
+
+        return matchScore+groupScore;
     }
+
+
 
     private int userScore(Result userResult){
         Result adminResult = userResult.match.resultFor("Admin");

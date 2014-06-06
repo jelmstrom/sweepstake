@@ -100,7 +100,7 @@ public class AcceptanceTest {
 
     @Test
     public void pointsForUserShouldBeCalculatedBasedOnAdminResults(){
-        int points = sweepstake.calculatePointsFor("Johan", matches);
+        int points = sweepstake.calculatePointsFor("Johan");
         assertThat(points, is(9));
     }
 
