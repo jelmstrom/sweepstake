@@ -1,10 +1,7 @@
 package com.jelmstrom.tips.group;
 
 import com.jelmstrom.tips.persistence.MongoRepository;
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
+import com.mongodb.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,12 +28,12 @@ public class GroupRepository extends MongoRepository {
     public static Group read(String groupName) {
         DBObject teams = groupCollection.findOne(new BasicDBObject(NAME, groupName));
         if(teams != null && null != teams.get(NAME)){
-            return buildTablePrediction(teams);
+            return buildGroup(teams);
         }
         return new Group(groupName, Collections.emptyList());
     }
 
-    private static Group buildTablePrediction(DBObject dbMatch) {
+    private static Group buildGroup(DBObject dbMatch) {
 
         List<String> teams = new ArrayList<>();
         ((BasicDBList) dbMatch.get(TEAMS)).forEach(entry -> teams.add((String) entry));

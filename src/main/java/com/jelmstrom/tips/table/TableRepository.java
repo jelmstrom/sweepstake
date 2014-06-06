@@ -1,11 +1,7 @@
 package com.jelmstrom.tips.table;
 
-import com.jelmstrom.tips.match.MatchRepository;
 import com.jelmstrom.tips.persistence.MongoRepository;
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
+import com.mongodb.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,5 +41,14 @@ public class TableRepository extends MongoRepository {
         ((BasicDBList) dbMatch.get("prediction")).forEach(entry -> predictions.add((String) entry));
         return new TablePrediction(dbMatch.get("user").toString(), dbMatch.get("group").toString(), predictions);
     }
+
+    public static List<TablePrediction> read() {
+        DBCursor teams = tablePredictionCollection.find();
+        ArrayList<TablePrediction> predictions = new ArrayList<>(teams.size());
+        teams.forEach(entry -> predictions.add(buildTablePrediction(entry)));
+        return predictions;
+
+    }
+
 
 }

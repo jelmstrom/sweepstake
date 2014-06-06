@@ -1,11 +1,13 @@
 package com.jelmstrom.tips;
 
+import com.jelmstrom.tips.group.Group;
 import com.jelmstrom.tips.group.GroupRepository;
 import com.jelmstrom.tips.match.Match;
 import com.jelmstrom.tips.match.MatchRepository;
 import com.jelmstrom.tips.match.Result;
 import com.jelmstrom.tips.table.TableEntry;
 import com.jelmstrom.tips.table.TablePrediction;
+import com.jelmstrom.tips.table.TableRepository;
 
 import java.util.List;
 import java.util.Objects;
@@ -14,11 +16,9 @@ import static java.util.stream.Collectors.toList;
 
 public class Sweepstake {
 
-
-
-    public List<TableEntry> calculateTableFor(List<String> group, String user) {
+    public List<TableEntry> calculateTableFor(Group group, String user) {
         List<Result> results = resultsFor(user);
-        return group.stream().map(team -> recordForTeam(team, user, results)).sorted().collect(toList());
+        return group.teams.stream().map(team -> recordForTeam(team, user, results)).sorted().collect(toList());
     }
 
     private List<Result> resultsFor(String user) {
@@ -43,7 +43,7 @@ public class Sweepstake {
                 .map(result -> userScore((Result) result))
                 .reduce(0, (a, b) -> a + b);
 
-        int groupScore = 0;
+        int groupScore = TableRepository.read().stream().mapToInt(this::scoreTable).sum();
 
         return matchScore+groupScore;
     }
@@ -69,11 +69,13 @@ public class Sweepstake {
     public int scoreTable(TablePrediction tablePrediction) {
 
         int score = 0;
-        List<String> groupTeams = GroupRepository.read(tablePrediction.group).teams;
-        List<String> correctOrder = calculateTableFor(groupTeams, "Admin").stream().map(entry -> entry.team).collect(toList());
+        Group group = GroupRepository.read(tablePrediction.group);
+        List<String> correctOrder = calculateTableFor(group, "Admin").stream().map(entry -> entry.team).collect(toList());
         List<String> userPrediction = tablePrediction.tablePrediction;
         if(userPrediction.equals(correctOrder)){
             score = 7;
+        } else if(correctOrder.isEmpty() || userPrediction.isEmpty()){
+            return 0;
         } else {
             List<String> topTwo =  correctOrder.subList(0,2);
             if(userPrediction.get(0).equals(correctOrder.get(0))){

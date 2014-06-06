@@ -7,6 +7,7 @@ import com.jelmstrom.tips.match.MatchRepository;
 import com.jelmstrom.tips.match.Result;
 import com.jelmstrom.tips.table.TableEntry;
 import com.jelmstrom.tips.table.TablePrediction;
+import com.jelmstrom.tips.table.TableRepository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,13 +27,13 @@ public class AcceptanceTest {
     private final String australia = "Australia";
     private final String argentina = "Argentina";
     private List<Match> matches;
-    private List<String> groupA = asList(brazil, germany, argentina, australia);
+    private Group groupA = new Group("GroupA",asList(brazil, germany, argentina, australia));
 
     private Sweepstake sweepstake = new Sweepstake();
 
     @Before
     public void setup(){
-        GroupRepository.store(new Group("GroupA", groupA));
+        GroupRepository.store(groupA);
         matches = new ArrayList<>();
         List<Result> results = new ArrayList<>();
         Date matchStart = new Date();
@@ -69,7 +70,8 @@ public class AcceptanceTest {
     @After
     public void tearDown(){
         MatchRepository.remove(matches);
-        GroupRepository.remove("GroupA");
+        GroupRepository.remove(groupA.groupName);
+        TableRepository.tablePredictionCollection.drop();
     }
 
 
@@ -108,7 +110,7 @@ public class AcceptanceTest {
     public void groupScoreForCompletelyCorrectTableShouldBeSeven(){
 
         List<String> userPrediction = asList(brazil, argentina, australia, germany);
-        TablePrediction prediction = new TablePrediction("Johan", "GroupA", userPrediction);
+        TablePrediction prediction = new TablePrediction("Johan", groupA.groupName, userPrediction);
         int score = sweepstake.scoreTable(prediction);
         assertThat(score, is(7));
     }
@@ -117,7 +119,7 @@ public class AcceptanceTest {
     public void groupScoreForFirstTwoTeamsIsFourIfCompletelyCorrect(){
 
         List<String> userPrediction = asList(brazil, argentina, germany, australia);
-        TablePrediction prediction = new TablePrediction("Johan", "GroupA", userPrediction);
+        TablePrediction prediction = new TablePrediction("Johan", groupA.groupName, userPrediction);
 
         int score = sweepstake.scoreTable(prediction);
 
@@ -129,7 +131,7 @@ public class AcceptanceTest {
     public void groupScoreForFirstTwoTeamsIsTwoIfOrderedIncorrectlyCorrect(){
 
         List<String> userPrediction = asList( argentina,brazil, germany, australia);
-        TablePrediction prediction = new TablePrediction("Johan", "GroupA", userPrediction);
+        TablePrediction prediction = new TablePrediction("Johan", groupA.groupName, userPrediction);
 
         int score = sweepstake.scoreTable(prediction);
 
@@ -141,11 +143,38 @@ public class AcceptanceTest {
     public void groupScoreIsZeroIfCompletelyWrong(){
 
         List<String> userPrediction = asList( germany, australia, argentina,brazil);
-        TablePrediction prediction = new TablePrediction("Johan", "GroupA", userPrediction);
+        TablePrediction prediction = new TablePrediction("Johan", groupA.groupName, userPrediction);
 
         int score = sweepstake.scoreTable(prediction);
 
         assertThat(score, is(0));
 
+    }
+
+
+    @Test
+    public void totalScoreForGamesAndTableShouldBeSixteen(){
+
+        List<String> userPrediction = asList(brazil, argentina, australia, germany);
+        TablePrediction prediction = new TablePrediction("Johan", groupA.groupName, userPrediction);
+        TableRepository.store(prediction);
+
+        int score = sweepstake.calculatePointsFor("Johan");
+        assertThat(score, is(16));
+    }
+
+    @Test
+    public void totalScoreCalculationHandlesEmptyActualGroupPositions(){
+
+        List<String> userPrediction = asList(brazil, argentina, australia, germany);
+        TablePrediction prediction = new TablePrediction("Johan", groupA.groupName, userPrediction);
+        TableRepository.store(prediction);
+        List<String> userPrediction2 = asList("1", "2", "3", "4");
+
+        prediction = new TablePrediction("Johan", "GroupB", userPrediction2);
+        TableRepository.store(prediction);
+
+        int score = sweepstake.calculatePointsFor("Johan");
+        assertThat(score, is(16));
     }
 }
