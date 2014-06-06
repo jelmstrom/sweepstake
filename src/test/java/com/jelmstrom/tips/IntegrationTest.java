@@ -1,8 +1,9 @@
 package com.jelmstrom.tips;
 
+import com.jelmstrom.tips.group.Group;
+import com.jelmstrom.tips.group.GroupRepository;
 import com.jelmstrom.tips.match.Match;
 import com.jelmstrom.tips.match.MatchRepository;
-import com.jelmstrom.tips.persistence.MongoRepository;
 import com.jelmstrom.tips.match.Result;
 import com.jelmstrom.tips.table.TablePrediction;
 import com.jelmstrom.tips.table.TableRepository;
@@ -22,6 +23,7 @@ public class IntegrationTest {
     public void tearDown(){
         MatchRepository.matchCollection.drop();
         TableRepository.tablePredictionCollection.drop();
+        GroupRepository.groupCollection.drop();
     }
 
     @Test
@@ -73,5 +75,13 @@ public class IntegrationTest {
         TablePrediction stored = TableRepository.readPrediction(prediction.user, prediction.group);
         assertThat(stored, equalTo(prediction));
 
+    }
+
+
+    @Test
+    public void groupRepositoryShouldStoreGroup(){
+        Group group = new Group("A", Arrays.asList("a", "b","c", "d"));
+        GroupRepository.store(group);
+        assertThat(GroupRepository.read("A"), is(equalTo(group)));
     }
 }

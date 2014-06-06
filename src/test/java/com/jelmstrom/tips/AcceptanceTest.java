@@ -1,6 +1,9 @@
 package com.jelmstrom.tips;
 
+import com.jelmstrom.tips.group.Group;
+import com.jelmstrom.tips.group.GroupRepository;
 import com.jelmstrom.tips.match.Match;
+import com.jelmstrom.tips.match.MatchRepository;
 import com.jelmstrom.tips.match.Result;
 import com.jelmstrom.tips.table.TableEntry;
 import com.jelmstrom.tips.table.TablePrediction;
@@ -29,6 +32,7 @@ public class AcceptanceTest {
 
     @Before
     public void setup(){
+        GroupRepository.store(new Group("GroupA", groupA));
         matches = new ArrayList<>();
         List<Result> results = new ArrayList<>();
         Date matchStart = new Date();
@@ -64,7 +68,8 @@ public class AcceptanceTest {
 
     @After
     public void tearDown(){
-        com.jelmstrom.tips.match.MatchRepository.remove(matches);
+        MatchRepository.remove(matches);
+        GroupRepository.remove("GroupA");
     }
 
 

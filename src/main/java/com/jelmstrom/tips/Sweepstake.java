@@ -1,5 +1,6 @@
 package com.jelmstrom.tips;
 
+import com.jelmstrom.tips.group.GroupRepository;
 import com.jelmstrom.tips.match.Match;
 import com.jelmstrom.tips.match.Result;
 import com.jelmstrom.tips.table.TableEntry;
@@ -60,7 +61,7 @@ public class Sweepstake {
     public int scoreTable(TablePrediction tablePrediction) {
 
         int score = 0;
-        List<String> groupTeams = Config.INSTANCE.getGroupTeams(tablePrediction.group);
+        List<String> groupTeams = GroupRepository.read(tablePrediction.group).teams;
         List<String> correctOrder = calculateTableFor(groupTeams, "Admin").stream().map(entry -> entry.team).collect(toList());
         List<String> userPrediction = tablePrediction.tablePrediction;
         if(userPrediction.equals(correctOrder)){
