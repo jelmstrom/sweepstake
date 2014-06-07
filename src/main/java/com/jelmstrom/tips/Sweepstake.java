@@ -35,15 +35,23 @@ public class Sweepstake {
 
     @RequestMapping(value = "/predictions/{user}")
     public List<TablePrediction> getPredictions(@PathVariable String user) {
-        return TableRepository.read();
+        return TableRepository.read().stream().filter(prediction -> prediction.user.equals(user)).collect(toList());
+    }
+
+    @RequestMapping(value = "/leaderboard")
+    public List<String[]> getLeaderBoard() {
+        return getUsers().stream().map(user -> new String[]{user.displayName, Integer.toString(calculatePointsFor(user.displayName))}).collect(toList());
     }
 
     @RequestMapping(value = "/table/{user}/{groupName}")
-    public List<TableEntry> calculateTableFor(@PathVariable String groupName, @PathVariable String user) {
-        List<Result> results = resultsFor(user);
+    public List<TableEntry> currentStandingsForGroup(@PathVariable String groupName) {
+        List<Result> results = resultsFor("Admin");
         Group group = GroupRepository.read(groupName);
-        return group.teams.stream().map(team -> recordForTeam(team, user, results)).sorted().collect(toList());
+        return group.teams.stream().map(team -> recordForTeam(team, "Admin", results)).sorted().collect(toList());
     }
+
+
+
 
     private List<Result> resultsFor(String user) {
         return com.jelmstrom.tips.match.MatchRepository.read().stream().map(match -> match.resultFor(user)).filter(Objects::nonNull).collect(toList());
@@ -93,7 +101,7 @@ public class Sweepstake {
 
         int score = 0;
 
-        List<String> correctOrder = calculateTableFor(tablePrediction.group, "Admin").stream().map(entry -> entry.team).collect(toList());
+        List<String> correctOrder = currentStandingsForGroup(tablePrediction.group).stream().map(entry -> entry.team).collect(toList());
         List<String> userPrediction = tablePrediction.tablePrediction;
         if (userPrediction.equals(correctOrder)) {
             score = 7;

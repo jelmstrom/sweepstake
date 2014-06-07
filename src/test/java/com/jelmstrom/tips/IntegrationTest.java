@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import java.util.*;
 
+import static com.jelmstrom.tips.match.MatchRepository.*;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
@@ -23,10 +24,10 @@ public class IntegrationTest {
 
     @After
     public void tearDown(){
-        MatchRepository.matchCollection.drop();
-        TableRepository.tablePredictionCollection.drop();
-        GroupRepository.groupCollection.drop();
-        UserRepository.userCollection.drop();
+       MatchRepository.matchCollection.drop();
+       TableRepository.tablePredictionCollection.drop();
+       GroupRepository.groupCollection.drop();
+       UserRepository.userCollection.drop();
     }
 
     @Test
@@ -34,8 +35,8 @@ public class IntegrationTest {
         Match match = new Match("TeamA", "TeamB", new Date(), UUID.randomUUID().toString());
         new Result(match, 2, 1, "Johan");
         new Result(match, 2, 2, "Christian");
-        com.jelmstrom.tips.match.MatchRepository.store(match);
-        Match persisted = com.jelmstrom.tips.match.MatchRepository.read(match.id);
+        store(match);
+        Match persisted = read(match.id);
         assertThat(persisted.equals(match), is(true));
     }
 
@@ -48,9 +49,9 @@ public class IntegrationTest {
         Match match2 = new Match("TeamA", "TeamB", new Date(), UUID.randomUUID().toString());
         new Result(match, 2, 1, "Johan");
         new Result(match, 2, 2, "Christian");
-        com.jelmstrom.tips.match.MatchRepository.store(match);
-        com.jelmstrom.tips.match.MatchRepository.store(match2);
-        List<Match> persisted = com.jelmstrom.tips.match.MatchRepository.read();
+        store(match);
+        store(match2);
+        List<Match> persisted = read();
         assertThat(persisted.size() > 1, is(true));
     }
 
@@ -59,13 +60,13 @@ public class IntegrationTest {
     public void saveExistingMatchUpdates(){
         Match match = new Match("TeamA", "TeamB", new Date(), UUID.randomUUID().toString());
         new Result(match, 2, 1, "Johan");
-        com.jelmstrom.tips.match.MatchRepository.store(match);
+        store(match);
 
-        Match versionOne = com.jelmstrom.tips.match.MatchRepository.read(match.id);
+        Match versionOne = read(match.id);
         new Result(match, 2, 2, "Christian");
-        com.jelmstrom.tips.match.MatchRepository.store(match);
+        store(match);
 
-        Match versionTwo = com.jelmstrom.tips.match.MatchRepository.read(match.id);
+        Match versionTwo = read(match.id);
 
         assertThat(versionTwo.equals(match), is(true));
         assertThat(versionTwo.equals(versionOne), is(false));

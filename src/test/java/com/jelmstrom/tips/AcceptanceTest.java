@@ -64,7 +64,7 @@ public class AcceptanceTest {
 
         results.add(new Result(matches.get(5), 1, 2, "Admin"));
 
-        com.jelmstrom.tips.match.MatchRepository.store(matches);
+        MatchRepository.store(matches);
     }
 
     @After
@@ -76,26 +76,13 @@ public class AcceptanceTest {
 
 
     @Test
-    public void tableForGroupAShouldBeBrazilGermanyArgentinaAustralia(){
+    public void currentStandingsForGroupAShouldBeBrazilArgentinaAustraliaGermany(){
 
-        List<TableEntry> table = sweepstake.calculateTableFor(groupA.groupName, "Johan");
+        List<TableEntry> table = sweepstake.currentStandingsForGroup(groupA.groupName);
 
         assertThat(table.get(0).team, is(brazil));
         assertThat(table.get(1).team, is(argentina));
-        assertThat(table.get(2).team, is(germany));
-        assertThat(table.get(3).team, is(australia));
-
-    }
-
-
-    @Test
-    public void tableForUserWithoutResultsShouldBeOrderedAlphabetically(){
-
-        List<TableEntry> table = sweepstake.calculateTableFor(groupA.groupName, "Christian");
-
-        assertThat(table.get(0).team, is(argentina));
-        assertThat(table.get(1).team, is(australia));
-        assertThat(table.get(2).team, is(brazil));
+        assertThat(table.get(2).team, is(australia));
         assertThat(table.get(3).team, is(germany));
 
     }
