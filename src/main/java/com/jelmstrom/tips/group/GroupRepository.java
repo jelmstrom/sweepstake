@@ -10,7 +10,7 @@ import java.util.List;
 
 public class GroupRepository extends MongoRepository {
 
-    public static final DBCollection groupCollection = getDb().getCollection("group");
+    public static final DBCollection groupCollection = getDb().getCollection("groups");
     public static final String NAME = "name";
     public static final String TEAMS = "teams";
 

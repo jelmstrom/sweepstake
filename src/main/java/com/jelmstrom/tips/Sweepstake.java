@@ -39,8 +39,8 @@ public class Sweepstake {
     }
 
     @RequestMapping(value = "/leaderboard")
-    public List<String[]> getLeaderBoard() {
-        return getUsers().stream().map(user -> new String[]{user.displayName, Integer.toString(calculatePointsFor(user.displayName))}).collect(toList());
+    public List<Object[]> getLeaderBoard() {
+        return getUsers().stream().map(user -> new Object[]{user, Integer.toString(calculatePointsFor(user.displayName))}).collect(toList());
     }
 
     @RequestMapping(value = "/table/{user}/{groupName}")
@@ -72,6 +72,7 @@ public class Sweepstake {
         List<Match> matches = MatchRepository.read();
         int matchScore = matches.stream().map(
                 match -> match.resultFor(user))
+                .filter(Objects::nonNull)
                 .map(result -> userScore((Result) result))
                 .reduce(0, (a, b) -> a + b);
 
@@ -101,7 +102,10 @@ public class Sweepstake {
 
         int score = 0;
 
-        List<String> correctOrder = currentStandingsForGroup(tablePrediction.group).stream().map(entry -> entry.team).collect(toList());
+        List<String> correctOrder = currentStandingsForGroup(tablePrediction.group).stream()
+                .map(entry -> entry.team)
+                .filter(Objects::nonNull)
+                .collect(toList());
         List<String> userPrediction = tablePrediction.tablePrediction;
         if (userPrediction.equals(correctOrder)) {
             score = 7;
@@ -129,5 +133,17 @@ public class Sweepstake {
 
         }
         return score;
+    }
+
+    public User getUser(String email) {
+        return UserRepository.read(email);
+    }
+
+    public void saveUser(User user) {
+        UserRepository.store(user);
+    }
+
+    public User findUser(String displayName) {
+        return UserRepository.find(displayName);
     }
 }

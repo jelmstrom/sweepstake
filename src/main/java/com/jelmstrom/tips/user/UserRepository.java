@@ -52,4 +52,12 @@ public class UserRepository extends MongoRepository {
         return userCollection.find().toArray().stream().map(UserRepository::buildUser).collect(toList());
 
     }
+
+    public static User find(String displayName) {
+        DBObject users = userCollection.findOne(new BasicDBObject(DISPLAY_NAME, displayName));
+        if(users != null && null != users.get(EMAIL)){
+            return buildUser(users);
+        }
+        return new User(displayName, "","");
+    }
 }

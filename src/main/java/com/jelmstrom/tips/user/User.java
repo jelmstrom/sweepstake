@@ -33,4 +33,8 @@ public class User {
         result = 31 * result + credentials.hashCode();
         return result;
     }
+
+    public boolean isAdmin(){
+        return displayName.equals("Admin");
+    }
 }

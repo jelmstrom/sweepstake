@@ -24,10 +24,10 @@ public class IntegrationTest {
 
     @After
     public void tearDown(){
-       MatchRepository.matchCollection.drop();
-       TableRepository.tablePredictionCollection.drop();
-       GroupRepository.groupCollection.drop();
-       UserRepository.userCollection.drop();
+        MatchRepository.matchCollection.drop();
+        TableRepository.tablePredictionCollection.drop();
+        GroupRepository.groupCollection.drop();
+        UserRepository.userCollection.drop();
     }
 
     @Test

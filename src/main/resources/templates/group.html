@@ -1,0 +1,58 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <style>
+            #cssTable td
+            {
+                text-align:center;
+                vertical-align:middle;
+            }
+        </style>
+</head>
+<body>
+<table>
+    <td th:if="${activeUser.email == null} == false">
+        <a href="/user/{${activeUser.email}" th:text="${activeUser.displayName}">GroupA</a>
+    </td>
+    <td th:if="${activeUser.email == null} == true">
+        <form action="/user" method="post">
+            <label>New user? </label><input type="checkbox" name="new" value="new"/>
+            <label>Email  </label><input type="txt" id="email" name="email" value="email"/>
+            <label>Password  </label><input type="password" name="credentials" id="credentials" value="pwd"/>
+            <button type="submit">Submit</button>
+        </form>
+    </td>
+</table>
+<p id="text">
+        <a href="/">Leaderboard</a>
+        <a href="/group/A">GroupA</a>
+        <a href="/group/B">GroupB</a>
+        <a href="/group/C">GroupC</a>
+        <a href="/group/D">GroupD</a>
+        <a href="/group/E">GroupE</a>
+        <a href="/group/F">GroupF</a>
+        <a href="/group/G">GroupG</a>
+        <a href="/group/H">GroupH</a>
+        <a href="/playoff">Playoff</a>
+</p>
+<table width="75%">
+    <tr>
+        <th width="20%">Date</th>
+        <th width="30%">Away</th>
+        <th width="2%">-</th>
+        <th width="30%">Home</th>
+        <th width="9%">HomeGoals</th>
+        <th width="9%">AwayGoals</th>
+
+    </tr>
+    <tr th:each="match,iterStat : ${matches}" th:class="${iterStat.odd}? 'odd'">
+        <td th:text="${match.matchStart}">start</td>
+        <td th:text="${match.homeTeam}">home</td>
+        <td>-</td>
+        <td th:text="${match.awayTeam}">home</td>
+        <td><input type="text" size="2" id="${match.id}_home"/></td>
+        <td><input type="text" size="2" id="${match.id}_away"/></td>
+    </tr>
+</table>
+</body>
+</html>

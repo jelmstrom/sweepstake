@@ -1,0 +1,74 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <style>
+            #cssTable td
+            {
+                text-align:center;
+                vertical-align:middle;
+            }
+        </style>
+</head>
+<body>
+<table>
+    <td th:if="${activeUser.email == null} == false">
+        <a href="/user/{${activeUser.email}" th:text="${activeUser.displayName}">GroupA</a>
+    </td>
+    <td th:if="${activeUser.email == null} == true">
+        <form action="/user" method="post">
+            <label>New user? </label><input type="checkbox" name="new" value="new"/>
+            <label>Email  </label><input type="txt" id="email" name="email" value="email"/>
+            <label>Password  </label><input type="password" name="credentials" id="credentials" value="pwd"/>
+            <button type="submit">Submit</button>
+        </form>
+    </td>
+</table>
+<p id="text">
+        <a href="/">Leaderboard</a>
+        <a href="/group/A">GroupA</a>
+        <a href="/group/B">GroupB</a>
+        <a href="/group/C">GroupC</a>
+        <a href="/group/D">GroupD</a>
+        <a href="/group/E">GroupE</a>
+        <a href="/group/F">GroupF</a>
+        <a href="/group/G">GroupG</a>
+        <a href="/group/H">GroupH</a>
+        <a href="/playoff">Playoff</a>
+</p>
+<table width="50%">
+    <form action="/user" method="post">
+            <input type="hidden" value="update" name="update" id="update" />
+        <tr>
+            <td width="50%">
+                <label>Display name </label>
+            </td>
+            <td width="50%">
+                <label th:text="${user.displayName}" th:if="${user.equals(activeUser)}==false"/>
+                <input type="text" name="displayName" id="displayName" th:value="${user.displayName}" th:if="${user.equals(activeUser)}==true"/>
+            </td>
+        </tr>
+        <tr>
+            <td width="50%">
+                <label>Email</label>
+            </td>
+            <td width="50%">
+                <label th:text="${user.email}"/>
+            </td>
+        </tr>
+        <tr th:if="${user.equals(activeUser)}==true">
+            <td><label>Old Password</label></td>
+            <td  width="50%"><input type="password" name="oldCredentials" id="oldCredentials_" value="pwd"/></td>
+        </tr>
+        <tr th:if="${user.equals(activeUser)}==true">
+            <td><label>New Password</label></td>
+            <td  width="50%"><input type="password" name="newCredentials" id="newCredentials_" value="pwd"/></td>
+        </tr>
+        <tr th:if="${user.equals(activeUser)}==true">
+            <td></td>
+            <td><button type="submit">Update</button></td>
+        </tr>
+    </form>
+
+</table>
+</body>
+</html>

@@ -1,25 +1,62 @@
 <!doctype html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
+
 <body>
-    <p id="text">text</p>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script>
-
-        $(document).ready(function() {
-            alert('ready');
-            $.ajax({
-                url: "/matches",
-                jsonp: "callback",
-                dataType: "jsonp",
-                data: {
-                    format: "json"
-                },
-                success: function( response ) {
-                    console.log( response );
-                }
-            });
-        });
-
-    </script>
+<table>
+    <td th:if="${activeUser.email == null} == false">
+        <a href="/user/{${activeUser.email}" th:text="${activeUser.displayName}">GroupA</a>
+    </td>
+    <td th:if="${activeUser.email == null} == true">
+        <form action="/user" method="post">
+            <label>New user? </label><input type="checkbox" name="new" value="new"/>
+            <label>Email  </label><input type="txt" id="email" name="email" value="email"/>
+            <label>Password  </label><input type="password" name="credentials" id="credentials" value="pwd"/>
+            <button type="submit">Submit</button>
+        </form>
+    </td>
+</table>
+<p id="navigation">
+    <a href="/">Leaderboard</a>
+    <a href="/group/A">GroupA</a>
+    <a href="/group/B">GroupB</a>
+    <a href="/group/C">GroupC</a>
+    <a href="/group/D">GroupD</a>
+    <a href="/group/E">GroupE</a>
+    <a href="/group/F">GroupF</a>
+    <a href="/group/G">GroupG</a>
+    <a href="/group/H">GroupH</a>
+    <a href="/playoff">Playoff</a>
+</p>
+<table>
+    <td width="35%%">
+        <!-- user list -->
+        <table>
+            <tr>
+                <td colspan="2">
+                    <h2> Active Users </h2>
+                </td>
+            </tr>
+            <tr th:each="user,iterStat : ${userList}" th:class="${iterStat.odd}? 'odd'" th:if="${user.isAdmin()} == false">
+                <td th:text="${user.displayName}">displayname</td>
+                <td th:text="${user.email}">email</td>
+            </tr>
+        </table>
+    </td>
+    <td width="30%" >&nbsp;</td>
+    <td width="35%">
+        <!-- Leader board -->
+        <table>
+            <tr>
+                <td colspan="2">
+                    <h2> Leaderboard </h2>
+                </td>
+            </tr>
+            <tr th:each="entry,iterStat : ${leaderBoard}" th:class="${iterStat.odd}? 'odd'" th:if="${entry[0].isAdmin()} == false">
+                <td th:text="${entry[0].displayName}">displayname</td>
+                <td th:text="${entry[1]}">points</td>
+            </tr>
+        </table>
+    </td>
+</table>
 </body>
 </html>

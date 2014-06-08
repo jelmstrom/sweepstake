@@ -10,7 +10,7 @@ import java.util.List;
 
 public class TableRepository extends MongoRepository {
 
-    public static final DBCollection tablePredictionCollection = getDb().getCollection("tablePrediction");
+    public static final DBCollection tablePredictionCollection = getDb().getCollection("tablePreditions");
 
     public static void store(TablePrediction prediction){
             BasicDBObject dbPrediction = new BasicDBObject()
