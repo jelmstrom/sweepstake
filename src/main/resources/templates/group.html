@@ -53,10 +53,10 @@
         <td th:text="${match.awayTeam}">Away</td>
         <td><input type="text" size="2" id="${match.id}_home"/></td>
         <td><input type="text" size="2" id="${match.id}_away"/></td>
-        <td th:if="${activeUser != null}" >
-            <label th:text="${match.scoreFor(activeUser.email?: 'placeholderforparsing')}"/>
+        <td th:if="${match.hasResult()}" >
+            <label th:if="${activeUser != null}"
+                   th:text="${match.scoreFor(activeUser.email?: '_anonymous_')}"/>
         </td>
-           <!-- th:if="${matchStart.before(Calendar.getInstance().getTime());}" -->
     </tr>
 </table>
 </body>

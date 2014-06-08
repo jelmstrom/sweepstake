@@ -62,7 +62,7 @@ public class Match {
             return 0;
         }
 
-        Result adminResult = userResult.match.resultFor(UserRepository.findAdminUser().email);
+        Result adminResult = resultFor(UserRepository.findAdminUser().email);
         int points = 0;
         if (userResult.winner() == adminResult.winner()) {
             points++;
@@ -75,5 +75,9 @@ public class Match {
         }
 
         return points;
+    }
+
+    public boolean hasResult(){
+        return null != resultFor(UserRepository.findAdminUser().email);
     }
 }
