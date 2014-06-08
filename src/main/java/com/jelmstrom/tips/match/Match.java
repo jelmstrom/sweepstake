@@ -1,6 +1,7 @@
 package com.jelmstrom.tips.match;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.jelmstrom.tips.user.UserRepository;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -28,11 +29,14 @@ public class Match {
     }
 
     public Result resultFor(String userEmail) {
-        Optional<Result> maybe = results.stream().filter(result -> result.userEmail.equals(userEmail)).findFirst();
-        if(maybe.isPresent()){
-            return maybe.get();
+        Optional<Result> option = results.stream().filter(result -> result.userEmail.equals(userEmail)).findFirst();
+        if(option.isPresent()){
+            return option.get();
         } else {
             return null;
+            //until any results have been added, this result will be
+            // returned for all users (including admin). Setting a default will give all users
+            // maxpoints until results are entered :)
         }
     }
 
@@ -47,7 +51,29 @@ public class Match {
                     && this.id.equals(that.id);
 
         }
-
         return false;
+    }
+
+    public int scoreFor(String user) {
+        return userScore(resultFor(user));
+    }
+    private int userScore(Result userResult) {
+        if(null == userResult){
+            return 0;
+        }
+
+        Result adminResult = userResult.match.resultFor(UserRepository.findAdminUser().email);
+        int points = 0;
+        if (userResult.winner() == adminResult.winner()) {
+            points++;
+        }
+        if (userResult.homeGoals == adminResult.homeGoals) {
+            points++;
+        }
+        if (userResult.awayGoals == adminResult.awayGoals) {
+            points++;
+        }
+
+        return points;
     }
 }

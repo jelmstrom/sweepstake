@@ -72,31 +72,13 @@ public class Sweepstake {
     public int calculatePointsFor(String user) {
         List<Match> matches = MatchRepository.read();
         int matchScore = matches.stream().map(
-                match -> match.resultFor(user))
+                match -> match.scoreFor(user))
                 .filter(Objects::nonNull)
-                .map(result -> userScore((Result) result))
                 .reduce(0, (a, b) -> a + b);
 
         int groupScore = TableRepository.read().stream().mapToInt(this::scoreTable).sum();
 
         return matchScore + groupScore;
-    }
-
-
-    private int userScore(Result userResult) {
-        Result adminResult = userResult.match.resultFor("Admin");
-        int points = 0;
-        if (userResult.winner() == adminResult.winner()) {
-            points++;
-        }
-        if (userResult.homeGoals == adminResult.homeGoals) {
-            points++;
-        }
-        if (userResult.awayGoals == adminResult.awayGoals) {
-            points++;
-        }
-
-        return points;
     }
 
     public int scoreTable(TablePrediction tablePrediction) {

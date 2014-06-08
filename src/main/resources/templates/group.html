@@ -41,17 +41,22 @@
         <th width="30%">Away</th>
         <th width="2%">-</th>
         <th width="30%">Home</th>
-        <th width="9%">HomeGoals</th>
-        <th width="9%">AwayGoals</th>
+        <th width="8%">HomeGoals</th>
+        <th width="8%">AwayGoals</th>
+        <th width="2%"></th>
 
     </tr>
     <tr th:each="match,iterStat : ${matches}" th:class="${iterStat.odd}? 'odd'">
         <td th:text="${match.matchStart}">start</td>
         <td th:text="${match.homeTeam}">home</td>
         <td>-</td>
-        <td th:text="${match.awayTeam}">home</td>
+        <td th:text="${match.awayTeam}">Away</td>
         <td><input type="text" size="2" id="${match.id}_home"/></td>
         <td><input type="text" size="2" id="${match.id}_away"/></td>
+        <td th:if="${activeUser != null}" >
+            <label th:text="${match.scoreFor(activeUser.email?: 'placeholderforparsing')}"/>
+        </td>
+           <!-- th:if="${matchStart.before(Calendar.getInstance().getTime());}" -->
     </tr>
 </table>
 </body>

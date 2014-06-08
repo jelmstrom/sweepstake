@@ -5,6 +5,7 @@ import com.jelmstrom.tips.match.Match;
 import com.jelmstrom.tips.match.Result;
 import org.junit.Test;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import static org.hamcrest.core.Is.is;
@@ -19,7 +20,7 @@ public class MatchTest {
          new Result(m1, 2, 1, "Johan");
          Match m2 = new Match ("A", "B", matchStart, "1");
          new Result(m2, 2, 1, "Johan");
-
+         matchStart.before(Calendar.getInstance().getTime());
          assertThat(m1.equals(m2), is(true));
 
      }
