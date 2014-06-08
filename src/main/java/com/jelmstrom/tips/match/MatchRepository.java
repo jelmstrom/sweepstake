@@ -20,7 +20,7 @@ public class MatchRepository extends MongoRepository {
                 match.results.stream()
                         .map(result -> new BasicDBObject("homeGoals", result.homeGoals)
                                 .append("awayGoals", result.awayGoals)
-                                .append("user", result.user))
+                                .append("userEmail", result.userEmail))
                         .collect(toList());
 
         DBObject entry = new BasicDBObject("homeTeam", match.homeTeam)
@@ -60,7 +60,7 @@ public class MatchRepository extends MongoRepository {
             new Result(match
                     , Integer.parseInt(dbResult.get("homeGoals").toString())
                     , Integer.parseInt(dbResult.get("awayGoals").toString())
-                    , dbResult.get("user").toString());
+                    , dbResult.get("userEmail").toString());
         }
         return match;
     }

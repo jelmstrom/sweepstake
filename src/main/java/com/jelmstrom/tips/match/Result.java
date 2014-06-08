@@ -7,13 +7,13 @@ public class Result {
     public final Match match;
     public final int homeGoals;
     public final int awayGoals;
-    public final String user;
+    public final String userEmail;
 
-    public Result(Match match, int homeGoals, int awayGoals, String user) {
+    public Result(Match match, int homeGoals, int awayGoals, String userEmail) {
         this.match = match;
         this.homeGoals = homeGoals;
         this.awayGoals = awayGoals;
-        this.user = user;
+        this.userEmail = userEmail;
         match.add(this);
     }
 
@@ -53,14 +53,14 @@ public class Result {
             Result that = (Result) other;
             return this.awayGoals == that.awayGoals
                     && this.homeGoals == that.homeGoals
-                    && this.user.equals(that.user)
+                    && this.userEmail.equals(that.userEmail)
                     && this.match.id.equals(that.match.id);
         }
         return false;
     }
 
     public int hashCode(){
-        return 31 * (homeGoals * awayGoals * user.hashCode() * match.id.hashCode());
+        return 31 * (homeGoals * awayGoals * userEmail.hashCode() * match.id.hashCode());
     }
 
 

@@ -37,13 +37,13 @@ public class SweepstakeController {
     }
 
 
-    @RequestMapping(value = "/user/{displayName}", method = RequestMethod.GET)
+    @RequestMapping(value = "/userEmail/{displayName}", method = RequestMethod.GET)
     public String getUser(Model uiModel, @PathVariable String displayName, HttpServletRequest request) {
         Sweepstake sweepstake = new Sweepstake();
         System.out.println("getting User  " + displayName);
-        uiModel.addAttribute("user", sweepstake.findUser(displayName));
+        uiModel.addAttribute("userEmail", sweepstake.findUser(displayName));
         setActiveUserModel(uiModel, request, sweepstake);
-        return "user";
+        return "userEmail";
     }
 
     private void setActiveUserModel(Model uiModel, HttpServletRequest request, Sweepstake sweepstake) {
@@ -54,13 +54,13 @@ public class SweepstakeController {
         return sweepstake.getUser((String)request.getSession().getAttribute("activeUser"));
     }
 
-    @RequestMapping(value = "/user", method = RequestMethod.POST)
+    @RequestMapping(value = "/userEmail", method = RequestMethod.POST)
     public String getUser(Model uiModel, HttpServletRequest request) {
         Sweepstake sweepstake = new Sweepstake();
         boolean newUser = request.getParameter("new") != null;
         User user;
         if(newUser) {
-            user = new User(request.getParameter("email"), request.getParameter("email"),request.getParameter("credentials"));
+            user = new User(request.getParameter("email"), request.getParameter("email"),request.getParameter("credentials"), false);
             sweepstake.saveUser(user);
             setSessionUser(request, user);
         } else if(request.getParameter("update") != null) {
@@ -68,8 +68,8 @@ public class SweepstakeController {
             User sessionUser = sessionUser(request, sweepstake);
             String newCredentials = validateCredentialsOnUpdate(request, sessionUser);
 
-            System.out.println("updating user ");
-            user = new User(request.getParameter("displayName"), sessionUser.email, newCredentials);
+            System.out.println("updating userEmail ");
+            user = new User(request.getParameter("displayName"), sessionUser.email, newCredentials, false);
 
             sweepstake.saveUser(user);
             setSessionUser(request, user);
@@ -82,8 +82,8 @@ public class SweepstakeController {
             }
         }
         uiModel.addAttribute("activeUser", user);
-        uiModel.addAttribute("user", user);
-        return "user";
+        uiModel.addAttribute("userEmail", user);
+        return "userEmail";
     }
 
     private String validateCredentialsOnUpdate(HttpServletRequest request, User sessionUser) {

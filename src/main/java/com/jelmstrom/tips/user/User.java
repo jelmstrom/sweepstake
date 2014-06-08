@@ -4,11 +4,13 @@ public class User {
     public final String displayName;
     public final String email;
     public final String credentials;
+    public final boolean admin;
 
-    public User(String displayName, String email, String credentials) {
+    public User(String displayName, String email, String credentials, boolean admin) {
         this.displayName = displayName;
         this.email = email;
         this.credentials = credentials;
+        this.admin = admin;
     }
 
     @SuppressWarnings("RedundantIfStatement")
@@ -32,9 +34,5 @@ public class User {
         result = 31 * result + email.hashCode();
         result = 31 * result + credentials.hashCode();
         return result;
-    }
-
-    public boolean isAdmin(){
-        return displayName.equals("Admin");
     }
 }

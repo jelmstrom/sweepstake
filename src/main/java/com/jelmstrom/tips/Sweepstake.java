@@ -33,36 +33,37 @@ public class Sweepstake {
         return UserRepository.read();
     }
 
-    @RequestMapping(value = "/predictions/{user}")
+    @RequestMapping(value = "/predictions/{userEmail}")
     public List<TablePrediction> getPredictions(@PathVariable String user) {
         return TableRepository.read().stream().filter(prediction -> prediction.user.equals(user)).collect(toList());
     }
 
     @RequestMapping(value = "/leaderboard")
     public List<Object[]> getLeaderBoard() {
-        return getUsers().stream().map(user -> new Object[]{user, Integer.toString(calculatePointsFor(user.displayName))}).collect(toList());
+        return getUsers().stream().map(user -> new Object[]{user, Integer.toString(calculatePointsFor(user.email))}).collect(toList());
     }
 
-    @RequestMapping(value = "/table/{user}/{groupName}")
+    @RequestMapping(value = "/table/{userEmail}/{groupName}")
     public List<TableEntry> currentStandingsForGroup(@PathVariable String groupName) {
-        List<Result> results = resultsFor("Admin");
+        User admin = UserRepository.findAdminUser();
+        List<Result> results = resultsFor(admin.email);
         Group group = GroupRepository.read(groupName);
-        return group.teams.stream().map(team -> recordForTeam(team, "Admin", results)).sorted().collect(toList());
+        return group.teams.stream().map(team -> recordForTeam(team, admin.email, results)).sorted().collect(toList());
     }
 
 
 
 
-    private List<Result> resultsFor(String user) {
-        return com.jelmstrom.tips.match.MatchRepository.read().stream().map(match -> match.resultFor(user)).filter(Objects::nonNull).collect(toList());
+    private List<Result> resultsFor(String userEmail) {
+        return com.jelmstrom.tips.match.MatchRepository.read().stream().map(match -> match.resultFor(userEmail)).filter(Objects::nonNull).collect(toList());
     }
 
-    private TableEntry recordForTeam(String team, String user, List<Result> results) {
-        int points = results.stream().filter(result -> result.user.equals(user))
+    private TableEntry recordForTeam(String team, String userEmail, List<Result> results) {
+        int points = results.stream().filter(result -> result.userEmail.equals(userEmail))
                 .mapToInt(match -> match.pointsFor(team)).sum();
-        int goalsFor = results.stream().filter(result -> result.user.equals(user))
+        int goalsFor = results.stream().filter(result -> result.userEmail.equals(userEmail))
                 .mapToInt(match -> match.goalsFor(team)).sum();
-        int goalsAgainst = results.stream().filter(result -> result.user.equals(user))
+        int goalsAgainst = results.stream().filter(result -> result.userEmail.equals(userEmail))
                 .mapToInt(match -> match.goalsAgainst(team)).sum();
         return new TableEntry(team, goalsFor, goalsAgainst, points);
     }

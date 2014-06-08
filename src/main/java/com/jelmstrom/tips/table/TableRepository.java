@@ -15,21 +15,21 @@ public class TableRepository extends MongoRepository {
     public static void store(TablePrediction prediction){
             BasicDBObject dbPrediction = new BasicDBObject()
                     .append("group", prediction.group)
-                    .append("user", prediction.user)
+                    .append("userEmail", prediction.user)
                     .append("prediction", prediction.tablePrediction);
         if(readPrediction(prediction.user, prediction.group).tablePrediction.isEmpty()){
             tablePredictionCollection.insert(dbPrediction);
         } else  {
             tablePredictionCollection.update(new BasicDBObject()
                     .append("group", prediction.group)
-                    .append("user", prediction.user)
+                    .append("userEmail", prediction.user)
                     , dbPrediction);
         }
     }
 
     public static TablePrediction readPrediction(String user, String group) {
-        DBObject dbPrediction = tablePredictionCollection.findOne(new BasicDBObject("user", user).append("group", group));
-        if(dbPrediction != null && null != dbPrediction.get("user")){
+        DBObject dbPrediction = tablePredictionCollection.findOne(new BasicDBObject("userEmail", user).append("group", group));
+        if(dbPrediction != null && null != dbPrediction.get("userEmail")){
             return buildTablePrediction(dbPrediction);
         }
         return new TablePrediction(user, group, Collections.emptyList());
@@ -39,7 +39,7 @@ public class TableRepository extends MongoRepository {
 
         List<String> predictions = new ArrayList<>();
         ((BasicDBList) dbMatch.get("prediction")).forEach(entry -> predictions.add((String) entry));
-        return new TablePrediction(dbMatch.get("user").toString(), dbMatch.get("group").toString(), predictions);
+        return new TablePrediction(dbMatch.get("userEmail").toString(), dbMatch.get("group").toString(), predictions);
     }
 
     public static List<TablePrediction> read() {

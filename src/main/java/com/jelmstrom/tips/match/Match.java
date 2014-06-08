@@ -27,8 +27,8 @@ public class Match {
 
     }
 
-    public Result resultFor(String user) {
-        Optional<Result> maybe = results.stream().filter(result -> result.user.equals(user)).findFirst();
+    public Result resultFor(String userEmail) {
+        Optional<Result> maybe = results.stream().filter(result -> result.userEmail.equals(userEmail)).findFirst();
         if(maybe.isPresent()){
             return maybe.get();
         } else {

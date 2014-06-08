@@ -74,7 +74,7 @@ public class IntegrationTest {
 
     @Test
     public void tablePredictionsAreStoredAndReadInCorrectOrder(){
-        TablePrediction prediction = new TablePrediction("user", "grp", Arrays.asList("teamB", "teamA", "teamC", "teamD"));
+        TablePrediction prediction = new TablePrediction("userEmail", "grp", Arrays.asList("teamB", "teamA", "teamC", "teamD"));
         TableRepository.store(prediction);
         TablePrediction stored = TableRepository.readPrediction(prediction.user, prediction.group);
         assertThat(stored, equalTo(prediction));
@@ -91,14 +91,14 @@ public class IntegrationTest {
 
     @Test
     public void addUser(){
-        User newUser = new User("display", "Email", "cred");
+        User newUser = new User("display", "Email", "cred", false);
         UserRepository.store(newUser);
         assertThat(UserRepository.read("Email"), is(equalTo(newUser)));
     }
 
     @Test
     public void removeUser(){
-        User newUser = new User("display", "Email", "cred");
+        User newUser = new User("display", "Email", "cred", false);
         UserRepository.store(newUser);
         assertThat(UserRepository.read("Email"), is(equalTo(newUser)));
         UserRepository.remove("Email");

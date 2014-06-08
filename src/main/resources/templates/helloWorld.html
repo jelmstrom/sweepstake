@@ -4,11 +4,11 @@
 <body>
 <table>
     <td th:if="${activeUser.email == null} == false">
-        <a href="/user/{${activeUser.email}" th:text="${activeUser.displayName}">GroupA</a>
+        <a href="/userEmail/{${activeUser.email}" th:text="${activeUser.displayName}">GroupA</a>
     </td>
     <td th:if="${activeUser.email == null} == true">
-        <form action="/user" method="post">
-            <label>New user? </label><input type="checkbox" name="new" value="new"/>
+        <form action="/userEmail" method="post">
+            <label>New userEmail? </label><input type="checkbox" name="new" value="new"/>
             <label>Email  </label><input type="txt" id="email" name="email" value="email"/>
             <label>Password  </label><input type="password" name="credentials" id="credentials" value="pwd"/>
             <button type="submit">Submit</button>
@@ -29,14 +29,14 @@
 </p>
 <table>
     <td width="35%%">
-        <!-- user list -->
+        <!-- userEmail list -->
         <table>
             <tr>
                 <td colspan="2">
                     <h2> Active Users </h2>
                 </td>
             </tr>
-            <tr th:each="user,iterStat : ${userList}" th:class="${iterStat.odd}? 'odd'" th:if="${user.isAdmin()} == false">
+            <tr th:each="user,iterStat : ${userList}" th:class="${iterStat.odd}? 'odd'" th:if="${user.admin} == false">
                 <td th:text="${user.displayName}">displayname</td>
                 <td th:text="${user.email}">email</td>
             </tr>
@@ -51,7 +51,7 @@
                     <h2> Leaderboard </h2>
                 </td>
             </tr>
-            <tr th:each="entry,iterStat : ${leaderBoard}" th:class="${iterStat.odd}? 'odd'" th:if="${entry[0].isAdmin()} == false">
+            <tr th:each="entry,iterStat : ${leaderBoard}" th:class="${iterStat.odd}? 'odd'" th:if="${entry[0].admin} == false">
                 <td th:text="${entry[0].displayName}">displayname</td>
                 <td th:text="${entry[1]}">points</td>
             </tr>

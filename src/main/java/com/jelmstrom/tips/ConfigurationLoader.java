@@ -78,13 +78,13 @@ public class ConfigurationLoader {
         createGroups();
         System.out.println("Create matches");
         createMatches();
-        System.out.println("Create Admin user");
+        System.out.println("Create Admin userEmail");
         createAdminUser();
         System.out.println("Data configured");
     }
 
     private static void createAdminUser() {
-        UserRepository.store(new User("Admin", "none@noreply.zzz", "admin"));
+        UserRepository.store(new User("Admin", "none@noreply.zzz", "admin", true));
     }
 
     private static void createMatches(){
