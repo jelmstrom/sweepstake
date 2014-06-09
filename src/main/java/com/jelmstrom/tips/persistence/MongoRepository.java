@@ -16,15 +16,18 @@ public class MongoRepository {
         }
     }
 
-    private static final DB db = getMongoClient().getDB("sweepstake");
+    private final DB db;
+
+    protected MongoRepository(String context){
+        db = getMongoClient().getDB(context);
+    }
 
 
-
-    public static MongoClient getMongoClient() {
+    public MongoClient getMongoClient() {
         return mongoClient;
     }
 
-    public static DB getDb() {
+    public DB getDb() {
         return db;
     }
 }

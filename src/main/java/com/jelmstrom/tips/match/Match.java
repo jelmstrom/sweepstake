@@ -25,7 +25,6 @@ public class Match {
 
     public void add(Result result){
         results.add(result);
-
     }
 
     public Result resultFor(String userEmail) {
@@ -57,12 +56,13 @@ public class Match {
     public int scoreFor(String user) {
         return userScore(resultFor(user));
     }
+
     private int userScore(Result userResult) {
         if(null == userResult){
             return 0;
         }
 
-        Result adminResult = resultFor(UserRepository.findAdminUser().email);
+        Result adminResult = resultFor("Admin");
         int points = 0;
         if (userResult.winner() == adminResult.winner()) {
             points++;
@@ -78,6 +78,6 @@ public class Match {
     }
 
     public boolean hasResult(){
-        return null != resultFor(UserRepository.findAdminUser().email);
+        return null != resultFor("Admin");
     }
 }

@@ -60,35 +60,35 @@ public class ConfigurationLoader {
 
     private static final DateFormat dateFormat = new SimpleDateFormat("dd MMMMM yyyy hh:mm");
 
-    private static void createGroups() {
-        if(GroupRepository.read("GroupA").teams.isEmpty()){
-            GroupRepository.store(GROUP_A);
-            GroupRepository.store(GROUP_B);
-            GroupRepository.store(GROUP_C);
-            GroupRepository.store(GROUP_D);
-            GroupRepository.store(GROUP_E);
-            GroupRepository.store(GROUP_F);
-            GroupRepository.store(GROUP_G);
-            GroupRepository.store(GROUP_H);
+    private static void createGroups(GroupRepository groupRepository) {
+        if(groupRepository.read("GroupA").teams.isEmpty()){
+            groupRepository.store(GROUP_A);
+            groupRepository.store(GROUP_B);
+            groupRepository.store(GROUP_C);
+            groupRepository.store(GROUP_D);
+            groupRepository.store(GROUP_E);
+            groupRepository.store(GROUP_F);
+            groupRepository.store(GROUP_G);
+            groupRepository.store(GROUP_H);
         }
     }
 
-    public static void initialiseData() {
+    public static void initialiseData(String context) {
         System.out.println("Create groups");
-        createGroups();
+        createGroups(new GroupRepository(context));
         System.out.println("Create matches");
-        createMatches();
-        System.out.println("Create Admin userEmail");
-        createAdminUser();
+        createMatches(new MatchRepository(context));
+        System.out.println("Create Admin user");
+        createAdminUser(new UserRepository(context));
         System.out.println("Data configured");
     }
 
-    private static void createAdminUser() {
-        UserRepository.store(new User("Admin", "none@noreply.zzz", "admin", true));
+    private static void createAdminUser(UserRepository userRepo) {
+        userRepo.store(new User("Admin", "none@noreply.zzz", "admin", true));
     }
 
-    private static void createMatches(){
-        if(new Sweepstake().getMatches().isEmpty()){
+    private static void createMatches(MatchRepository matchRepository){
+        if(matchRepository.read().isEmpty()){
             List<Match> matches = new ArrayList<>();
             try {
                 matches.add(new Match(BRAZIL, CROATIA, dateFormat.parse("12 June 2014 17:00"),"A1"));
@@ -150,7 +150,7 @@ public class ConfigurationLoader {
                 matches.add(new Match(GROUP_H.teams.get(3), GROUP_H.teams.get(0), dateFormat.parse("26 June 2014 17:00"),"H5"));
                 matches.add(new Match(GROUP_H.teams.get(1), GROUP_H.teams.get(2), dateFormat.parse("26 June 2014 17:00"),"H6"));
 
-                MatchRepository.store(matches);
+                matchRepository.store(matches);
             } catch (ParseException e) {
                 e.printStackTrace();
                 throw new IllegalStateException("Incorrect configuration, failed to parse date");

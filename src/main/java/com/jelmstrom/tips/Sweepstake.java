@@ -23,19 +23,40 @@ import static java.util.stream.Collectors.toList;
 @RestController
 public class Sweepstake {
 
+    private final String context;
+    private final MatchRepository matchRepository;
+    private final UserRepository userRepository;
+    private final TableRepository tableRepository;
+
+    Sweepstake(){
+        //only used for rest controller..
+        // if I can get JQuery hooked in...
+        this.context = null;
+        matchRepository = null;
+        userRepository = null;
+        tableRepository = null;
+    }
+
+    public Sweepstake(String context) {
+        this.context = context;
+        matchRepository = new MatchRepository(context);
+        userRepository = new UserRepository(context);
+        tableRepository = new TableRepository(context);
+    }
+
     @RequestMapping("/matches")
     public List<Match> getMatches() {
-        return MatchRepository.read();
+        return matchRepository.read();
     }
 
     @RequestMapping("/users")
     public List<User> getUsers() {
-        return UserRepository.read();
+        return userRepository.read();
     }
 
-    @RequestMapping(value = "/predictions/{userEmail}")
+    @RequestMapping(value = "/predictions/{user}")
     public List<TablePrediction> getPredictions(@PathVariable String user) {
-        return TableRepository.read().stream().filter(prediction -> prediction.user.equals(user)).collect(toList());
+        return tableRepository.read().stream().filter(prediction -> prediction.user.equals(user)).collect(toList());
     }
 
     @RequestMapping(value = "/leaderboard")
@@ -43,11 +64,11 @@ public class Sweepstake {
         return getUsers().stream().map(user -> new Object[]{user, Integer.toString(calculatePointsFor(user.email))}).collect(toList());
     }
 
-    @RequestMapping(value = "/table/{userEmail}/{groupName}")
+    @RequestMapping(value = "/table/{groupName}")
     public List<TableEntry> currentStandingsForGroup(@PathVariable String groupName) {
-        User admin = UserRepository.findAdminUser();
+        User admin = userRepository.findAdminUser();
         List<Result> results = resultsFor(admin.email);
-        Group group = GroupRepository.read(groupName);
+        Group group = new GroupRepository(context).read(groupName);
         return group.teams.stream().map(team -> recordForTeam(team, admin.email, results)).sorted().collect(toList());
     }
 
@@ -55,7 +76,7 @@ public class Sweepstake {
 
 
     private List<Result> resultsFor(String userEmail) {
-        return com.jelmstrom.tips.match.MatchRepository.read().stream().map(match -> match.resultFor(userEmail)).filter(Objects::nonNull).collect(toList());
+        return matchRepository.read().stream().map(match -> match.resultFor(userEmail)).filter(Objects::nonNull).collect(toList());
     }
 
     private TableEntry recordForTeam(String team, String userEmail, List<Result> results) {
@@ -70,13 +91,13 @@ public class Sweepstake {
 
 
     public int calculatePointsFor(String user) {
-        List<Match> matches = MatchRepository.read();
+        List<Match> matches = matchRepository.read();
         int matchScore = matches.stream().map(
                 match -> match.scoreFor(user))
                 .filter(Objects::nonNull)
                 .reduce(0, (a, b) -> a + b);
 
-        int groupScore = TableRepository.read().stream().mapToInt(this::scoreTable).sum();
+        int groupScore = tableRepository.read().stream().mapToInt(this::scoreTable).sum();
 
         return matchScore + groupScore;
     }
@@ -119,14 +140,14 @@ public class Sweepstake {
     }
 
     public User getUser(String email) {
-        return UserRepository.read(email);
+        return userRepository.read(email);
     }
 
     public void saveUser(User user) {
-        UserRepository.store(user);
+        userRepository.store(user);
     }
 
     public User findUser(String displayName) {
-        return UserRepository.find(displayName);
+        return userRepository.find(displayName);
     }
 }

@@ -35,6 +35,8 @@
         <a href="/group/H">GroupH</a>
         <a href="/playoff">Playoff</a>
 </p>
+
+
 <table width="50%">
     <form action="/userEmail" method="post">
             <input type="hidden" value="update" name="update" id="update" />
@@ -43,8 +45,8 @@
                 <label>Display name </label>
             </td>
             <td width="50%">
-                <label th:text="${userEmail.displayName}" th:if="${userEmail.equals(activeUser)}==false"/>
-                <input type="text" name="displayName" id="displayName" th:value="${userEmail.displayName}" th:if="${userEmail.equals(activeUser)}==true"/>
+                <label th:text="${user.displayName}" th:if="${user.equals(activeUser)}==false"/>
+                <input type="text" name="displayName" id="displayName" th:value="${user.displayName}" th:if="${user.equals(activeUser)}==true"/>
             </td>
         </tr>
         <tr>
@@ -52,18 +54,18 @@
                 <label>Email</label>
             </td>
             <td width="50%">
-                <label th:text="${userEmail.email}"/>
+                <label th:text="${user.email}"/>
             </td>
         </tr>
-        <tr th:if="${userEmail.equals(activeUser)}==true">
+        <tr th:if="${user.equals(activeUser)}==true">
             <td><label>Old Password</label></td>
             <td  width="50%"><input type="password" name="oldCredentials" id="oldCredentials_" value="pwd"/></td>
         </tr>
-        <tr th:if="${userEmail.equals(activeUser)}==true">
+        <tr th:if="${user.equals(activeUser)}==true">
             <td><label>New Password</label></td>
             <td  width="50%"><input type="password" name="newCredentials" id="newCredentials_" value="pwd"/></td>
         </tr>
-        <tr th:if="${userEmail.equals(activeUser)}==true">
+        <tr th:if="${user.equals(activeUser)}==true">
             <td></td>
             <td><button type="submit">Update</button></td>
         </tr>

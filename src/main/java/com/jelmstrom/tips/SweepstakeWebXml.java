@@ -8,7 +8,6 @@ public class SweepstakeWebXml extends SpringBootServletInitializer {
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        ConfigurationLoader.initialiseData();
         return application.sources(Application.class);
     }
 

@@ -13,9 +13,14 @@ import static java.util.stream.Collectors.toList;
 
 public class MatchRepository extends MongoRepository {
 
-    public static final DBCollection matchCollection = getDb().getCollection("matches");
+    public final DBCollection matchCollection;
 
-    public static void store(Match match) {
+    public MatchRepository(String context) {
+        super(context);
+        matchCollection = getDb().getCollection("matches");
+    }
+
+    public void store(Match match) {
         List<DBObject> results =
                 match.results.stream()
                         .map(result -> new BasicDBObject("homeGoals", result.homeGoals)
@@ -36,7 +41,7 @@ public class MatchRepository extends MongoRepository {
         }
     }
 
-    public static Match read(String matchId) {
+    public Match read(String matchId) {
         DBObject dbMatch = matchCollection.findOne(new BasicDBObject("matchId", matchId));
         if (dbMatch != null && null != dbMatch.get("matchId")) {
             return buildMatch(dbMatch);
@@ -44,11 +49,11 @@ public class MatchRepository extends MongoRepository {
         return new Match("", "", new Date(), "");
     }
 
-    public static List<Match> read() {
-        return matchCollection.find().toArray().parallelStream().map(MatchRepository::buildMatch).collect(toList());
+    public List<Match> read() {
+        return matchCollection.find().toArray().parallelStream().map(this::buildMatch).collect(toList());
     }
 
-    private static Match buildMatch(DBObject dbMatch) {
+    private Match buildMatch(DBObject dbMatch) {
         Match match = new Match(dbMatch.get("homeTeam").toString()
                 , dbMatch.get("awayTeam").toString()
                 , new Date(Long.parseLong(dbMatch.get("matchStart").toString()))
@@ -65,15 +70,15 @@ public class MatchRepository extends MongoRepository {
         return match;
     }
 
-    public static void store(List<Match> matches) {
-        matches.stream().forEach(MatchRepository::store);
+    public void store(List<Match> matches) {
+        matches.stream().forEach(this::store);
     }
 
-    public static void remove(List<Match> matches) {
-        matches.stream().forEach(MatchRepository::remove);
+    public void remove(List<Match> matches) {
+        matches.stream().forEach(this::remove);
     }
 
-    public static void remove(Match match) {
+    public void remove(Match match) {
         matchCollection.remove(new BasicDBObject("matchId", match.id));
 
     }

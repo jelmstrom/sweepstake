@@ -12,8 +12,6 @@ public class ResultTest {
 
     private final String brazil = "Brazil";
     private final String germany = "Germany";
-    private final String argentina = "Argentina";
-
 
 
     @Test
@@ -68,7 +66,7 @@ public class ResultTest {
     public void nonTeamGetsZeroPointsForDraw(){
         Match newMatch = new Match(brazil, germany, null, "A1");
         Result result = new Result(newMatch, 2,1, "Johan");
-        assertThat(result.pointsFor(argentina), is(0));
+        assertThat(result.pointsFor("Argentina"), is(0));
     }
 
 

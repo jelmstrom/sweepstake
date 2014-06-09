@@ -26,6 +26,11 @@ public class AcceptanceTest {
 
     public static final String ADMIN_EMAIL = "Admin";
     public static final String USER_EMAIL = "Johan";
+    public static final String TEST_REPO = "testRepo";
+    public static final UserRepository USER_REPOSITORY = new UserRepository(TEST_REPO);
+    public static final MatchRepository MATCH_REPOSITORY = new MatchRepository(TEST_REPO);
+    private static final TableRepository TABLE_REPOSITORY = new TableRepository(TEST_REPO);
+    private static final GroupRepository GROUP_REPOSITORY = new GroupRepository(TEST_REPO);
     private final String brazil = "Brazil";
     private final String germany = "Germany";
     private final String australia = "Australia";
@@ -33,13 +38,12 @@ public class AcceptanceTest {
     private List<Match> matches;
     private Group groupA = new Group("GroupA",asList(brazil, germany, argentina, australia));
 
-    private Sweepstake sweepstake = new Sweepstake();
+    private Sweepstake sweepstake = new Sweepstake(TEST_REPO);
 
     @Before
     public void setup(){
-        GroupRepository.store(groupA);
+        GROUP_REPOSITORY.store(groupA);
         matches = new ArrayList<>();
-        List<Result> results = new ArrayList<>();
         Date matchStart = new Date();
         matches.add( new Match(brazil, germany, matchStart, "A1"));
         matches.add( new Match(brazil, argentina, matchStart, "A2"));
@@ -48,35 +52,35 @@ public class AcceptanceTest {
         matches.add( new Match(germany, argentina, matchStart, "A5"));
         matches.add( new Match(australia, argentina, matchStart, "A6"));
 
-        results.add(new Result(matches.get(0), 2, 0, USER_EMAIL));
-        results.add(new Result(matches.get(1), 2, 0, USER_EMAIL));
-        results.add(new Result(matches.get(2), 2, 0, USER_EMAIL));
+        new Result(matches.get(0), 2, 0, USER_EMAIL);
+        new Result(matches.get(1), 2, 0, USER_EMAIL);
+        new Result(matches.get(2), 2, 0, USER_EMAIL);
 
-        results.add(new Result(matches.get(3), 2, 0, USER_EMAIL));
-        results.add(new Result(matches.get(4), 0, 0, USER_EMAIL));
-
-        results.add(new Result(matches.get(5), 1, 5, USER_EMAIL));
-
+        new Result(matches.get(3), 2, 0, USER_EMAIL);
+        new Result(matches.get(4), 0, 0, USER_EMAIL);
+        new Result(matches.get(5), 1, 5, USER_EMAIL);
 
 
-        results.add(new Result(matches.get(0), 2, 1, ADMIN_EMAIL));
-        results.add(new Result(matches.get(1), 2, 0, ADMIN_EMAIL));
-        results.add(new Result(matches.get(2), 0, 0, ADMIN_EMAIL));
 
-        results.add(new Result(matches.get(3), 1, 3, ADMIN_EMAIL));
-        results.add(new Result(matches.get(4), 0, 1, ADMIN_EMAIL));
+        new Result(matches.get(0), 2, 1, ADMIN_EMAIL);
+        new Result(matches.get(1), 2, 0, ADMIN_EMAIL);
+        new Result(matches.get(2), 0, 0, ADMIN_EMAIL);
 
-        results.add(new Result(matches.get(5), 1, 2, ADMIN_EMAIL));
+        new Result(matches.get(3), 1, 3, ADMIN_EMAIL);
+        new Result(matches.get(4), 0, 1, ADMIN_EMAIL);
 
-        MatchRepository.store(matches);
-        UserRepository.store(new User("admin", ADMIN_EMAIL, "credentials", true));
+        new Result(matches.get(5), 1, 2, ADMIN_EMAIL);
+
+        MATCH_REPOSITORY.store(matches);
+        USER_REPOSITORY.store(new User("admin", ADMIN_EMAIL, "credentials", true));
     }
 
     @After
     public void tearDown(){
-       MatchRepository.remove(matches);
-       GroupRepository.remove(groupA.groupName);
-       TableRepository.tablePredictionCollection.drop();
+       MATCH_REPOSITORY.matchCollection.drop();
+       GROUP_REPOSITORY.groupCollection.drop();
+       TABLE_REPOSITORY.tablePredictionCollection.drop();
+        USER_REPOSITORY.userCollection.drop();
     }
 
 
@@ -149,7 +153,7 @@ public class AcceptanceTest {
 
         List<String> userPrediction = asList(brazil, argentina, australia, germany);
         TablePrediction prediction = new TablePrediction(USER_EMAIL, groupA.groupName, userPrediction);
-        TableRepository.store(prediction);
+        TABLE_REPOSITORY.store(prediction);
 
         int score = sweepstake.calculatePointsFor(USER_EMAIL);
         assertThat(score, is(16));
@@ -160,11 +164,11 @@ public class AcceptanceTest {
 
         List<String> userPrediction = asList(brazil, argentina, australia, germany);
         TablePrediction prediction = new TablePrediction(USER_EMAIL, groupA.groupName, userPrediction);
-        TableRepository.store(prediction);
+        TABLE_REPOSITORY.store(prediction);
         List<String> userPrediction2 = asList("1", "2", "3", "4");
 
         prediction = new TablePrediction(USER_EMAIL, "GroupB", userPrediction2);
-        TableRepository.store(prediction);
+        TABLE_REPOSITORY.store(prediction);
 
         int score = sweepstake.calculatePointsFor(USER_EMAIL);
         assertThat(score, is(16));

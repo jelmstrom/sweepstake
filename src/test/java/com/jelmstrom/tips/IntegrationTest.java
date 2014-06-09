@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import java.util.*;
 
-import static com.jelmstrom.tips.match.MatchRepository.*;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
@@ -22,12 +21,17 @@ import static org.junit.Assert.assertThat;
 public class IntegrationTest {
 
 
+    private MatchRepository matchRepo = new MatchRepository("testRepo");
+    private TableRepository tableRepo = new TableRepository("testRepo");
+    private GroupRepository groupRepo = new GroupRepository("testRepo");
+    private UserRepository userRepo = new UserRepository("userRepo");
+
     @After
     public void tearDown(){
-        MatchRepository.matchCollection.drop();
-        TableRepository.tablePredictionCollection.drop();
-        GroupRepository.groupCollection.drop();
-        UserRepository.userCollection.drop();
+        matchRepo.matchCollection.drop();
+        tableRepo.tablePredictionCollection.drop();
+        groupRepo.groupCollection.drop();
+        userRepo.userCollection.drop();
     }
 
     @Test
@@ -35,8 +39,8 @@ public class IntegrationTest {
         Match match = new Match("TeamA", "TeamB", new Date(), UUID.randomUUID().toString());
         new Result(match, 2, 1, "Johan");
         new Result(match, 2, 2, "Christian");
-        store(match);
-        Match persisted = read(match.id);
+        matchRepo.store(match);
+        Match persisted = matchRepo.read(match.id);
         assertThat(persisted.equals(match), is(true));
     }
 
@@ -49,9 +53,9 @@ public class IntegrationTest {
         Match match2 = new Match("TeamA", "TeamB", new Date(), UUID.randomUUID().toString());
         new Result(match, 2, 1, "Johan");
         new Result(match, 2, 2, "Christian");
-        store(match);
-        store(match2);
-        List<Match> persisted = read();
+        matchRepo.store(match);
+        matchRepo.store(match2);
+        List<Match> persisted = matchRepo.read();
         assertThat(persisted.size() > 1, is(true));
     }
 
@@ -60,13 +64,13 @@ public class IntegrationTest {
     public void saveExistingMatchUpdates(){
         Match match = new Match("TeamA", "TeamB", new Date(), UUID.randomUUID().toString());
         new Result(match, 2, 1, "Johan");
-        store(match);
+        matchRepo.store(match);
 
-        Match versionOne = read(match.id);
+        Match versionOne = matchRepo.read(match.id);
         new Result(match, 2, 2, "Christian");
-        store(match);
+        matchRepo.store(match);
 
-        Match versionTwo = read(match.id);
+        Match versionTwo = matchRepo.read(match.id);
 
         assertThat(versionTwo.equals(match), is(true));
         assertThat(versionTwo.equals(versionOne), is(false));
@@ -74,9 +78,9 @@ public class IntegrationTest {
 
     @Test
     public void tablePredictionsAreStoredAndReadInCorrectOrder(){
-        TablePrediction prediction = new TablePrediction("userEmail", "grp", Arrays.asList("teamB", "teamA", "teamC", "teamD"));
-        TableRepository.store(prediction);
-        TablePrediction stored = TableRepository.readPrediction(prediction.user, prediction.group);
+        TablePrediction prediction = new TablePrediction("user", "grp", Arrays.asList("teamB", "teamA", "teamC", "teamD"));
+        tableRepo.store(prediction);
+        TablePrediction stored = tableRepo.readPrediction(prediction.user, prediction.group);
         assertThat(stored, equalTo(prediction));
 
     }
@@ -85,23 +89,23 @@ public class IntegrationTest {
     @Test
     public void groupRepositoryShouldStoreGroup(){
         Group group = new Group("A", Arrays.asList("a", "b","c", "d"));
-        GroupRepository.store(group);
-        assertThat(GroupRepository.read("A"), is(equalTo(group)));
+        groupRepo.store(group);
+        assertThat(groupRepo.read("A"), is(equalTo(group)));
     }
 
     @Test
     public void addUser(){
         User newUser = new User("display", "Email", "cred", false);
-        UserRepository.store(newUser);
-        assertThat(UserRepository.read("Email"), is(equalTo(newUser)));
+        userRepo.store(newUser);
+        assertThat(userRepo.read("Email"), is(equalTo(newUser)));
     }
 
     @Test
     public void removeUser(){
         User newUser = new User("display", "Email", "cred", false);
-        UserRepository.store(newUser);
-        assertThat(UserRepository.read("Email"), is(equalTo(newUser)));
-        UserRepository.remove("Email");
-        assertThat(UserRepository.read("Email").displayName, is(""));
+        userRepo.store(newUser);
+        assertThat(userRepo.read("Email"), is(equalTo(newUser)));
+        userRepo.remove("Email");
+        assertThat(userRepo.read("Email").displayName, is(""));
     }
 }

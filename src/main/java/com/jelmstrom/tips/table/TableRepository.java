@@ -10,9 +10,15 @@ import java.util.List;
 
 public class TableRepository extends MongoRepository {
 
-    public static final DBCollection tablePredictionCollection = getDb().getCollection("tablePreditions");
+    public final DBCollection tablePredictionCollection;
 
-    public static void store(TablePrediction prediction){
+
+    public TableRepository(String context) {
+        super(context);
+        tablePredictionCollection = getDb().getCollection("tablePreditions");
+    }
+
+    public void store(TablePrediction prediction){
             BasicDBObject dbPrediction = new BasicDBObject()
                     .append("group", prediction.group)
                     .append("userEmail", prediction.user)
@@ -27,7 +33,7 @@ public class TableRepository extends MongoRepository {
         }
     }
 
-    public static TablePrediction readPrediction(String user, String group) {
+    public TablePrediction readPrediction(String user, String group) {
         DBObject dbPrediction = tablePredictionCollection.findOne(new BasicDBObject("userEmail", user).append("group", group));
         if(dbPrediction != null && null != dbPrediction.get("userEmail")){
             return buildTablePrediction(dbPrediction);
@@ -35,14 +41,14 @@ public class TableRepository extends MongoRepository {
         return new TablePrediction(user, group, Collections.emptyList());
     }
 
-    private static TablePrediction buildTablePrediction(DBObject dbMatch) {
+    private TablePrediction buildTablePrediction(DBObject dbMatch) {
 
         List<String> predictions = new ArrayList<>();
         ((BasicDBList) dbMatch.get("prediction")).forEach(entry -> predictions.add((String) entry));
         return new TablePrediction(dbMatch.get("userEmail").toString(), dbMatch.get("group").toString(), predictions);
     }
 
-    public static List<TablePrediction> read() {
+    public List<TablePrediction> read() {
         DBCursor teams = tablePredictionCollection.find();
         ArrayList<TablePrediction> predictions = new ArrayList<>(teams.size());
         teams.forEach(entry -> predictions.add(buildTablePrediction(entry)));
