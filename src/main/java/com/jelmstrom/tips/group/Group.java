@@ -32,4 +32,8 @@ public class Group {
         result = 31 * result + teams.hashCode();
         return result;
     }
+
+    public String toString(){
+        return groupName + " " + teams;
+    }
 }

@@ -11,34 +11,42 @@
 </head>
 <body>
 <table>
-    <td th:if="${activeUser.email == null} == false">
-        <a href="/userEmail/{${activeUser.email}" th:text="${activeUser.displayName}">GroupA</a>
-    </td>
-    <td th:if="${activeUser.email == null} == true">
-        <form action="/userEmail" method="post">
-            <label>New userEmail? </label><input type="checkbox" name="new" value="new"/>
-            <label>Email  </label><input type="txt" id="email" name="email" value="email"/>
-            <label>Password  </label><input type="password" name="credentials" id="credentials" value="pwd"/>
-            <button type="submit">Submit</button>
-        </form>
-    </td>
+    <tr th:if="${activeUser.email == null} == false">
+        <td>
+            <a href="" th:href="${'/user/'+activeUser.displayName}" th:text="${activeUser.displayName}"></a>
+        </td>
+        <td>
+            <a href="/logout">Logout</a>
+        </td>
+    </tr>
+    <tr th:if="${activeUser.email == null} == true">
+        <td>
+            <form action="/user" method="post">
+                <label>New user? </label><input type="checkbox" name="new" value="new"/>
+                <label>Email  </label><input type="txt" id="email" name="email" value="email"/>
+                <label>Password  </label><input type="password" name="credentials" id="credentials" value="pwd"/>
+                <button type="submit">Submit</button>
+            </form>
+        </td>
+    </tr>
 </table>
-<p id="text">
-        <a href="/">Leaderboard</a>
-        <a href="/group/A">GroupA</a>
-        <a href="/group/B">GroupB</a>
-        <a href="/group/C">GroupC</a>
-        <a href="/group/D">GroupD</a>
-        <a href="/group/E">GroupE</a>
-        <a href="/group/F">GroupF</a>
-        <a href="/group/G">GroupG</a>
-        <a href="/group/H">GroupH</a>
-        <a href="/playoff">Playoff</a>
+
+<p id="navigation">
+    <a href="/">Leaderboard</a>
+    <a href="/group/A">GroupA</a>
+    <a href="/group/B">GroupB</a>
+    <a href="/group/C">GroupC</a>
+    <a href="/group/D">GroupD</a>
+    <a href="/group/E">GroupE</a>
+    <a href="/group/F">GroupF</a>
+    <a href="/group/G">GroupG</a>
+    <a href="/group/H">GroupH</a>
+    <a href="/playoff">Playoff</a>
 </p>
 
 
 <table width="50%">
-    <form action="/userEmail" method="post">
+    <form action="/user" method="post">
             <input type="hidden" value="update" name="update" id="update" />
         <tr>
             <td width="50%">
@@ -70,7 +78,6 @@
             <td><button type="submit">Update</button></td>
         </tr>
     </form>
-
 </table>
 </body>
 </html>

@@ -48,7 +48,8 @@ public class UserRepository extends MongoRepository {
 
         return new User(dbUser.get(DISPLAY_NAME).toString()
                 , dbUser.get(EMAIL).toString()
-                , dbUser.get(CREDENTIALS).toString(), false);
+                , dbUser.get(CREDENTIALS).toString()
+                , Boolean.parseBoolean(dbUser.get(ADMIN).toString()));
     }
 
     public void remove(String user) {
@@ -69,10 +70,16 @@ public class UserRepository extends MongoRepository {
     }
 
     public User findAdminUser() {
-        DBObject users = userCollection.findOne(new BasicDBObject(ADMIN, true));
-        if(users != null && null != users.get(EMAIL)){
-            return buildUser(users);
+        DBObject user = userCollection.findOne(new BasicDBObject(ADMIN, true));
+        System.out.println("Admin Users " + user);
+        if(user != null && null != user.get(EMAIL)){
+            System.out.println("building user");
+            User admin= buildUser(user);
+            System.out.println("Admin Users " + admin);
+            return admin;
+
         }
+        System.out.println("building user");
         return new User("", "","", false);
     }
 }

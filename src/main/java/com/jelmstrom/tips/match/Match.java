@@ -1,13 +1,14 @@
 package com.jelmstrom.tips.match;
 
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.jelmstrom.tips.user.UserRepository;
 
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Optional;
 
-public class Match {
+
+public class Match implements Comparable<Match>{
     public final String homeTeam;
     public final String awayTeam;
     public final Date matchStart;
@@ -33,9 +34,6 @@ public class Match {
             return option.get();
         } else {
             return null;
-            //until any results have been added, this result will be
-            // returned for all users (including admin). Setting a default will give all users
-            // maxpoints until results are entered :)
         }
     }
 
@@ -58,11 +56,13 @@ public class Match {
     }
 
     private int userScore(Result userResult) {
-        if(null == userResult){
+        Result adminResult;
+        if(null == userResult
+                || (adminResult =  resultFor("none@noreply.zzz")) == null){
             return 0;
         }
 
-        Result adminResult = resultFor("Admin");
+
         int points = 0;
         if (userResult.winner() == adminResult.winner()) {
             points++;
@@ -77,7 +77,22 @@ public class Match {
         return points;
     }
 
+    @SuppressWarnings("UnusedDeclaration")
     public boolean hasResult(){
-        return null != resultFor("Admin");
+        return resultFor("none@noreply.zzz") != null;
+    }
+
+    public String homeGoalsAsStringFor(String email){
+        Result result =  resultFor(email);
+        return result==null?"":Integer.toString(result.homeGoals);
+    }
+    public String awayGoalsAsStringFor(String email){
+        Result result =  resultFor(email);
+        return result==null?"":Integer.toString(result.awayGoals);
+    }
+
+    @Override
+    public int compareTo(Match o) {
+        return matchStart.compareTo(o.matchStart);
     }
 }

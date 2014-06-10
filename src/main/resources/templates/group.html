@@ -11,53 +11,135 @@
 </head>
 <body>
 <table>
-    <td th:if="${activeUser.email == null} == false">
-        <a href="/userEmail/{${activeUser.email}" th:text="${activeUser.displayName}">GroupA</a>
-    </td>
-    <td th:if="${activeUser.email == null} == true">
-        <form action="/userEmail" method="post">
-            <label>New userEmail? </label><input type="checkbox" name="new" value="new"/>
-            <label>Email  </label><input type="txt" id="email" name="email" value="email"/>
-            <label>Password  </label><input type="password" name="credentials" id="credentials" value="pwd"/>
-            <button type="submit">Submit</button>
-        </form>
-    </td>
-</table>
-<p id="text">
-        <a href="/">Leaderboard</a>
-        <a href="/group/A">GroupA</a>
-        <a href="/group/B">GroupB</a>
-        <a href="/group/C">GroupC</a>
-        <a href="/group/D">GroupD</a>
-        <a href="/group/E">GroupE</a>
-        <a href="/group/F">GroupF</a>
-        <a href="/group/G">GroupG</a>
-        <a href="/group/H">GroupH</a>
-        <a href="/playoff">Playoff</a>
-</p>
-<table width="75%">
-    <tr>
-        <th width="20%">Date</th>
-        <th width="30%">Away</th>
-        <th width="2%">-</th>
-        <th width="30%">Home</th>
-        <th width="8%">HomeGoals</th>
-        <th width="8%">AwayGoals</th>
-        <th width="2%"></th>
-
+    <tr th:if="${activeUser.email == null} == false">
+        <td>
+            <a href="" th:href="${'/user/'+activeUser.displayName}" th:text="${activeUser.displayName}"></a>
+        </td>
+        <td>
+            <a href="/logout">Logout</a>
+        </td>
     </tr>
-    <tr th:each="match,iterStat : ${matches}" th:class="${iterStat.odd}? 'odd'">
-        <td th:text="${match.matchStart}">start</td>
-        <td th:text="${match.homeTeam}">home</td>
-        <td>-</td>
-        <td th:text="${match.awayTeam}">Away</td>
-        <td><input type="text" size="2" id="${match.id}_home"/></td>
-        <td><input type="text" size="2" id="${match.id}_away"/></td>
-        <td th:if="${match.hasResult()}" >
-            <label th:if="${activeUser != null}"
-                   th:text="${match.scoreFor(activeUser.email?: '_anonymous_')}"/>
+    <tr th:if="${activeUser.email == null} == true">
+         <td>
+             <form action="/user" method="post">
+                <label>New user? </label><input type="checkbox" name="new" value="new"/>
+                <label>Email  </label><input type="txt" id="email" name="email" value="email"/>
+                <label>Password  </label><input type="password" name="credentials" id="credentials" value="pwd"/>
+                <button type="submit">Submit</button>
+            </form>
         </td>
     </tr>
 </table>
+<p id="navigation">
+    <a href="/">Leaderboard</a>
+    <a href="/group/A">GroupA</a>
+    <a href="/group/B">GroupB</a>
+    <a href="/group/C">GroupC</a>
+    <a href="/group/D">GroupD</a>
+    <a href="/group/E">GroupE</a>
+    <a href="/group/F">GroupF</a>
+    <a href="/group/G">GroupG</a>
+    <a href="/group/H">GroupH</a>
+    <a href="/playoff">Playoff</a>
+</p>
+<table width="75%">
+    <tr>
+        <td width="30%">
+            <table width="100%">
+                <tr>
+                    <td colspan='6'> Current standings</td>
+                </tr>
+                <tr th:each="tableEntry, iterStat : ${currentStandings}" th:class="${iterStat.odd}? 'odd'">
+                    <td><label id="position" th:text="${iterStat.count}">label</label></td>
+                    <td width="45%" id="team" th:text="${tableEntry.team}">team</td>
+                    <td width="10%" th:text="${tableEntry.goalsFor}">for</td>
+                    <td width="5%"> - </td>
+                    <td width="10%" th:text="${tableEntry.goalsAgainst}">against</td>
+                    <td width="15%" th:text="${tableEntry.goalDifference()}">diff</td>
+                    <td width="15%" th:text="${tableEntry.points + 'p'}">points</td>
+                </tr>
+            </table>
+        </td>
+        <td width="30%">
+
+            <form id="predicionForm" action="" th:action="@{'/prediction/'+${group}}" method="post">
+            <table width="100%%">
+                <tr>
+                    <td width="100%%" colspan="2">use predictions</td>
+                </tr>
+                <tr>
+                    <td width="5%">1</td>
+
+                    <td width="95%">
+                        <input type="text" id="prediction1" name="prediction1" th:value="${prediction.get(0)}" />
+                    </td>
+                </tr>
+                <tr>
+                    <td width="5%"> 2</td>
+                    <td width="95%">
+                        <input type="text" id="prediction2" name="prediction2" th:value="${prediction.get(1)}" />
+                    </td>
+                </tr>
+                <tr>
+                    <td width="5%">3</td>
+                    <td width="95%">
+                        <input type="text" id="prediction3" name="prediction3" th:value="${prediction.get(2)}" />
+                    </td >
+                </tr>
+                <tr>
+                    <td width="5%">4</td>
+                    <td width="95%">
+                        <input type="text" id="prediction4" name="prediction4" th:value="${prediction.get(3)}" />
+                    </td>
+                </tr>
+                <tr>
+                    <td width="100%" colspan="2"><button type="submit">Submit</button></td>
+                </tr>
+            </table>
+            </form>
+        </td>
+    </tr>
+</table>
+<p height="30px">&nbsp;</p>
+<form id="matchForm" action="" th:action="@{'/group/'+${group}}" method="post">
+    <table width="75%">
+        <tr>
+            <th width="20%">Date</th>
+            <th width="30%">Away</th>
+            <th width="2%">-</th>
+            <th width="30%">Home</th>
+            <th width="8%">HomeGoals</th>
+            <th width="8%">AwayGoals</th>
+            <th width="2%"></th>
+        </tr>
+        <tr th:each="match,iterStat : ${matches}" th:class="${iterStat.odd}? 'odd'">
+            <td th:text="${match.matchStart}">start</td>
+            <td th:text="${match.homeTeam}">home</td>
+            <td>-</td>
+            <td th:text="${match.awayTeam}">Away</td>
+            <td>
+                <input type="text" size="2"
+                       id="${match.id}_home"
+                       th:value="${match.homeGoalsAsStringFor(activeUser.email)}"
+                       name=""
+                       th:name="${match.id+'_h'}"/></td>
+            <td>
+                <input type="text" size="2"
+                       id="${match.id}_away"
+                       name="away"
+                       th:value="${match.awayGoalsAsStringFor(activeUser.email)}"
+                       th:name="${match.id+'_a'}"/></td>
+
+            <td th:if="${match.hasResult()}" >
+                <label th:if="${activeUser != null}"
+                       th:text="${match.scoreFor(activeUser.email?: '_anonymous_')}"/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="5"></td>
+            <td colspan="2"><button type="submit">Submit</button></td>
+        </tr>
+    </table>
+</form>
 </body>
 </html>

@@ -3,17 +3,24 @@
 
 <body>
 <table>
-    <td th:if="${activeUser.email == null} == false">
-        <a href="/user/{${activeUser.email}" th:text="${activeUser.displayName}">GroupA</a>
-    </td>
-    <td th:if="${activeUser.email == null} == true">
-        <form action="/user" method="post">
-            <label>New user? </label><input type="checkbox" name="new" value="new"/>
-            <label>Email  </label><input type="txt" id="email" name="email" value="email"/>
-            <label>Password  </label><input type="password" name="credentials" id="credentials" value="pwd"/>
-            <button type="submit">Submit</button>
-        </form>
-    </td>
+    <tr th:if="${activeUser.email == null} == false">
+        <td>
+            <a href="" th:href="${'/user/'+activeUser.displayName}" th:text="${activeUser.displayName}"></a>
+        </td>
+        <td>
+            <a href="/logout">Logout</a>
+        </td>
+    </tr>
+    <tr th:if="${activeUser.email == null} == true">
+        <td>
+            <form action="/user" method="post">
+                <label>New user? </label><input type="checkbox" name="new" value="new"/>
+                <label>Email  </label><input type="txt" id="email" name="email" value="email"/>
+                <label>Password  </label><input type="password" name="credentials" id="credentials" value="pwd"/>
+                <button type="submit">Submit</button>
+            </form>
+        </td>
+    </tr>
 </table>
 <p id="navigation">
     <a href="/">Leaderboard</a>

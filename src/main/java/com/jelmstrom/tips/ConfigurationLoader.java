@@ -6,13 +6,13 @@ import com.jelmstrom.tips.match.Match;
 import com.jelmstrom.tips.match.MatchRepository;
 import com.jelmstrom.tips.user.User;
 import com.jelmstrom.tips.user.UserRepository;
-
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 
 public class ConfigurationLoader {
 
@@ -59,6 +59,7 @@ public class ConfigurationLoader {
     public static final Group GROUP_H = new Group("GroupH", Arrays.asList(BELGIUM, ALGERIA, RUSSIA, SOUTH_KOREA));
 
     private static final DateFormat dateFormat = new SimpleDateFormat("dd MMMMM yyyy hh:mm");
+
 
     private static void createGroups(GroupRepository groupRepository) {
         if(groupRepository.read("GroupA").teams.isEmpty()){

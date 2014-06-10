@@ -24,7 +24,7 @@ import static org.junit.Assert.assertThat;
 
 public class AcceptanceTest {
 
-    public static final String ADMIN_EMAIL = "Admin";
+    public static final String ADMIN_EMAIL = "none@noreply.zzz";
     public static final String USER_EMAIL = "Johan";
     public static final String TEST_REPO = "testRepo";
     public static final UserRepository USER_REPOSITORY = new UserRepository(TEST_REPO);

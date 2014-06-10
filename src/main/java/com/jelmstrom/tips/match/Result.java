@@ -17,6 +17,10 @@ public class Result {
         match.add(this);
     }
 
+    public static Result emptyResult() {
+        return new Result(new Match("", "", null, ""), 0, 0, "");
+    }
+
     public int goalsAgainst(String team) {
         if(match.homeTeam.equals(team)){
             return awayGoals;
@@ -62,6 +66,4 @@ public class Result {
     public int hashCode(){
         return 31 * (homeGoals * awayGoals * userEmail.hashCode() * match.id.hashCode());
     }
-
-
 }

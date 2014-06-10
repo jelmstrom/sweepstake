@@ -35,4 +35,8 @@ public class User {
         result = 31 * result + credentials.hashCode();
         return result;
     }
+
+    public String toString(){
+        return displayName + " " + email +  "" + (admin?"admin":"");
+    }
 }

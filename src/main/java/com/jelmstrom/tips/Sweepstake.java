@@ -10,10 +10,13 @@ import com.jelmstrom.tips.table.TablePrediction;
 import com.jelmstrom.tips.table.TableRepository;
 import com.jelmstrom.tips.user.User;
 import com.jelmstrom.tips.user.UserRepository;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,7 +25,7 @@ import static java.util.stream.Collectors.toList;
 @SuppressWarnings("UnusedDeclaration")
 @RestController
 public class Sweepstake {
-
+    private final Logger logger = LogManager.getLogger(Sweepstake.class);
     private final String context;
     private final MatchRepository matchRepository;
     private final UserRepository userRepository;
@@ -66,10 +69,19 @@ public class Sweepstake {
 
     @RequestMapping(value = "/table/{groupName}")
     public List<TableEntry> currentStandingsForGroup(@PathVariable String groupName) {
+
+        System.out.println("Getting admin user");
         User admin = userRepository.findAdminUser();
+        System.out.println("admin user" + admin);
         List<Result> results = resultsFor(admin.email);
+
+        System.out.println("Admin Results " + results.size());
         Group group = new GroupRepository(context).read(groupName);
-        return group.teams.stream().map(team -> recordForTeam(team, admin.email, results)).sorted().collect(toList());
+
+        System.out.println("Group " + groupName + " " + group );
+        List<TableEntry> tableEntries =  group.teams.stream().map(team -> recordForTeam(team, admin.email, results)).sorted().collect(toList());
+        System.out.println("Admin Results " + tableEntries.size());
+        return tableEntries;
     }
 
 
@@ -86,6 +98,7 @@ public class Sweepstake {
                 .mapToInt(match -> match.goalsFor(team)).sum();
         int goalsAgainst = results.stream().filter(result -> result.userEmail.equals(userEmail))
                 .mapToInt(match -> match.goalsAgainst(team)).sum();
+        System.out.println(String.format("Table Entry {}", Arrays.asList(team, points, goalsFor, goalsAgainst)));
         return new TableEntry(team, goalsFor, goalsAgainst, points);
     }
 
@@ -97,7 +110,7 @@ public class Sweepstake {
                 .filter(Objects::nonNull)
                 .reduce(0, (a, b) -> a + b);
 
-        int groupScore = tableRepository.read().stream().mapToInt(this::scoreTable).sum();
+        int groupScore = tableRepository.read().stream().filter(prediction -> prediction.user.equals(user)).mapToInt(this::scoreTable).sum();
 
         return matchScore + groupScore;
     }
@@ -111,6 +124,8 @@ public class Sweepstake {
                 .filter(Objects::nonNull)
                 .collect(toList());
         List<String> userPrediction = tablePrediction.tablePrediction;
+        System.out.println("User table " + tablePrediction.user  + " " + tablePrediction.group + "  " + userPrediction);
+        System.out.println("correct table " + correctOrder);
         if (userPrediction.equals(correctOrder)) {
             score = 7;
         } else if (correctOrder.isEmpty() || userPrediction.isEmpty()) {
@@ -129,10 +144,10 @@ public class Sweepstake {
             }
 
             if (userPrediction.get(2).equals(correctOrder.get(2))) {
-                score += 1;
+                score ++;
             }
             if (userPrediction.get(3).equals(correctOrder.get(3))) {
-                score += 1;
+                score ++;
             }
 
         }
@@ -149,5 +164,26 @@ public class Sweepstake {
 
     public User findUser(String displayName) {
         return userRepository.find(displayName);
+    }
+
+    public void saveResults(List<Result> resultList, User user) {
+        List<Match> matches = getMatches();
+        System.out.println(String.format("Storing results", resultList));
+        resultList.stream().forEach(result -> new Result(
+                            findMatch(matches, result.match.id)
+                            , result.homeGoals
+                            , result.awayGoals
+                            , result.userEmail));
+        matchRepository.store(matches);
+
+    }
+
+    private Match findMatch(List<Match> matches, String id) {
+        System.out.println(String.format("Finding match for {}", id));
+        return matches.stream().filter(match -> match.id.equals(id)).findFirst().get();
+    }
+
+    public void saveUserPrediction(TablePrediction tablePrediction) {
+        tableRepository.store(tablePrediction);
     }
 }
