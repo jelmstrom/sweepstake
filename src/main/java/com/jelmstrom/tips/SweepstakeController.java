@@ -108,6 +108,7 @@ public class SweepstakeController {
         uiModel.addAttribute("matches", groupMatches);
         uiModel.addAttribute("group", groupLetter);
         uiModel.addAttribute("currentStandings", tableEntries);
+        uiModel.addAttribute("teams", tableEntries.stream().map(entry -> entry.team).collect(toList()));
         uiModel.addAttribute("maybe", maybe.orElse(new TablePrediction("", "", Collections.emptyList())));
         uiModel.addAttribute("prediction", maybe.isPresent() ? maybe.get().tablePrediction : Arrays.asList("", "", "", ""));
         setActiveUserModel(uiModel, request);

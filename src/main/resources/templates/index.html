@@ -44,7 +44,7 @@
                 </td>
             </tr>
             <tr th:each="user,iterStat : ${userList}" th:class="${iterStat.odd}? 'odd'" th:if="${user.admin} == false">
-                <td th:text="${user.displayName}">displayname</td>
+                <td> <a href="" th:href="@{'user/'+ ${user.displayName}}" th:text="${user.displayName}"></a></td>
                 <td th:text="${user.email}">email</td>
             </tr>
         </table>

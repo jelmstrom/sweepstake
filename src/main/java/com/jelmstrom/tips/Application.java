@@ -21,8 +21,8 @@ public class Application {
 
     @SuppressWarnings("UnusedDeclaration")
     @Bean
-    public EmbeddedServletContainerFactory containerFactory() {
-        return new TomcatEmbeddedServletContainerFactory(9080);
+    public EmbeddedServletContainerFactory containerFactory(){
+        return new TomcatEmbeddedServletContainerFactory(8080);
     }
 
 }
