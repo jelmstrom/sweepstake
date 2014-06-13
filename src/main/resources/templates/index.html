@@ -1,71 +1,113 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css"/>
-</head>
 
+<head>
+
+    <link rel="stylesheet" href="http://getbootstrap.com/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="http://getbootstrap.com/dist/css/bootstrap-theme.min.css"/>
+    <link rel="stylesheet" href="http://getbootstrap.com/examples/dashboard/dashboard.css"/>
+
+</head>
 <body>
 <table>
     <tr th:if="${activeUser.email == null} == false">
         <td>
-            <a href="" th:href="${'/user/'+activeUser.displayName}" th:text="${activeUser.displayName}"></a>
+            <a href="" th:href="@{'/user/'+activeUser.displayName}" th:text="${activeUser.displayName}"></a>
         </td>
         <td>
             <a href="/logout">Logout</a>
         </td>
     </tr>
     <tr th:if="${activeUser.email == null} == true">
-        <td>
-            <form action="/user" method="post">
-                <label>New user? </label><input type="checkbox" name="new" value="new"/>
-                <label>Email  </label><input type="txt" id="email" name="email" value="email"/>
-                <label>Password  </label><input type="password" name="credentials" id="credentials" value="pwd"/>
-                <button type="submit">Submit</button>
-            </form>
-        </td>
+        <form action="/user" method="post">
+            <td>
+                <label>New user? </label>
+            </td>
+            <td>
+                <input type="checkbox" name="new" value="new"/>
+            </td>
+            <td>
+                <label>Email </label>
+            </td>
+            <td>
+                <input type="txt" id="email" name="email" value="email"/>
+            </td>
+            <td>
+                <label>Password </label>
+            </td>
+            <td>
+                <input type="password" name="credentials" id="credentials" value="pwd"/>
+            </td>
+            <td>
+                <button class="btn btn-sm btn-success" type="submit">Submit</button>
+            </td>
+        </form>
     </tr>
 </table>
-<p id="navigation">
-    <a href="/">Leaderboard</a>
-    <a href="/group/A">GroupA</a>
-    <a href="/group/B">GroupB</a>
-    <a href="/group/C">GroupC</a>
-    <a href="/group/D">GroupD</a>
-    <a href="/group/E">GroupE</a>
-    <a href="/group/F">GroupF</a>
-    <a href="/group/G">GroupG</a>
-    <a href="/group/H">GroupH</a>
-    <a href="/playoff">Playoff</a>
-</p>
-<table>
+<div class="navbar navbar-default">
+    <div class="container">
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="/">Leaderboard</a></li>
+                <li><a href="/group/A">GroupA</a></li>
+                <li><a href="/group/B">GroupB</a></li>
+                <li><a href="/group/C">GroupC</a></li>
+                <li><a href="/group/D">GroupD</a></li>
+                <li><a href="/group/E">GroupE</a></li>
+                <li><a href="/group/F">GroupF</a></li>
+                <li><a href="/group/G">GroupG</a></li>
+                <li><a href="/group/H">GroupH</a></li>
+                <li><a href="/playoff">Playoff</a></li>
+            </ul>
+        </div>
+        <!--/.nav-collapse -->
+    </div>
+</div>
+
+<table width="100%">
+    <thead>
+        <tr>
+            <th>Active Users</th>
+            <th></th>
+            <th>Leaderboard (including current standings)</th>
+        </tr>
+
+    </thead>
     <td width="35%%">
-        <!-- user list -->
         <table>
+            <thead>
             <tr>
-                <td colspan="2">
-                    <h2> Active Users </h2>
-                </td>
+                <th>
+                     Username
+                </th>
+                <th>
+                    Email
+                </th>
             </tr>
-            <tr th:each="user,iterStat : ${userList}" th:class="${iterStat.odd}? 'odd'" th:if="${user.admin} == false">
-                <td> <a href="" th:href="@{'user/'+ ${user.displayName}}" th:text="${user.displayName}"></a></td>
-                <td th:text="${user.email}">email</td>
-            </tr>
+            </thead>
+            <tbody>
+                <tr th:each="user : ${userList}" th:if="${user.admin} == false">
+                    <td>
+                        <a href="" th:href="@{'user/'+ ${user.displayName}}" th:text="${user.displayName}"></a>
+                    </td>
+                    <td th:text="${user.email}">email</td>
+                </tr>
+            </tbody>
         </table>
     </td>
-    <td width="30%" >&nbsp;</td>
-    <td width="35%">
-        <!-- Leader board -->
+    <td width="10%" >&nbsp;</td>
+    <td width="55%">
         <table>
-            <tr>
-                <td colspan="2">
-                    <h2> Leaderboard </h2>
-                </td>
-            </tr>
-            <tr th:each="entry,iterStat : ${leaderBoard}" th:class="${iterStat.odd}? 'odd'" th:if="${entry[0].admin} == false">
-                <td th:text="${entry[0].displayName}">displayname</td>
-                <td th:text="${entry[1]}">points</td>
-            </tr>
+            <thead>
+                <th>username</th>
+                <th>Points</th>
+            </thead>
+            <tbody>
+                <tr th:each="entry : ${leaderBoard}" th:if="${entry[0].admin} == false">
+                    <td><label th:text="${entry[0].displayName}">displayname</label></td>
+                    <td><label th:text="${entry[1]}">points</label></td>
+                </tr>
+            </tbody>
         </table>
     </td>
 </table>
