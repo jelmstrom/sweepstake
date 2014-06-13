@@ -98,7 +98,7 @@ public class Sweepstake {
                 .mapToInt(match -> match.goalsFor(team)).sum();
         int goalsAgainst = results.stream().filter(result -> result.userEmail.equals(userEmail))
                 .mapToInt(match -> match.goalsAgainst(team)).sum();
-        System.out.println(String.format("Table Entry {}", Arrays.asList(team, points, goalsFor, goalsAgainst)));
+        System.out.println(String.format("Table Entry %s", Arrays.asList(team, points, goalsFor, goalsAgainst)));
         return new TableEntry(team, goalsFor, goalsAgainst, points);
     }
 
@@ -168,18 +168,20 @@ public class Sweepstake {
 
     public void saveResults(List<Result> resultList, User user) {
         List<Match> matches = getMatches();
-        System.out.println(String.format("Storing results", resultList));
+        System.out.println(String.format("Storing results %s", resultList));
         resultList.stream().forEach(result -> new Result(
                             findMatch(matches, result.match.id)
                             , result.homeGoals
                             , result.awayGoals
                             , result.userEmail));
         matchRepository.store(matches);
+        // TODO : Enable
+        // new EmailNotification(userRepository.findAdminUser()).sendMail(user);
 
     }
 
     private Match findMatch(List<Match> matches, String id) {
-        System.out.println(String.format("Finding match for {}", id));
+        System.out.println(String.format("Finding match for %s", id));
         return matches.stream().filter(match -> match.id.equals(id)).findFirst().get();
     }
 

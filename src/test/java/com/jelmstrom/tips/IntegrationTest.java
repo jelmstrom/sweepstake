@@ -7,9 +7,11 @@ import com.jelmstrom.tips.match.MatchRepository;
 import com.jelmstrom.tips.match.Result;
 import com.jelmstrom.tips.table.TablePrediction;
 import com.jelmstrom.tips.table.TableRepository;
+import com.jelmstrom.tips.user.EmailNotification;
 import com.jelmstrom.tips.user.User;
 import com.jelmstrom.tips.user.UserRepository;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.*;
@@ -100,6 +102,7 @@ public class IntegrationTest {
         assertThat(userRepo.read("Email"), is(equalTo(newUser)));
     }
 
+    @Ignore // stop spamming
     @Test
     public void removeUser(){
         User newUser = new User("display", "Email", "cred", false);
@@ -107,5 +110,12 @@ public class IntegrationTest {
         assertThat(userRepo.read("Email"), is(equalTo(newUser)));
         userRepo.remove("Email");
         assertThat(userRepo.read("Email").displayName, is(""));
+    }
+
+
+    @Test
+    public void sendMailDoesNotFail(){
+        new EmailNotification(new User("", "admin.user@gmail.com", "", false))
+                .sendMail(new User("...userName...", "johan.elmstrom@gmail.com", "", false));
     }
 }
