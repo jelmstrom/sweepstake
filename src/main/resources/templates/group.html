@@ -67,7 +67,7 @@
 <table width="75%">
     <tr>
         <td width="30%">
-            <table width="100%">
+            <table valign="top" width="100%" class="table table-striped">
                 <thead>
                 <tr>
                     <th align="center"></th>
@@ -92,16 +92,22 @@
                 </tbody>
             </table>
         </td>
+        <td width="15%">
+            &nbsp;
+        </td>
         <td width="30%">
             <form id="predicionForm" action="" th:action="@{'/prediction/'+${group}}" method="post">
-                <table width="100%" th:if="${canEdit}">
+                <table width="100%" th:if="${canEdit}" class="table table-striped">
+                    <thead>
                     <tr>
-                        <td width="100%%" colspan="2">Group prediction</td>
+                        <th></th>
+                        <th> Group prediction</th>
                     </tr>
+                    </thead>
                     <tr>
                         <td width="5%">1</td>
 
-                        <td width="9%">
+                        <td width="95%">
                             <input type="text" id="prediction1" name="prediction1" th:value="${prediction.get(0)}"/>
                         </td>
                     </tr>
@@ -124,13 +130,12 @@
                         </td>
                     </tr>
                     <tr>
-                        <td height="30px">&nbsp;</td>
-                    </tr>
-                    <tr>
-                        <td align="center" width="50%" colspan="2">
+                        <td align="center" width="5%">
+
+                        </td>
+                        <td align="left" width="95%" colspan="2">
                             <button type="submit" class="btn btn-sm btn-success">Submit</button>
                         </td>
-                        <td align="left" width="100%" colspan="2">&nbsp;</td>
                     </tr>
                 </table>
             </form>
@@ -140,7 +145,7 @@
 <p height="30px">&nbsp;</p>
 
 <form id="matchForm" action="" th:action="@{'/group/'+${group}}" method="post">
-    <table width="75%">
+    <table width="75%" class="table table-striped">
         <thead>
         <tr>
             <th width="20%">Date</th>
@@ -156,10 +161,10 @@
         <tbody>
         <tr th:each="match,iterStat : ${matches}">
             <td th:text="${#dates.format(match.matchStart,'dd MMMM yyyy HH:mm')}">start</td>
-            <td align="center" th:text="${match.homeTeam}">home</td>
+            <td th:text="${match.homeTeam}">home</td>
             <td>-</td>
-            <td align="center" th:text="${match.awayTeam}">Away</td>
-            <td align="center">
+            <td th:text="${match.awayTeam}">Away</td>
+            <td >
                 <input type="text" size="2"
                        id="${match.id}_home"
                        th:value="${match.homeGoalsAsStringFor(activeUser.email)}"
@@ -167,8 +172,10 @@
                        th:name="${match.id+'_h'}"
                        th:if="${canEdit}"/>
             </td>
-            <td>-</td>
-            <td align="center">
+            <td>
+                <label th:if="${canEdit}">-</label>
+            </td>
+            <td >
                 <input type="text" size="2"
                        id="${match.id}_away"
                        name="away"
