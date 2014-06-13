@@ -24,7 +24,7 @@ import static java.util.stream.Collectors.toList;
 @RequestMapping(value = "/")
 public class SweepstakeController {
 
-    public static final String context = "sweepstake";
+    public static final String context = "vmtips";
     public static final String ACTIVE_USER = "activeUser";
 
     @RequestMapping(method = RequestMethod.GET)
@@ -125,7 +125,10 @@ public class SweepstakeController {
     }
 
     private void setActiveUserModel(Model uiModel, HttpServletRequest request) {
-        uiModel.addAttribute(ACTIVE_USER, new Sweepstake(context).getUser(sessionUser(request)));
+        User user = new Sweepstake(context).getUser(sessionUser(request));
+        uiModel.addAttribute(ACTIVE_USER, user);
+        boolean editable = !StringUtils.isEmpty(user.displayName);
+        uiModel.addAttribute("canEdit", editable);
     }
 
     private String sessionUser(HttpServletRequest request) {

@@ -1,19 +1,14 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <style>
-            #cssTable td
-            {
-                text-align:center;
-                vertical-align:middle;
-            }
-        </style>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css"/>
 </head>
 <body>
 <table>
     <tr th:if="${activeUser.email == null} == false">
         <td>
-            <a href="" th:href="${'/user/'+activeUser.displayName}" th:text="${activeUser.displayName}"></a>
+            <a href="" th:href="@{'/user/'+activeUser.displayName}" th:text="${activeUser.displayName}"></a>
         </td>
         <td>
             <a href="/logout">Logout</a>
@@ -42,7 +37,7 @@
     <a href="/group/H">GroupH</a>
     <a href="/playoff">Playoff</a>
 </p>
-<table width="75%" th:if="${activeUser.email == null} == false">
+<table width="75%">
     <tr>
         <td width="30%">
             <table width="100%">
@@ -50,27 +45,26 @@
                     <td colspan='6'> Current standings</td>
                 </tr>
                 <tr th:each="tableEntry, iterStat : ${currentStandings}" th:class="${iterStat.odd}? 'odd'">
-                    <td><label id="position" th:text="${iterStat.count}">label</label></td>
-                    <td width="45%" id="team" th:text="${tableEntry.team}">team</td>
+                    <td width="15%" ><label id="position" th:text="${iterStat.count}">label</label></td>
+                    <td width="40%" id="team" th:text="${tableEntry.team}">team</td>
                     <td width="10%" th:text="${tableEntry.goalsFor}">for</td>
                     <td width="5%"> - </td>
                     <td width="10%" th:text="${tableEntry.goalsAgainst}">against</td>
-                    <td width="15%" th:text="${tableEntry.goalDifference()}">diff</td>
-                    <td width="15%" th:text="${tableEntry.points + 'p'}">points</td>
+                    <td width="10%" th:text="${tableEntry.goalDifference()}">diff</td>
+                    <td width="10%" th:text="${tableEntry.points + 'p'}">points</td>
                 </tr>
             </table>
         </td>
         <td width="30%">
-
             <form id="predicionForm" action="" th:action="@{'/prediction/'+${group}}" method="post">
-            <table width="100%%">
+            <table width="100%"  th:if="${canEdit}" >
                 <tr>
-                    <td width="100%%" colspan="2">use predictions</td>
+                    <td width="100%%" colspan="2">Group prediction</td>
                 </tr>
                 <tr>
                     <td width="5%">1</td>
 
-                    <td width="95%">
+                    <td width="9%">
                         <input type="text" id="prediction1" name="prediction1" th:value="${prediction.get(0)}" />
                     </td>
                 </tr>
@@ -92,8 +86,10 @@
                         <input type="text" id="prediction4" name="prediction4" th:value="${prediction.get(3)}" />
                     </td>
                 </tr>
+                <tr><td height="30px">&nbsp;</td></tr>
                 <tr>
-                    <td width="100%" colspan="2"><button type="submit">Submit</button></td>
+                    <td align="center" width="50%" colspan="2"><button type="submit">Submit</button></td>
+                    <td align="left" width="100%" colspan="2">&nbsp;</td>
                 </tr>
             </table>
             </form>
@@ -104,31 +100,37 @@
 <form id="matchForm" action="" th:action="@{'/group/'+${group}}" method="post">
     <table width="75%">
         <tr>
-            <th width="20%">Date</th>
-            <th width="30%">Away</th>
-            <th width="2%">-</th>
-            <th width="30%">Home</th>
-            <th width="8%">HomeGoals</th>
-            <th width="8%">AwayGoals</th>
-            <th width="2%"></th>
+            <td widtd="20%">Date</td>
+            <td align="center" width="30%">Home Team</td>
+            <td width="1%">&nbsp;</td>
+            <td align="center" width="30%">Away Team</td>
+            <td width="8%">&nbsp;</td>
+            <td width="1%">&nbsp;</td>
+            <td width="8%">&nbsp;</td>
+            <td width="2%">&nbsp;</td>
         </tr>
         <tr th:each="match,iterStat : ${matches}" th:class="${iterStat.odd}? 'odd'">
-            <td th:text="${match.matchStart}">start</td>
-            <td th:text="${match.homeTeam}">home</td>
+            <td th:text="${#dates.format(match.matchStart,'dd MMMM yyyy HH:mm')}">start</td>
+            <td align="center" th:text="${match.homeTeam}">home</td>
             <td>-</td>
-            <td th:text="${match.awayTeam}">Away</td>
-            <td>
+            <td align="center" th:text="${match.awayTeam}">Away</td>
+            <td align="center">
                 <input type="text" size="2"
                        id="${match.id}_home"
                        th:value="${match.homeGoalsAsStringFor(activeUser.email)}"
                        name=""
-                       th:name="${match.id+'_h'}"/></td>
-            <td>
+                       th:name="${match.id+'_h'}"
+                       th:if="${canEdit}"/>
+            </td>
+            <td>-</td>
+            <td align="center">
                 <input type="text" size="2"
                        id="${match.id}_away"
                        name="away"
                        th:value="${match.awayGoalsAsStringFor(activeUser.email)}"
-                       th:name="${match.id+'_a'}"/></td>
+                       th:name="${match.id+'_a'}"
+                       th:if="${canEdit}"/>
+            </td>
 
             <td th:if="${match.hasResult()}" >
                 <label th:if="${activeUser != null}"
@@ -137,7 +139,9 @@
         </tr>
         <tr>
             <td colspan="5"></td>
-            <td colspan="2"><button type="submit">Submit</button></td>
+            <td colspan="3" align="left">
+                <button type="submit" th:if="${canEdit}">Submit</button>
+            </td>
         </tr>
     </table>
 </form>
