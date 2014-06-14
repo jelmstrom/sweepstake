@@ -8,6 +8,7 @@ import com.jelmstrom.tips.match.Result;
 import com.jelmstrom.tips.table.TableEntry;
 import com.jelmstrom.tips.table.TablePrediction;
 import com.jelmstrom.tips.table.TableRepository;
+import com.jelmstrom.tips.user.EmailNotification;
 import com.jelmstrom.tips.user.User;
 import com.jelmstrom.tips.user.UserRepository;
 import org.apache.log4j.LogManager;
@@ -160,8 +161,9 @@ public class Sweepstake {
     }
 
     public User saveUser(User user) {
-        return userRepository.store(user);
-        //new EmailNotification(userRepository.findAdminUser()).sendMail(user);
+        User updated = userRepository.store(user);
+        new EmailNotification(userRepository.findAdminUser()).sendMail(user);
+        return updated;
     }
 
     public User findUser(String displayName) {
