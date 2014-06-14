@@ -4,6 +4,8 @@ import com.jelmstrom.tips.persistence.MongoRepository;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.mongodb.WriteResult;
+import org.bson.types.ObjectId;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -14,6 +16,7 @@ import static java.util.stream.Collectors.toList;
 public class UserRepository extends MongoRepository {
 
     public static final String TOKEN = "token";
+    public static final String ID = "_id";
     public final DBCollection userCollection;
     public static final String EMAIL = "email";
     public static final String CREDENTIALS = "credentials";
@@ -25,17 +28,26 @@ public class UserRepository extends MongoRepository {
         userCollection = getDb().getCollection("registeredUser");
     }
 
-    public void store(User user){
-            User existingUser = read(user.email);
+    public User store(User user){
+            User existingUser = read(user.id);
             String token= handleEmptyToken(user.token, existingUser.token);
             BasicDBObject dbUser = new BasicDBObject(EMAIL, user.email)
                     .append(DISPLAY_NAME, user.displayName)
                     .append(ADMIN, user.admin)
                     .append(TOKEN, token);
-        if(existingUser.isValid()){
-            userCollection.update(new BasicDBObject(EMAIL, user.email), dbUser);
+        if(existingUser.isValid() && existingUser.id.equals(user.id)){
+            userCollection.update(new BasicDBObject(ID, new ObjectId(existingUser.id)), dbUser);
         } else  {
-            userCollection.insert(dbUser);
+           userCollection.insert(dbUser);
+        }
+        return findByEmail(user.email);
+    }
+
+    private User read(String id) {
+        if(StringUtils.isEmpty(id)) {
+            return User.emptyUser();
+        } else {
+            return buildUser(userCollection.findOne(new BasicDBObject(ID, new ObjectId(id))));
         }
     }
 
@@ -44,22 +56,19 @@ public class UserRepository extends MongoRepository {
 
     }
 
-    public User read(String email) {
-        DBObject users = userCollection.findOne(new BasicDBObject(EMAIL, email));
-        if(users != null && null != users.get(EMAIL)){
-            return buildUser(users);
-        }
-        return new User("", email, false, "");
+    public User findByEmail(String email) {
+        return buildUser(userCollection.findOne(new BasicDBObject(EMAIL, email)));
     }
 
     private User buildUser(DBObject dbUser) {
-        if(dbUser != null && null != dbUser.get(EMAIL)){
-              return new User(dbUser.get(DISPLAY_NAME).toString()
+        if(dbUser != null && null != dbUser.get("_id")){
+              return new User(dbUser.get("_id").toString()
+                , dbUser.get(DISPLAY_NAME).toString()
                 , dbUser.get(EMAIL).toString()
                 , Boolean.parseBoolean(dbUser.get(ADMIN).toString())
                 , (String) dbUser.get(TOKEN));
         } else {
-            return new User("", "", false, "");
+            return User.emptyUser();
         }
     }
 
@@ -72,7 +81,7 @@ public class UserRepository extends MongoRepository {
 
     }
 
-    public User find(String displayName) {
+    public User findByDisplayName(String displayName) {
         return buildUser(userCollection.findOne(new BasicDBObject(DISPLAY_NAME, displayName)));
     }
 

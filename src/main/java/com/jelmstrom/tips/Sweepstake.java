@@ -8,7 +8,6 @@ import com.jelmstrom.tips.match.Result;
 import com.jelmstrom.tips.table.TableEntry;
 import com.jelmstrom.tips.table.TablePrediction;
 import com.jelmstrom.tips.table.TableRepository;
-import com.jelmstrom.tips.user.EmailNotification;
 import com.jelmstrom.tips.user.User;
 import com.jelmstrom.tips.user.UserRepository;
 import org.apache.log4j.LogManager;
@@ -21,7 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 
 @SuppressWarnings("UnusedDeclaration")
@@ -158,16 +156,16 @@ public class Sweepstake {
     }
 
     public User getUser(String email) {
-        return userRepository.read(email);
+        return userRepository.findByEmail(email);
     }
 
-    public void saveUser(User user) {
-        userRepository.store(user);
+    public User saveUser(User user) {
+        return userRepository.store(user);
         //new EmailNotification(userRepository.findAdminUser()).sendMail(user);
     }
 
     public User findUser(String displayName) {
-        return userRepository.find(displayName);
+        return userRepository.findByDisplayName(displayName);
     }
 
     public User login(String token) {

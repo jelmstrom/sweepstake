@@ -16,6 +16,7 @@ import org.junit.Test;
 
 import java.util.*;
 
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
@@ -99,7 +100,21 @@ public class IntegrationTest {
     public void addUser(){
         User newUser = new User("display", "Email", false, "");
         userRepo.store(newUser);
-        assertThat(userRepo.read("Email"), is(equalTo(newUser)));
+        User readUser = userRepo.findByEmail("Email");
+        assertThat(readUser.isValid(), is(true));
+        assertThat(readUser.id.length(), is(greaterThan(0)));
+    }
+
+
+    @Test
+    public void updateUser(){
+        User newUser = new User("display", "Email", false, "");
+        userRepo.store(newUser);
+        newUser = userRepo.findByDisplayName("display");
+        User updated = new User(newUser.id, "updated", "updated", true, "updated");
+        userRepo.store(updated);
+        assertThat(userRepo.findByDisplayName("display").isValid(), is(false));
+        assertThat(userRepo.findByDisplayName("updated"), is(updated));
     }
 
     @Test
@@ -107,17 +122,19 @@ public class IntegrationTest {
         String token_uuid__ = "__token_uuid__";
         User newUser = new User("display", "Email", false, token_uuid__);
         userRepo.store(newUser);
-        assertThat(userRepo.findByToken(token_uuid__), is(equalTo(newUser)));
+        User read = userRepo.findByToken(token_uuid__);
+        assertThat(read.email, is(equalTo(newUser.email)));
     }
 
 
     @Test
-    public void removeUser(){
+         public void removeUser(){
         User newUser = new User("display", "Email", false, "");
         userRepo.store(newUser);
-        assertThat(userRepo.read("Email"), is(equalTo(newUser)));
+        assertThat(userRepo.findByEmail("Email").isValid(), is(true));
+        assertThat(userRepo.findByEmail("Email").isValid(), is(true));
         userRepo.remove("Email");
-        assertThat(userRepo.read("Email").displayName, is(""));
+        assertThat(userRepo.findByEmail("Email").isValid(), is(false));
     }
 
     @Ignore

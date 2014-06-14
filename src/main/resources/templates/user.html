@@ -48,15 +48,13 @@
             <form action="/user" method="post">
                 <table width="100%">
                     <tbody>
-
                     <tr>
                         <td width="50%">
-                            <label>Display name </label>
+                            <label>Display name</label>
                         </td>
                         <td width="50%">
                             <label th:text="${user.displayName}" th:if="${not(canEdit)}">displayname</label>
-                            <input type="text" name="displayName" id="displayName" th:value="${user.displayName}"
-                                   th:if="${canEdit}"/>
+                            <input type="text" name="displayName" id="displayName" th:value="${user.displayName}" th:if="${canEdit}"/>
                         </td>
                     </tr>
                     <tr>
@@ -64,7 +62,10 @@
                             <label>Email</label>
                         </td>
                         <td width="50%">
-                            <label th:text="${user.email}"></label>
+                            <label th:text="${user.email}" th:if="${not(canEdit)}"></label>
+                            <input type="text" name="email" id="email" th:value="${user.email}" th:if="${canEdit}"/>
+                            <input type="hidden" name="userId" id="userId" th:value="${user.id}" th:if="${canEdit}"/>
+
                         </td>
                     </tr>
                     <tr th:if="${not (activeUser == null)}">

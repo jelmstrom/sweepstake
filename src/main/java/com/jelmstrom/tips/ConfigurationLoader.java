@@ -86,8 +86,8 @@ public class ConfigurationLoader {
             createAdminUser(userRepo);
             System.out.println("Data configured");
         }
-
-        userRepo.store(new User("Admin", "none@noreply.zzz", true, "__admin__"));
+        User admin = userRepo.findByEmail("none@noreply.zzz") ;
+        userRepo.store(new User(admin.id, "Admin", "none@noreply.zzz", true, "__admin__"));
     }
 
     private static void createAdminUser(UserRepository userRepo) {

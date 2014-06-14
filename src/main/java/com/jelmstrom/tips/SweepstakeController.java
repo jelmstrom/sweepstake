@@ -43,7 +43,7 @@ public class SweepstakeController {
         String pos2 = request.getParameter("prediction2");
         String pos3 = request.getParameter("prediction3");
         String pos4 = request.getParameter("prediction4");
-        new Sweepstake(context).saveUserPrediction(new TablePrediction(sessionUser(request), "Group" + groupLetter, Arrays.asList(pos1, pos2, pos3, pos4)));
+        new Sweepstake(context).saveUserPrediction(new TablePrediction(sessionUserEmail(request), "Group" + groupLetter, Arrays.asList(pos1, pos2, pos3, pos4)));
 
         return showGroup(uiModel, groupLetter, request);
     }
@@ -53,7 +53,7 @@ public class SweepstakeController {
     public String storeGroup(Model uiModel, @PathVariable String groupLetter, HttpServletRequest request) {
         Enumeration<String> parameterNames = request.getParameterNames();
         Sweepstake sweepstake = new Sweepstake(context);
-        User user = sweepstake.getUser(sessionUser(request));
+        User user = sweepstake.getUser(sessionUserEmail(request));
         Map<String, int[]> results = new HashMap<>();
 
         while (parameterNames.hasMoreElements()) {
@@ -102,7 +102,7 @@ public class SweepstakeController {
     public String showGroup(Model uiModel, @PathVariable String groupLetter, HttpServletRequest request) {
         Sweepstake sweepstake = new Sweepstake(context);
         List<TableEntry> tableEntries = sweepstake.currentStandingsForGroup("Group" + groupLetter);
-        List<TablePrediction> predictions = sweepstake.getPredictions(sessionUser(request));
+        List<TablePrediction> predictions = sweepstake.getPredictions(sessionUserEmail(request));
         Optional<TablePrediction> maybe = predictions.stream().filter(entry -> entry.group.equals("Group" + groupLetter)).findFirst();
         List<Match> groupMatches = sweepstake.getMatches().stream().filter(match -> match.id.contains(groupLetter)).sorted().collect(toList());
 
@@ -124,7 +124,7 @@ public class SweepstakeController {
         return "user";
     }
 
-    private String sessionUser(HttpServletRequest request) {
+    private String sessionUserEmail(HttpServletRequest request) {
         return (String) request.getSession().getAttribute(SESSION_USER);
     }
 
@@ -150,16 +150,21 @@ public class SweepstakeController {
     @RequestMapping(value = "/user", method = RequestMethod.POST)
     public String updateUser(Model uiModel, HttpServletRequest request) {
 
-        System.out.println("Update user");
+        System.out.println(String.format("%s user", request.getParameter("action")));
         Sweepstake sweepstake = new Sweepstake(context);
         User user;
         if ("update".equals(request.getParameter("action"))) {
             System.out.println("Update");
+            User sessionUser = sessionUser(request);
             user = updateUser(request, sweepstake);
+            if(user.id.equals(sessionUser.id)){
+                request.getSession().setAttribute(SESSION_USER, user.email);
+            }
         } else {
             System.out.println("new");
             user = createUser(request, sweepstake);
-            if (null == sessionUser(request)) {
+            if (StringUtils.isEmptyOrWhitespace(sessionUserEmail(request))) {
+                System.out.println("Logging in new user");
                 request.getSession().setAttribute(SESSION_USER, user.email);
             }
         }
@@ -169,12 +174,15 @@ public class SweepstakeController {
     }
 
     private User updateUser(HttpServletRequest request, Sweepstake sweepstake) {
-        User sessionUser = sweepstake.getUser(sessionUser(request));
-        User user = new User(request.getParameter("displayName")
-                , sessionUser.email
+        System.out.println(String.format("updating user %s, %s %s",  request.getParameter("userId")
+                ,request.getParameter("displayName")
+                , request.getParameter("email")));
+        User user = new User(request.getParameter("userId")
+                , request.getParameter("displayName")
+                , request.getParameter("email")
                 , null != request.getParameter("isAdmin")
                 , UUID.randomUUID().toString());
-        sweepstake.saveUser(user);
+        user = sweepstake.saveUser(user);
         System.out.println(String.format("user %s updated %s", user.email, (user.admin?" -> admin <-":"")));
         return user;
     }
@@ -186,8 +194,7 @@ public class SweepstakeController {
                 , false
                 , UUID.randomUUID().toString());
         System.out.println(String.format("create user %s ", user.email));
-        sweepstake.saveUser(user);
-        return user;
+        return sweepstake.saveUser(user);
     }
 
     private boolean isNewUser(HttpServletRequest request) {
@@ -204,9 +211,7 @@ public class SweepstakeController {
     }
 
     private void setSessionUsers(HttpServletRequest request, User user, Model model) {
-        String currentSessionUser = sessionUser(request);
-        System.out.println(String.format("Session user : %s", currentSessionUser));
-        User sessionUser = new Sweepstake(context).getUser(currentSessionUser);
+        User sessionUser = sessionUser(request);
         if (!user.isValid()) {
             user = sessionUser;
         }
@@ -216,5 +221,11 @@ public class SweepstakeController {
         model.addAttribute("canEdit", editable);
         model.addAttribute(USER, user);
         model.addAttribute(SESSION_USER, sessionUser);
+    }
+
+    private User sessionUser(HttpServletRequest request) {
+        String currentSessionUser = sessionUserEmail(request);
+        System.out.println(String.format("Session user : %s", currentSessionUser));
+        return new Sweepstake(context).getUser(currentSessionUser);
     }
 }
