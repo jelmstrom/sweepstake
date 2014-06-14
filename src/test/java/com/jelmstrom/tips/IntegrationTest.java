@@ -120,7 +120,6 @@ public class IntegrationTest {
         assertThat(userRepo.read("Email").displayName, is(""));
     }
 
-    @Ignore // stop spamming
     @Test
     public void sendMailDoesNotFail(){
         new EmailNotification(new User("", "admin.user@gmail.com", "", false, ""))

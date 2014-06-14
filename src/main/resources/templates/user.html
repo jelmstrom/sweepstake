@@ -63,7 +63,7 @@
                    th:text="${activeUser.displayName}"
                    th:if="${not (activeUser.email == null)}"></a>
             </li>
-            <li><a href="user"
+            <li><a href="/user"
                    th:if="${activeUser.email == null}">Register</a>
             </li>
             <li><a href="/logout" th:if="${not (activeUser.email == null)}">Logout</a></li>

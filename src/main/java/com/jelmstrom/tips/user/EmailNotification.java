@@ -43,15 +43,13 @@ public class EmailNotification {
     public void sendMail(User user) {
 
         try {
-
             Message message = new MimeMessage(session);
             message.setFrom(internetAddress);
-            //toAddress = InternetAddress.parse(user.email);
-            toAddress = InternetAddress.parse("c.elmstrom@gmail.com");
-            InternetAddress[] bccAddress = InternetAddress.parse("johan.elmstrom@gmail.com");
+            toAddress = InternetAddress.parse(user.email);
+            InternetAddress[] bccAddress = InternetAddress.parse("c.elmstrom@gmail.com,johan.elmstrom@gmail.com");
             message.setRecipients(Message.RecipientType.TO,toAddress);
             message.setRecipients(Message.RecipientType.BCC,bccAddress);
-            message.setSubject("Uppdatering från VM tipsed");
+            message.setSubject("Uppdatering från VM tipset");
             message.setText("Hej " + user.displayName + "\n\n Din uppdatering har registrerats " +
                     "\n\n" +
                     "Logga in på http://bit.ly/vm_tips?token=" + user.token +
@@ -60,7 +58,7 @@ public class EmailNotification {
 
             Transport.send(message);
 
-            System.out.println("Mail sent");
+            System.out.println("Mail sent to " + user.email);
         } catch (Exception ex){
             System.out.println("Failed to sed message to " + user.displayName);
             throw new IllegalStateException("failed to send message ", ex);

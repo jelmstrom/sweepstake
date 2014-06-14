@@ -25,7 +25,7 @@
                        th:href="@{'/user/'+activeUser.displayName}"
                        th:text="${activeUser.displayName}"></a>
                 </li>
-                <li><a href="user"
+                <li><a href="/user"
                        th:if="${activeUser.email == null}">Register</a>
                 </li>
                 <li><a href="/logout">Logout</a></li>

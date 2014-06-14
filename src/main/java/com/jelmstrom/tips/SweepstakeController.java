@@ -143,6 +143,16 @@ public class SweepstakeController {
         return "user";
     }
 
+    @RequestMapping(value = "/authenticate/{token}", method = RequestMethod.GET)
+    public String login(Model uiModel, @PathVariable String token, HttpServletRequest request) {
+
+        System.out.println("login user by token");
+        User user = new Sweepstake(context).login(token);
+        System.out.println(user);
+        setSessionUsers(request, user, uiModel);
+        return "user";
+    }
+
     @RequestMapping(value = "/user", method = RequestMethod.POST)
     public String updateUser(Model uiModel, HttpServletRequest request) {
 
@@ -220,7 +230,7 @@ public class SweepstakeController {
         if(!sessionUser.isValid()){
             sessionUser = user;
         }
-        System.out.println(String.format("Session user %s", user.email));
+        System.out.println(String.format("Session user : %s", user.email));
         request.getSession().setAttribute(SESSION_USER, user.email);
         model.addAttribute(USER, user);
         model.addAttribute(SESSION_USER, sessionUser);
