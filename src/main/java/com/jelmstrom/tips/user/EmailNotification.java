@@ -52,9 +52,8 @@ public class EmailNotification {
             message.setSubject("Uppdatering från VM tipset");
             message.setText("Hej " + user.displayName + "\n\n Din uppdatering har registrerats " +
                     "\n\n" +
-                    "Logga in på http://bit.ly/vm_tips?token=" + user.token +
-                    "\n Mvh Admin \n\n" +
-                    "http://bit.ly/vm_tips") ;
+                    "Logga in på http://bit.ly/authenticate/" + user.token +
+                    "\n Mvh Admin \n\n" ) ;
 
             Transport.send(message);
 

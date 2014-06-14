@@ -187,7 +187,11 @@ public class SweepstakeController {
     private User updateUser(HttpServletRequest request, Sweepstake sweepstake) {
         User sessionUser = sweepstake.getUser(sessionUser(request));
         String newCredentials = validateCredentialsOnUpdate(request, sessionUser);
-        User user = new User(request.getParameter("displayName"), sessionUser.email, newCredentials, false, UUID.randomUUID().toString());
+        User user = new User(request.getParameter("displayName")
+                , sessionUser.email
+                , newCredentials
+                , false
+                , UUID.randomUUID().toString());
         System.out.println(String.format("user %s update ", user.email));
         sweepstake.saveUser(user);
         return user;

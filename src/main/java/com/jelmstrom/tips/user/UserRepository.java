@@ -4,6 +4,7 @@ import com.jelmstrom.tips.persistence.MongoRepository;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -25,17 +26,23 @@ public class UserRepository extends MongoRepository {
     }
 
     public void store(User user){
+            User existingUser = read(user.email);
+            String token= handleEmptyToken(user.token, existingUser.token);
             BasicDBObject dbUser = new BasicDBObject(EMAIL, user.email)
                     .append(CREDENTIALS, user.credentials)
                     .append(DISPLAY_NAME, user.displayName)
                     .append(ADMIN, user.admin)
-                    .append(TOKEN, user.token);
-        if(read(user.email).credentials.isEmpty()){
-            userCollection.insert(dbUser);
+                    .append(TOKEN, token);
+        if(existingUser.isValid()){
+            userCollection.update(new BasicDBObject(EMAIL, user.email), dbUser);
         } else  {
-            userCollection.update(new BasicDBObject(EMAIL, user.email)
-                    , dbUser);
+            userCollection.insert(dbUser);
         }
+    }
+
+    public String handleEmptyToken(String userToken, String existingToken) {
+        return StringUtils.isEmpty(existingToken)? userToken : existingToken;
+
     }
 
     public User read(String email) {
@@ -47,18 +54,15 @@ public class UserRepository extends MongoRepository {
     }
 
     private User buildUser(DBObject dbUser) {
-
-        User user = null;
         if(dbUser != null && null != dbUser.get(EMAIL)){
-            user  = new User(dbUser.get(DISPLAY_NAME).toString()
+              return new User(dbUser.get(DISPLAY_NAME).toString()
                 , dbUser.get(EMAIL).toString()
                 , dbUser.get(CREDENTIALS).toString()
                 , Boolean.parseBoolean(dbUser.get(ADMIN).toString())
                 , (String) dbUser.get(TOKEN));
         } else {
-            user =  new User("", "","", false, "");
+            return new User("", "","", false, "");
         }
-        return user;
     }
 
     public void remove(String user) {
