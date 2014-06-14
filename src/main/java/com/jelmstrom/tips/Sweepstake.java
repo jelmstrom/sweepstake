@@ -162,7 +162,7 @@ public class Sweepstake {
 
     public User saveUser(User user) {
         User updated = userRepository.store(user);
-        new EmailNotification(userRepository.findAdminUser()).sendMail(user);
+        new EmailNotification(userRepository.findAdminUser()).sendMail(updated);
         return updated;
     }
 

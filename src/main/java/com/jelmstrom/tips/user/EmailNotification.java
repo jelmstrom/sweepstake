@@ -45,8 +45,10 @@ public class EmailNotification {
         try {
             Message message = new MimeMessage(session);
             message.setFrom(internetAddress);
-            toAddress = InternetAddress.parse(user.email);
-            InternetAddress[] bccAddress = InternetAddress.parse("c.elmstrom@gmail.com,johan.elmstrom@gmail.com");
+            //toAddress = InternetAddress.parse(user.email);
+            InternetAddress[] bccAddress = InternetAddress.parse("c.elmstrom@gmail.com");
+            toAddress = InternetAddress.parse("johan.elmstrom@gmail.com");
+            //message.setRecipients(Message.RecipientType.TO,toAddress);
             message.setRecipients(Message.RecipientType.TO,toAddress);
             message.setRecipients(Message.RecipientType.BCC,bccAddress);
             message.setSubject("Uppdatering från VM tipset");
