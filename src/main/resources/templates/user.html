@@ -10,7 +10,7 @@
 </head>
 <body>
 <table>
-    <tr th:if="${activeUser.email == null} == false">
+    <tr th:if="${not (activeUser.email == null)}">
         <td>
             <a href="" th:href="@{'/user/'+activeUser.displayName}" th:text="${activeUser.displayName}"></a>
         </td>
@@ -18,7 +18,7 @@
             <a href="/logout">Logout</a>
         </td>
     </tr>
-    <tr th:if="${activeUser.email == null} == true">
+    <tr th:if="${activeUser.email == null}">
         <form action="/user" method="post">
             <td>
                 <label>New user? </label>
@@ -46,59 +46,104 @@
 </table>
 
 <div class="navbar navbar-default">
-    <div class="container">
-        <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                <li><a href="/">Leaderboard</a></li>
-                <li><a href="/group/A">GroupA</a></li>
-                <li><a href="/group/B">GroupB</a></li>
-                <li><a href="/group/C">GroupC</a></li>
-                <li><a href="/group/D">GroupD</a></li>
-                <li><a href="/group/E">GroupE</a></li>
-                <li><a href="/group/F">GroupF</a></li>
-                <li><a href="/group/G">GroupG</a></li>
-                <li><a href="/group/H">GroupH</a></li>
-                <li><a href="/playoff">Playoff</a></li>
-            </ul>
-        </div>
-        <!--/.nav-collapse -->
+    <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+            <li><a href="/">Leaderboard</a></li>
+            <li><a href="/group/A">GroupA</a></li>
+            <li><a href="/group/B">GroupB</a></li>
+            <li><a href="/group/C">GroupC</a></li>
+            <li><a href="/group/D">GroupD</a></li>
+            <li><a href="/group/E">GroupE</a></li>
+            <li><a href="/group/F">GroupF</a></li>
+            <li><a href="/group/G">GroupG</a></li>
+            <li><a href="/group/H">GroupH</a></li>
+            <li><a href="/playoff">Playoff</a></li>
+            <li><a href="user"
+                   th:href="@{'/user/'+ ${activeUser.displayName}}"
+                   th:text="${activeUser.displayName}"
+                   th:if="${not (activeUser.email == null)}"></a>
+            </li>
+            <li><a href="user"
+                   th:if="${activeUser.email == null}">Register</a>
+            </li>
+            <li><a href="/logout" th:if="${not (activeUser.email == null)}">Logout</a></li>
+        </ul>
     </div>
+    <!--/.nav-collapse -->
 </div>
 
-
-<table width="50%">
-    <form action="/user" method="post">
-            <input type="hidden" value="update" name="update" id="update" />
-        <tr>
-            <td width="50%">
-                <label>Display name </label>
-            </td>
-            <td width="50%">
-                <label th:text="${user.displayName}" th:if="${user.equals(activeUser)}==false"/>
-                <input type="text" name="displayName" id="displayName" th:value="${user.displayName}" th:if="${user.equals(activeUser)}==true"/>
-            </td>
-        </tr>
-        <tr>
-            <td width="50%">
-                <label>Email</label>
-            </td>
-            <td width="50%">
-                <label th:text="${user.email}"/>
-            </td>
-        </tr>
-        <tr th:if="${user.equals(activeUser)}==true">
-            <td><label>Old Password</label></td>
-            <td  width="50%"><input type="password" name="oldCredentials" id="oldCredentials_" value="pwd"/></td>
-        </tr>
-        <tr th:if="${user.equals(activeUser)}==true">
-            <td><label>New Password</label></td>
-            <td  width="50%"><input type="password" name="newCredentials" id="newCredentials_" value="pwd"/></td>
-        </tr>
-        <tr th:if="${user.equals(activeUser)}==true">
-            <td></td>
-            <td><button type="submit">Update</button></td>
-        </tr>
-    </form>
+<table>
+    <thead>
+        <th><h2>User details</h2></th>
+        <th></th>
+        <th><h2>Register user</h2></th>
+    </thead>
+    <tr>
+        <td width="30%">
+            <form action="/user" method="post">
+                <table width="100%">
+                    <tr>
+                        <td width="50%">
+                            <label>Display name </label>
+                        </td>
+                        <td width="50%">
+                            <label th:text="${user.displayName}" th:if="${not(user.equals(activeUser))}"/>
+                            <input type="text" name="displayName" id="displayName" th:value="${user.displayName}" th:if="${user.equals(activeUser)}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="50%">
+                            <label>Email</label>
+                        </td>
+                        <td width="50%">
+                            <label th:text="${user.email}"/>
+                        </td>
+                    </tr>
+                    <tr th:if="${user.equals(activeUser)}">
+                        <td><label>Old Password</label></td>
+                        <td  width="50%"><input type="password" name="oldCredentials" id="oldCredentials_" value="pwd"/></td>
+                    </tr>
+                    <tr th:if="${user.equals(activeUser)}">
+                        <td><label>New Password</label></td>
+                        <td  width="50%"><input type="password" name="newCredentials" id="newCredentials_" value="pwd"/></td>
+                    </tr>
+                    <tr th:if="${user.equals(activeUser)}">
+                        <td></td>
+                        <td><button type="submit" name="action" value="update">Update</button></td>
+                    </tr>
+                </table>
+            </form>
+        </td>
+        <td width="10%">&nbsp;<!-- spacing --></td>
+        <td width="30%">
+            <form action="/user" method="post">
+                <table width="100%">
+                    <tr>
+                        <td width="50%">
+                            <label>Display name </label>
+                        </td>
+                        <td width="50%">
+                            <input type="text" name="displayName" id="newDisplayName"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="50%">
+                            <label>Email</label>
+                        </td>
+                        <td width="50%">
+                            <input type="text" name="email" id="newEmail"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><button type="submit" name="action" value="register">Register</button></td>
+                    </tr>
+                </table>
+            </form>
+        </td>
+    </tr>
 </table>
+
+
 </body>
 </html>

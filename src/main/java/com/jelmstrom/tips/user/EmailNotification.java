@@ -53,7 +53,9 @@ public class EmailNotification {
             message.setRecipients(Message.RecipientType.BCC,bccAddress);
             message.setSubject("Uppdatering från VM tipsed");
             message.setText("Hej " + user.displayName + "\n\n Din uppdatering har registrerats " +
-                    "\n\n\n Mvh Admin \n\n" +
+                    "\n\n" +
+                    "Logga in på http://bit.ly/vm_tips?token=" + user.token +
+                    "\n Mvh Admin \n\n" +
                     "http://bit.ly/vm_tips") ;
 
             Transport.send(message);
@@ -61,6 +63,7 @@ public class EmailNotification {
             System.out.println("Mail sent");
         } catch (Exception ex){
             System.out.println("Failed to sed message to " + user.displayName);
+            throw new IllegalStateException("failed to send message ", ex);
         }
 
     }

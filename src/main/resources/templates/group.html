@@ -9,15 +9,7 @@
 </head>
 <body>
 <table>
-    <tr th:if="${activeUser.email == null} == false">
-        <td>
-            <a href="" th:href="@{'/user/'+activeUser.displayName}" th:text="${activeUser.displayName}"></a>
-        </td>
-        <td>
-            <a href="/logout">Logout</a>
-        </td>
-    </tr>
-    <tr th:if="${activeUser.email == null} == true">
+    <tr th:if="${activeUser.email == null}">
         <form action="/user" method="post">
             <td>
                 <label>New user? </label>
@@ -44,8 +36,8 @@
     </tr>
 </table>
 
+
 <div class="navbar navbar-default">
-    <div class="container">
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 <li><a href="/">Leaderboard</a></li>
@@ -58,10 +50,19 @@
                 <li><a href="/group/G">GroupG</a></li>
                 <li><a href="/group/H">GroupH</a></li>
                 <li><a href="/playoff">Playoff</a></li>
+                <li class="divider"></li>
+                <li><a href="user"
+                       th:href="@{'/user/'+ ${activeUser.displayName}}"
+                       th:text="${activeUser.displayName}"
+                       th:if="${not (activeUser.email == null)}"></a>
+                </li>
+                <li><a href="user"
+                       th:if="${activeUser.email == null}">Register</a>
+                </li>
+                <li><a href="/logout" th:if="${not (activeUser.email == null)}">Logout</a></li>
             </ul>
         </div>
         <!--/.nav-collapse -->
-    </div>
 </div>
 
 <table width="75%">
@@ -155,7 +156,7 @@
             <th width="8%">&nbsp;</th>
             <th width="1%">&nbsp;</th>
             <th width="8%">&nbsp;</th>
-            <th width="2%">&nbsp;</th>
+            <th width="2%">Score</th>
         </tr>
         </thead>
         <tbody>
@@ -184,8 +185,8 @@
                        th:if="${canEdit}"/>
             </td>
 
-            <td th:if="${match.hasResult()}">
-                <label th:if="${activeUser != null}"
+            <td th:if="${activeUser != null}">
+                <label th:if="${match.hasResult()}"
                        th:text="${match.scoreFor(activeUser.email?: '_anonymous_') + 'p'}"/>
             </td>
         </tr>

@@ -72,7 +72,7 @@ public class AcceptanceTest {
         new Result(matches.get(5), 1, 2, ADMIN_EMAIL);
 
         MATCH_REPOSITORY.store(matches);
-        USER_REPOSITORY.store(new User("admin", ADMIN_EMAIL, "credentials", true));
+        USER_REPOSITORY.store(new User("admin", ADMIN_EMAIL, "credentials", true, ""));
     }
 
     @After
@@ -173,4 +173,6 @@ public class AcceptanceTest {
         int score = sweepstake.calculatePointsFor(USER_EMAIL);
         assertThat(score, is(16));
     }
+
+
 }

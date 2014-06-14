@@ -1,16 +1,21 @@
 package com.jelmstrom.tips.user;
 
+import org.hsqldb.lib.StringUtil;
+import org.springframework.util.StringUtils;
+
 public class User {
     public final String displayName;
     public final String email;
     public final String credentials;
     public final boolean admin;
+    public final String token;
 
-    public User(String displayName, String email, String credentials, boolean admin) {
+    public User(String displayName, String email, String credentials, boolean admin, String token) {
         this.displayName = displayName;
         this.email = email;
         this.credentials = credentials;
         this.admin = admin;
+        this.token = token;
     }
 
     @SuppressWarnings("RedundantIfStatement")
@@ -38,5 +43,9 @@ public class User {
 
     public String toString(){
         return displayName + " " + email +  "" + (admin?"admin":"");
+    }
+
+    public boolean isValid() {
+        return StringUtils.isEmpty(email);
     }
 }

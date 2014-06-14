@@ -97,25 +97,33 @@ public class IntegrationTest {
 
     @Test
     public void addUser(){
-        User newUser = new User("display", "Email", "cred", false);
+        User newUser = new User("display", "Email", "cred", false, "");
         userRepo.store(newUser);
         assertThat(userRepo.read("Email"), is(equalTo(newUser)));
     }
 
-    @Ignore // stop spamming
+    @Test
+    public void findUserByToken(){
+        String token_uuid__ = "__token_uuid__";
+        User newUser = new User("display", "Email", "cred", false, token_uuid__);
+        userRepo.store(newUser);
+        assertThat(userRepo.findByToken(token_uuid__), is(equalTo(newUser)));
+    }
+
+
     @Test
     public void removeUser(){
-        User newUser = new User("display", "Email", "cred", false);
+        User newUser = new User("display", "Email", "cred", false, "");
         userRepo.store(newUser);
         assertThat(userRepo.read("Email"), is(equalTo(newUser)));
         userRepo.remove("Email");
         assertThat(userRepo.read("Email").displayName, is(""));
     }
 
-
+    @Ignore // stop spamming
     @Test
     public void sendMailDoesNotFail(){
-        new EmailNotification(new User("", "admin.user@gmail.com", "", false))
-                .sendMail(new User("...userName...", "johan.elmstrom@gmail.com", "", false));
+        new EmailNotification(new User("", "admin.user@gmail.com", "", false, ""))
+                .sendMail(new User("...userName...", "johan.elmstrom@gmail.com", "", false, ""));
     }
 }

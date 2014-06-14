@@ -12,6 +12,7 @@ import static java.util.stream.Collectors.toList;
 
 public class UserRepository extends MongoRepository {
 
+    public static final String TOKEN = "token";
     public final DBCollection userCollection;
     public static final String EMAIL = "email";
     public static final String CREDENTIALS = "credentials";
@@ -27,7 +28,8 @@ public class UserRepository extends MongoRepository {
             BasicDBObject dbUser = new BasicDBObject(EMAIL, user.email)
                     .append(CREDENTIALS, user.credentials)
                     .append(DISPLAY_NAME, user.displayName)
-                    .append(ADMIN, user.admin);
+                    .append(ADMIN, user.admin)
+                    .append(TOKEN, user.token);
         if(read(user.email).credentials.isEmpty()){
             userCollection.insert(dbUser);
         } else  {
@@ -41,15 +43,22 @@ public class UserRepository extends MongoRepository {
         if(users != null && null != users.get(EMAIL)){
             return buildUser(users);
         }
-        return new User("", email,"", false);
+        return new User("", email,"", false, "");
     }
 
     private User buildUser(DBObject dbUser) {
 
-        return new User(dbUser.get(DISPLAY_NAME).toString()
+        User user = null;
+        if(dbUser != null && null != dbUser.get(EMAIL)){
+            user  = new User(dbUser.get(DISPLAY_NAME).toString()
                 , dbUser.get(EMAIL).toString()
                 , dbUser.get(CREDENTIALS).toString()
-                , Boolean.parseBoolean(dbUser.get(ADMIN).toString()));
+                , Boolean.parseBoolean(dbUser.get(ADMIN).toString())
+                , (String) dbUser.get(TOKEN));
+        } else {
+            user =  new User("", "","", false, "");
+        }
+        return user;
     }
 
     public void remove(String user) {
@@ -62,24 +71,15 @@ public class UserRepository extends MongoRepository {
     }
 
     public User find(String displayName) {
-        DBObject users = userCollection.findOne(new BasicDBObject(DISPLAY_NAME, displayName));
-        if(users != null && null != users.get(EMAIL)){
-            return buildUser(users);
-        }
-        return new User(displayName, "","", false);
+        return buildUser(userCollection.findOne(new BasicDBObject(DISPLAY_NAME, displayName)));
     }
 
     public User findAdminUser() {
-        DBObject user = userCollection.findOne(new BasicDBObject(ADMIN, true));
-        System.out.println("Admin Users " + user);
-        if(user != null && null != user.get(EMAIL)){
-            System.out.println("building user");
-            User admin= buildUser(user);
-            System.out.println("Admin Users " + admin);
-            return admin;
+        return buildUser(userCollection.findOne(new BasicDBObject(ADMIN, true)));
+    }
 
-        }
-        System.out.println("building user");
-        return new User("", "","", false);
+
+    public User findByToken(String token) {
+        return buildUser(userCollection.findOne(new BasicDBObject(TOKEN, token)));
     }
 }

@@ -8,6 +8,7 @@ import com.jelmstrom.tips.match.Result;
 import com.jelmstrom.tips.table.TableEntry;
 import com.jelmstrom.tips.table.TablePrediction;
 import com.jelmstrom.tips.table.TableRepository;
+import com.jelmstrom.tips.user.EmailNotification;
 import com.jelmstrom.tips.user.User;
 import com.jelmstrom.tips.user.UserRepository;
 import org.apache.log4j.LogManager;
@@ -41,6 +42,7 @@ public class Sweepstake {
     }
 
     public Sweepstake(String context) {
+        ConfigurationLoader.initialiseData(context);
         this.context = context;
         matchRepository = new MatchRepository(context);
         userRepository = new UserRepository(context);
@@ -160,10 +162,15 @@ public class Sweepstake {
 
     public void saveUser(User user) {
         userRepository.store(user);
+        new EmailNotification(userRepository.findAdminUser()).sendMail(user);
     }
 
     public User findUser(String displayName) {
         return userRepository.find(displayName);
+    }
+
+    public User login(String token) {
+        return userRepository.findByToken(token);
     }
 
     public void saveResults(List<Result> resultList, User user) {
@@ -175,8 +182,6 @@ public class Sweepstake {
                             , result.awayGoals
                             , result.userEmail));
         matchRepository.store(matches);
-        // TODO : Enable
-        // new EmailNotification(userRepository.findAdminUser()).sendMail(user);
 
     }
 
