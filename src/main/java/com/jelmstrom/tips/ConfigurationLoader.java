@@ -76,21 +76,22 @@ public class ConfigurationLoader {
 
     public static void initialiseData(String context) {
         GroupRepository groupRepository = new GroupRepository(context);
-        if(groupRepository.groupCollection.find().count() > 0){
-            //data already configured for context
-            return;
+        UserRepository userRepo = new UserRepository(context);
+        if(groupRepository.groupCollection.find().count() == 0){
+            System.out.println("Create groups");
+            createGroups(groupRepository);
+            System.out.println("Create matches");
+            createMatches(new MatchRepository(context));
+            System.out.println("Create Admin user");
+            createAdminUser(userRepo);
+            System.out.println("Data configured");
         }
-        System.out.println("Create groups");
-        createGroups(groupRepository);
-        System.out.println("Create matches");
-        createMatches(new MatchRepository(context));
-        System.out.println("Create Admin user");
-        createAdminUser(new UserRepository(context));
-        System.out.println("Data configured");
+
+        userRepo.store(new User("Admin", "none@noreply.zzz", true, "__admin__"));
     }
 
     private static void createAdminUser(UserRepository userRepo) {
-        userRepo.store(new User("Admin", "none@noreply.zzz", "admin", true, ""));
+        userRepo.store(new User("Admin", "none@noreply.zzz", true, ""));
     }
 
     private static void createMatches(MatchRepository matchRepository){

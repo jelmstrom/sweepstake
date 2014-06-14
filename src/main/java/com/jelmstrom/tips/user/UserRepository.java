@@ -29,7 +29,6 @@ public class UserRepository extends MongoRepository {
             User existingUser = read(user.email);
             String token= handleEmptyToken(user.token, existingUser.token);
             BasicDBObject dbUser = new BasicDBObject(EMAIL, user.email)
-                    .append(CREDENTIALS, user.credentials)
                     .append(DISPLAY_NAME, user.displayName)
                     .append(ADMIN, user.admin)
                     .append(TOKEN, token);
@@ -50,18 +49,17 @@ public class UserRepository extends MongoRepository {
         if(users != null && null != users.get(EMAIL)){
             return buildUser(users);
         }
-        return new User("", email,"", false, "");
+        return new User("", email, false, "");
     }
 
     private User buildUser(DBObject dbUser) {
         if(dbUser != null && null != dbUser.get(EMAIL)){
               return new User(dbUser.get(DISPLAY_NAME).toString()
                 , dbUser.get(EMAIL).toString()
-                , dbUser.get(CREDENTIALS).toString()
                 , Boolean.parseBoolean(dbUser.get(ADMIN).toString())
                 , (String) dbUser.get(TOKEN));
         } else {
-            return new User("", "","", false, "");
+            return new User("", "", false, "");
         }
     }
 

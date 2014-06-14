@@ -9,42 +9,6 @@
 
 </head>
 <body>
-<table>
-    <tr th:if="${not (activeUser.email == null)}">
-        <td>
-            <a href="" th:href="@{'/user/'+activeUser.displayName}" th:text="${activeUser.displayName}"></a>
-        </td>
-        <td>
-            <a href="/logout">Logout</a>
-        </td>
-    </tr>
-    <tr th:if="${activeUser.email == null}">
-        <form action="/user" method="post">
-            <td>
-                <label>New user? </label>
-            </td>
-            <td>
-                <input type="checkbox" name="new" value="new"/>
-            </td>
-            <td>
-                <label>Email </label>
-            </td>
-            <td>
-                <input type="txt" id="email" name="email" value="email"/>
-            </td>
-            <td>
-                <label>Password </label>
-            </td>
-            <td>
-                <input type="password" name="credentials" id="credentials" value="pwd"/>
-            </td>
-            <td>
-                <button class="btn btn-sm btn-success" type="submit">Submit</button>
-            </td>
-        </form>
-    </tr>
-</table>
-
 <div class="navbar navbar-default">
     <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
@@ -61,12 +25,12 @@
             <li><a href="user"
                    th:href="@{'/user/'+ ${activeUser.displayName}}"
                    th:text="${activeUser.displayName}"
-                   th:if="${not (activeUser.email == null)}"></a>
+                   th:if="${activeUser.isValid()}"></a>
             </li>
             <li><a href="/user"
-                   th:if="${activeUser.email == null}">Register</a>
+                   th:if="${not activeUser.isValid()}">Register</a>
             </li>
-            <li><a href="/logout" th:if="${not (activeUser.email == null)}">Logout</a></li>
+            <li><a href="/logout" th:if="${activeUser.isValid()}">Logout</a></li>
         </ul>
     </div>
     <!--/.nav-collapse -->
@@ -78,17 +42,21 @@
         <th></th>
         <th><h2>Register user</h2></th>
     </thead>
+    <tbody>
     <tr>
         <td width="30%">
             <form action="/user" method="post">
                 <table width="100%">
+                    <tbody>
+
                     <tr>
                         <td width="50%">
                             <label>Display name </label>
                         </td>
                         <td width="50%">
-                            <label th:text="${user.displayName}" th:if="${not(user.equals(activeUser))}"/>
-                            <input type="text" name="displayName" id="displayName" th:value="${user.displayName}" th:if="${user.equals(activeUser)}"/>
+                            <label th:text="${user.displayName}" th:if="${not(canEdit)}">displayname</label>
+                            <input type="text" name="displayName" id="displayName" th:value="${user.displayName}"
+                                   th:if="${canEdit}"/>
                         </td>
                     </tr>
                     <tr>
@@ -96,21 +64,18 @@
                             <label>Email</label>
                         </td>
                         <td width="50%">
-                            <label th:text="${user.email}"/>
+                            <label th:text="${user.email}"></label>
                         </td>
                     </tr>
-                    <tr th:if="${user.equals(activeUser)}">
-                        <td><label>Old Password</label></td>
-                        <td  width="50%"><input type="password" name="oldCredentials" id="oldCredentials_" value="pwd"/></td>
+                    <tr th:if="${not (activeUser == null)}">
+                        <td><label>Admin user</label></td>
+                        <td><input type="checkbox" name="isAdmin" th:if="${activeUser.admin}" th:checked="${user.admin}"/></td>
                     </tr>
-                    <tr th:if="${user.equals(activeUser)}">
-                        <td><label>New Password</label></td>
-                        <td  width="50%"><input type="password" name="newCredentials" id="newCredentials_" value="pwd"/></td>
-                    </tr>
-                    <tr th:if="${user.equals(activeUser)}">
+                    <tr th:if="${canEdit}">
                         <td></td>
                         <td><button type="submit" name="action" value="update">Update</button></td>
                     </tr>
+                    </tbody>
                 </table>
             </form>
         </td>
@@ -118,6 +83,8 @@
         <td width="30%">
             <form action="/user" method="post">
                 <table width="100%">
+                    <tbody>
+
                     <tr>
                         <td width="50%">
                             <label>Display name </label>
@@ -138,10 +105,12 @@
                         <td></td>
                         <td><button type="submit" name="action" value="register">Register</button></td>
                     </tr>
+                    </tbody>
                 </table>
             </form>
         </td>
     </tr>
+    </tbody>
 </table>
 
 

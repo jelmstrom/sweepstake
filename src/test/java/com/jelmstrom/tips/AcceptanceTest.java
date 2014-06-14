@@ -72,7 +72,7 @@ public class AcceptanceTest {
         new Result(matches.get(5), 1, 2, ADMIN_EMAIL);
 
         MATCH_REPOSITORY.store(matches);
-        USER_REPOSITORY.store(new User("admin", ADMIN_EMAIL, "credentials", true, ""));
+        USER_REPOSITORY.store(new User("admin", ADMIN_EMAIL, true, ""));
     }
 
     @After

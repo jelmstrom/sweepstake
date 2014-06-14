@@ -163,7 +163,7 @@ public class Sweepstake {
 
     public void saveUser(User user) {
         userRepository.store(user);
-        new EmailNotification(userRepository.findAdminUser()).sendMail(user);
+        //new EmailNotification(userRepository.findAdminUser()).sendMail(user);
     }
 
     public User findUser(String displayName) {

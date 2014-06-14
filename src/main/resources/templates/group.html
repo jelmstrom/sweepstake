@@ -8,61 +8,31 @@
 
 </head>
 <body>
-<table>
-    <tr th:if="${activeUser.email == null}">
-        <form action="/user" method="post">
-            <td>
-                <label>New user? </label>
-            </td>
-            <td>
-                <input type="checkbox" name="new" value="new"/>
-            </td>
-            <td>
-                <label>Email </label>
-            </td>
-            <td>
-                <input type="txt" id="email" name="email" value="email"/>
-            </td>
-            <td>
-                <label>Password </label>
-            </td>
-            <td>
-                <input type="password" name="credentials" id="credentials" value="pwd"/>
-            </td>
-            <td>
-                <button class="btn btn-sm btn-success" type="submit">Submit</button>
-            </td>
-        </form>
-    </tr>
-</table>
-
-
 <div class="navbar navbar-default">
-        <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                <li><a href="/">Leaderboard</a></li>
-                <li><a href="/group/A">GroupA</a></li>
-                <li><a href="/group/B">GroupB</a></li>
-                <li><a href="/group/C">GroupC</a></li>
-                <li><a href="/group/D">GroupD</a></li>
-                <li><a href="/group/E">GroupE</a></li>
-                <li><a href="/group/F">GroupF</a></li>
-                <li><a href="/group/G">GroupG</a></li>
-                <li><a href="/group/H">GroupH</a></li>
-                <li><a href="/playoff">Playoff</a></li>
-                <li class="divider"></li>
-                <li><a href="/user"
-                       th:href="@{'/user/'+ ${activeUser.displayName}}"
-                       th:text="${activeUser.displayName}"
-                       th:if="${not (activeUser.email == null)}"></a>
-                </li>
-                <li><a href="user"
-                       th:if="${activeUser.email == null}">Register</a>
-                </li>
-                <li><a href="/logout" th:if="${not (activeUser.email == null)}">Logout</a></li>
-            </ul>
-        </div>
-        <!--/.nav-collapse -->
+    <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+            <li><a href="/">Leaderboard</a></li>
+            <li><a href="/group/A">GroupA</a></li>
+            <li><a href="/group/B">GroupB</a></li>
+            <li><a href="/group/C">GroupC</a></li>
+            <li><a href="/group/D">GroupD</a></li>
+            <li><a href="/group/E">GroupE</a></li>
+            <li><a href="/group/F">GroupF</a></li>
+            <li><a href="/group/G">GroupG</a></li>
+            <li><a href="/group/H">GroupH</a></li>
+            <li><a href="/playoff">Playoff</a></li>
+            <li><a href="user"
+                   th:href="@{'/user/'+ ${activeUser.displayName}}"
+                   th:text="${activeUser.displayName}"
+                   th:if="${activeUser.isValid()}"></a>
+            </li>
+            <li><a href="/user"
+                   th:if="${not activeUser.isValid()}">Register</a>
+            </li>
+            <li><a href="/logout" th:if="${activeUser.isValid()}">Logout</a></li>
+        </ul>
+    </div>
+    <!--/.nav-collapse -->
 </div>
 
 <table width="75%">

@@ -6,14 +6,12 @@ import org.springframework.util.StringUtils;
 public class User {
     public final String displayName;
     public final String email;
-    public final String credentials;
     public final boolean admin;
     public final String token;
 
-    public User(String displayName, String email, String credentials, boolean admin, String token) {
+    public User(String displayName, String email, boolean admin, String token) {
         this.displayName = displayName;
         this.email = email;
-        this.credentials = credentials;
         this.admin = admin;
         this.token = token;
     }
@@ -26,7 +24,6 @@ public class User {
 
         User user = (User) o;
 
-        if (!credentials.equals(user.credentials)) return false;
         if (!displayName.equals(user.displayName)) return false;
         if (!email.equals(user.email)) return false;
 
@@ -37,7 +34,6 @@ public class User {
     public int hashCode() {
         int result = displayName.hashCode();
         result = 31 * result + email.hashCode();
-        result = 31 * result + credentials.hashCode();
         return result;
     }
 
@@ -46,6 +42,14 @@ public class User {
     }
 
     public boolean isValid() {
-        return StringUtils.isEmpty(email);
+        return !invalid();
+    }
+
+    private boolean invalid() {
+        return StringUtils.isEmpty(email) || StringUtils.isEmpty(displayName);
+    }
+
+    public static User emptyUser() {
+       return new User("","", false, "");
     }
 }
