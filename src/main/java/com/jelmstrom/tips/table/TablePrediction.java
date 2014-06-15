@@ -39,7 +39,7 @@ public class TablePrediction {
 
     public int score(List<Match> matches){
         List <Result> adminResult = matches.stream().map(match -> match.resultFor("none@noreply.zzz")).filter(Objects::nonNull).collect(toList());
-        List<TableEntry> tableEntries =  this.tablePrediction.stream().map(team -> recordForTeam(team, adminResult)).sorted().collect(toList());
+        List<TableEntry> tableEntries =  this.tablePrediction.stream().map(team -> TableEntry.recordForTeam(team, adminResult)).sorted().collect(toList());
         return scoreTable(tableEntries);
     }
 
@@ -79,16 +79,6 @@ public class TablePrediction {
         }
         return score;
     }
-
-
-    private TableEntry recordForTeam(String team, List<Result> results) {
-        int points = results.stream().mapToInt(match -> match.pointsFor(team)).sum();
-        int goalsFor = results.stream().mapToInt(match -> match.goalsFor(team)).sum();
-        int goalsAgainst = results.stream().mapToInt(match -> match.goalsAgainst(team)).sum();
-
-        return new TableEntry(team, goalsFor, goalsAgainst, points);
-    }
-
     @Override
     public int hashCode() {
         int result = user != null ? user.hashCode() : 0;

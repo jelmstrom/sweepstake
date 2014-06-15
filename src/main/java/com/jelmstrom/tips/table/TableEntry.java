@@ -1,5 +1,9 @@
 package com.jelmstrom.tips.table;
 
+import com.jelmstrom.tips.match.Result;
+
+import java.util.List;
+
 public class TableEntry implements Comparable<TableEntry>{
 
 
@@ -14,6 +18,14 @@ public class TableEntry implements Comparable<TableEntry>{
         this.goalsFor = goalsFor;
         this.goalsAgainst = goalsAgainst;
         this.points = points;
+    }
+
+    public static TableEntry recordForTeam(String team, List<Result> results) {
+        int points = results.stream().mapToInt(match -> match.pointsFor(team)).sum();
+        int goalsFor = results.stream().mapToInt(match -> match.goalsFor(team)).sum();
+        int goalsAgainst = results.stream().mapToInt(match -> match.goalsAgainst(team)).sum();
+
+        return new TableEntry(team, goalsFor, goalsAgainst, points);
     }
 
     @SuppressWarnings("NullableProblems")

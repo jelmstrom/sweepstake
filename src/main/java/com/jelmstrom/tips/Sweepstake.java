@@ -20,9 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
-
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.reverseOrder;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
@@ -80,11 +77,10 @@ public class Sweepstake {
                 .collect(toMap(p -> p.user, p2 -> p2.score(matches), Math::addExact));
 
         Map<String, Integer> leaderboardmap =  mergeMaps(matchScores, tables);
-        List leaderboard =  leaderboardmap.entrySet().stream()
+        return leaderboardmap.entrySet().stream()
                 .map(entry -> new LeaderboardEntry(entry.getKey(), entry.getValue()))
                 .sorted()
                 .collect(toList());
-        return leaderboard;
 
     }
 
@@ -103,91 +99,24 @@ public class Sweepstake {
             entry -> entry.getKey().toString(),
             entry -> Integer.parseInt(entry.getValue().toString()),
             Math::addExact
-);
+        );
     }
 
-    @RequestMapping(value = "/leaderboard")
-    public List<Object[]> getLeaderBoard() {
-        return getUsers().stream().map(user -> new Object[]{user, Integer.toString(calculatePointsFor(user.email))}).collect(toList());
-    }
+
 
     @RequestMapping(value = "/table/{groupName}")
     public List<TableEntry> currentStandingsForGroup(@PathVariable String groupName) {
         User admin = userRepository.findAdminUser();
         List<Result> results = resultsFor(admin.email);
         Group group = new GroupRepository(context).read(groupName);
-        return group.teams.stream().map(team -> recordForTeam(team, admin.email, results)).sorted().collect(toList());
+        return group.teams.stream().map(team -> TableEntry.recordForTeam(team, results)).sorted().collect(toList());
     }
-
-
 
 
     private List<Result> resultsFor(String userEmail) {
         return matchRepository.read().stream().map(match -> match.resultFor(userEmail)).filter(Objects::nonNull).collect(toList());
     }
 
-    private TableEntry recordForTeam(String team, String userEmail, List<Result> results) {
-        int points = results.stream().filter(result -> result.userEmail.equals(userEmail))
-                .mapToInt(match -> match.pointsFor(team)).sum();
-        int goalsFor = results.stream().filter(result -> result.userEmail.equals(userEmail))
-                .mapToInt(match -> match.goalsFor(team)).sum();
-        int goalsAgainst = results.stream().filter(result -> result.userEmail.equals(userEmail))
-                .mapToInt(match -> match.goalsAgainst(team)).sum();
-        System.out.println(String.format("Table Entry %s", Arrays.asList(team, points, goalsFor, goalsAgainst)));
-        return new TableEntry(team, goalsFor, goalsAgainst, points);
-    }
-
-
-    private int calculatePointsFor(String user) {
-        List<Match> matches = matchRepository.read();
-        int matchScore = matches.stream().map(
-                match -> match.scoreFor(user))
-                .filter(Objects::nonNull)
-                .reduce(0, (a, b) -> a + b);
-
-        int groupScore = tableRepository.read().stream().filter(prediction -> prediction.user.equals(user)).mapToInt(this::scoreTable).sum();
-
-        return matchScore + groupScore;
-    }
-
-    private int scoreTable(TablePrediction tablePrediction) {
-
-        int score = 0;
-
-        List<String> correctOrder = currentStandingsForGroup(tablePrediction.group).stream()
-                .map(entry -> entry.team)
-                .filter(Objects::nonNull)
-                .collect(toList());
-        List<String> userPrediction = tablePrediction.tablePrediction;
-        System.out.println("User table " + tablePrediction.user  + " " + tablePrediction.group + "  " + userPrediction);
-        System.out.println("correct table " + correctOrder);
-        if (userPrediction.equals(correctOrder)) {
-            score = 7;
-        } else if (correctOrder.isEmpty() || userPrediction.isEmpty()) {
-            return 0;
-        } else {
-            List<String> topTwo = correctOrder.subList(0, 2);
-            if (userPrediction.get(0).equals(correctOrder.get(0))) {
-                score += 2;
-            } else if (topTwo.contains(userPrediction.get(0))) {
-                score++;
-            }
-            if (userPrediction.get(1).equals(correctOrder.get(1))) {
-                score += 2;
-            } else if (topTwo.contains(userPrediction.get(0))) {
-                score++;
-            }
-
-            if (userPrediction.get(2).equals(correctOrder.get(2))) {
-                score ++;
-            }
-            if (userPrediction.get(3).equals(correctOrder.get(3))) {
-                score ++;
-            }
-
-        }
-        return score;
-    }
 
     public User getUser(String email) {
         return userRepository.findByEmail(email);
