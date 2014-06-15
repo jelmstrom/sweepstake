@@ -32,7 +32,7 @@ public class SweepstakeController {
     public String index(Model uiModel, HttpServletRequest request) {
         Sweepstake sweepstake = new Sweepstake(context);
         uiModel.addAttribute("userList", sweepstake.getUsers());
-        uiModel.addAttribute("leaderBoard", sweepstake.getLeaderBoard());
+        uiModel.addAttribute("leaderBoard", sweepstake.fasterLeaderboard());
         setSessionUsers(request, uiModel);
         return "index";
     }

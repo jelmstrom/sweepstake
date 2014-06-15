@@ -21,6 +21,8 @@ import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.reverseOrder;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
@@ -65,7 +67,7 @@ public class Sweepstake {
         return tableRepository.read().stream().filter(prediction -> prediction.user.equals(user)).collect(toList());
     }
 
-    public Map<String, Integer> fasterLeaderboard(){
+    public List<LeaderboardEntry> fasterLeaderboard(){
         List<Match> matches = getMatches();
         Map<String, Integer> matchScores = matches.stream()
                 .flatMap(match -> match.results.stream())
@@ -77,7 +79,12 @@ public class Sweepstake {
                     .stream()
                 .collect(toMap(p -> p.user, p2 -> p2.score(matches), Math::addExact));
 
-        return mergeMaps(matchScores, tables);
+        Map<String, Integer> leaderboardmap =  mergeMaps(matchScores, tables);
+        List leaderboard =  leaderboardmap.entrySet().stream()
+                .map(entry -> new LeaderboardEntry(entry.getKey(), entry.getValue()))
+                .sorted()
+                .collect(toList());
+        return leaderboard;
 
     }
 

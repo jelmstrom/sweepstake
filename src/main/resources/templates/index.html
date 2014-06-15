@@ -80,9 +80,9 @@
                 <th>Points</th>
             </thead>
             <tbody>
-                <tr th:each="entry : ${leaderBoard}" th:if="${not (entry[0].displayName == 'Admin')}">
-                    <td><label th:text="${entry[0].displayName}">displayname</label></td>
-                    <td><label th:text="${entry[1]}">points</label></td>
+                <tr th:each="entry : ${leaderBoard}" th:if="${not (entry.user == 'Admin')}">
+                    <td><label th:text="${entry.user}">displayname</label></td>
+                    <td><label th:text="${entry.points}">points</label></td>
                 </tr>
             </tbody>
         </table>

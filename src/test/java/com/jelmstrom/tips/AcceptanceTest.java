@@ -176,6 +176,6 @@ public class AcceptanceTest {
     }
 
     public int pointsForUser() {
-        return sweepstake.fasterLeaderboard().get(USER_EMAIL);
+        return sweepstake.fasterLeaderboard().stream().filter(entry -> entry.user.equals(USER_EMAIL)).findFirst().get().points;
     }
 }
