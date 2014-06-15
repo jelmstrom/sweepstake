@@ -50,8 +50,6 @@ public class TablePrediction {
 
         List<String> correctOrder = table.stream().map(entry -> entry.team).collect(toList());
         List<String> userPrediction = this.tablePrediction;
-        System.out.println("User table " + this.user  + " " + this.group + "  " + userPrediction);
-        System.out.println("correct table " + correctOrder);
         if (userPrediction.equals(correctOrder)) {
             score = 7;
         } else if (correctOrder.isEmpty() || userPrediction.isEmpty()) {
