@@ -4,7 +4,6 @@ import com.jelmstrom.tips.persistence.MongoRepository;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.mongodb.WriteResult;
 import org.bson.types.ObjectId;
 import org.springframework.util.StringUtils;
 
@@ -19,7 +18,6 @@ public class UserRepository extends MongoRepository {
     public static final String ID = "_id";
     public final DBCollection userCollection;
     public static final String EMAIL = "email";
-    public static final String CREDENTIALS = "credentials";
     public static final String DISPLAY_NAME = "displayName";
     public static final String ADMIN = "isAdmin";
 
@@ -31,10 +29,10 @@ public class UserRepository extends MongoRepository {
     public User store(User user){
             User existingUser = read(user.id);
             String token= handleEmptyToken(user.token, existingUser.token);
-            BasicDBObject dbUser = new BasicDBObject(EMAIL, user.email)
-                    .append(DISPLAY_NAME, user.displayName)
+            BasicDBObject dbUser = new BasicDBObject(EMAIL, user.email.trim())
+                    .append(DISPLAY_NAME, user.displayName.trim())
                     .append(ADMIN, user.admin)
-                    .append(TOKEN, token);
+                    .append(TOKEN, token.trim());
         if(existingUser.isValid() && existingUser.id.equals(user.id)){
             userCollection.update(new BasicDBObject(ID, new ObjectId(existingUser.id)), dbUser);
         } else  {
@@ -72,8 +70,8 @@ public class UserRepository extends MongoRepository {
         }
     }
 
-    public void remove(String user) {
-        userCollection.remove(new BasicDBObject(EMAIL, user));
+    public void remove(String userId) {
+        userCollection.remove(new BasicDBObject(ID, new ObjectId(userId)));
     }
 
     public List<User> read() {

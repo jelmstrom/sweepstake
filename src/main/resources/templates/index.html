@@ -63,6 +63,11 @@
                         <a href="" th:href="@{'user/'+ ${user.displayName}}" th:text="${user.displayName}"></a>
                     </td>
                     <td th:text="${user.email}">email</td>
+                    <td>
+                        <form id="delete" name="delete" method="post" action="/delete" th:action="@{'/delete/'+${user.id}}">
+                            <button class="btn btn-xs btn-danger" type="submit" th:if="${canEdit}">Delete</button>
+                        </form>
+                    </td>
                 </tr>
             </tbody>
         </table>

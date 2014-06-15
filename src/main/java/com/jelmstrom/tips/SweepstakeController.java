@@ -147,6 +147,12 @@ public class SweepstakeController {
         }
     }
 
+    @RequestMapping(value = "/delete/{userId}", method = RequestMethod.POST)
+    public String deleteUser(Model uiModel, @PathVariable String userId, HttpServletRequest request) {
+        new Sweepstake(context).deleteUser(userId);
+        return index(uiModel, request);
+    }
+
     @RequestMapping(value = "/user", method = RequestMethod.POST)
     public String updateUser(Model uiModel, HttpServletRequest request) {
 

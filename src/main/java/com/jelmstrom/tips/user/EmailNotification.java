@@ -11,16 +11,14 @@ import java.util.Properties;
 
 public class EmailNotification {
 
-    private final Properties props;
     private Session session;
 
     private final InternetAddress internetAddress;
-    private InternetAddress[] toAddress;
 
 
     public EmailNotification(User adminUser)  {
 
-        props = new Properties();
+        Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.host", "smtp.gmail.com");
@@ -47,9 +45,9 @@ public class EmailNotification {
             message.setFrom(internetAddress);
             //toAddress = InternetAddress.parse(user.email);
             InternetAddress[] bccAddress = InternetAddress.parse("c.elmstrom@gmail.com");
-            toAddress = InternetAddress.parse("johan.elmstrom@gmail.com");
+            InternetAddress[] toAddress = InternetAddress.parse("johan.elmstrom@gmail.com");
             //message.setRecipients(Message.RecipientType.TO,toAddress);
-            message.setRecipients(Message.RecipientType.TO,toAddress);
+            message.setRecipients(Message.RecipientType.TO, toAddress);
             message.setRecipients(Message.RecipientType.BCC,bccAddress);
             message.setSubject("Uppdatering från VM tipset");
             message.setText("Hej " + user.displayName + "\n\n Din uppdatering har registrerats " +

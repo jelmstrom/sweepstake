@@ -21,7 +21,6 @@ import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
@@ -110,8 +109,7 @@ public class Sweepstake {
         User admin = userRepository.findAdminUser();
         List<Result> results = resultsFor(admin.email);
         Group group = new GroupRepository(context).read(groupName);
-        List<TableEntry> tableEntries =  group.teams.stream().map(team -> recordForTeam(team, admin.email, results)).sorted().collect(toList());
-        return tableEntries;
+        return group.teams.stream().map(team -> recordForTeam(team, admin.email, results)).sorted().collect(toList());
     }
 
 
@@ -221,5 +219,9 @@ public class Sweepstake {
 
     public void saveUserPrediction(TablePrediction tablePrediction) {
         tableRepository.store(tablePrediction);
+    }
+
+    public void deleteUser(String userId) {
+        userRepository.remove(userId);
     }
 }

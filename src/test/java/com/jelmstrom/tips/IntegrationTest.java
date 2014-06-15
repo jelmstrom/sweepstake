@@ -128,12 +128,11 @@ public class IntegrationTest {
 
 
     @Test
-         public void removeUser(){
+    public void removeUser(){
         User newUser = new User("display", "Email", false, "");
-        userRepo.store(newUser);
+        User storedUser = userRepo.store(newUser);
         assertThat(userRepo.findByEmail("Email").isValid(), is(true));
-        assertThat(userRepo.findByEmail("Email").isValid(), is(true));
-        userRepo.remove("Email");
+        userRepo.remove(storedUser.id);
         assertThat(userRepo.findByEmail("Email").isValid(), is(false));
     }
 
