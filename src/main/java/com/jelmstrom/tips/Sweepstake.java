@@ -13,6 +13,7 @@ import com.jelmstrom.tips.user.User;
 import com.jelmstrom.tips.user.UserRepository;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -79,6 +80,7 @@ public class Sweepstake {
         Map<String, Integer> leaderboardmap =  mergeMaps(matchScores, tables);
         return leaderboardmap.entrySet().stream()
                 .map(entry -> new LeaderboardEntry(entry.getKey(), entry.getValue()))
+                .filter(entry -> !StringUtils.isEmpty(entry.user.trim()))
                 .sorted()
                 .collect(toList());
 
