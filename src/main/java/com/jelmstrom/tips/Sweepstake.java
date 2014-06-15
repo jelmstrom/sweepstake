@@ -17,11 +17,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 @SuppressWarnings("UnusedDeclaration")
 @RestController
@@ -64,6 +66,40 @@ public class Sweepstake {
         return tableRepository.read().stream().filter(prediction -> prediction.user.equals(user)).collect(toList());
     }
 
+    public Map<String, Integer> fasterLeaderboard(){
+        List<Match> matches = getMatches();
+        Map<String, Integer> matchScores = matches.stream()
+                .flatMap(match -> match.results.stream())
+                .collect(toMap(p -> p.userEmail, Result::score, Math::addExact));
+
+        List<TablePrediction> tablePredictions = tableRepository.read();
+
+        Map<String, Integer> tables = tablePredictions
+                    .stream()
+                .collect(toMap(p -> p.user, p2 -> p2.score(matches), Math::addExact));
+
+        return mergeMaps(matchScores, tables);
+
+    }
+
+    public Map<String, Integer> mergeMaps(Map<String, Integer> matchScores, Map<String, Integer> tables) {
+        Collector<Map.Entry, ?, Map<String, Integer>> mapJoinCollector = getEntryMapCollector();
+
+
+        return Stream.of(tables, matchScores)
+                .map(map -> map.entrySet())
+                .flatMap(entrySet -> entrySet.stream())
+                .collect(mapJoinCollector);
+    }
+
+    public Collector<Map.Entry, ?, Map<String, Integer>> getEntryMapCollector() {
+        return toMap(
+            entry -> entry.getKey().toString(),
+            entry -> Integer.parseInt(entry.getValue().toString()),
+            Math::addExact
+);
+    }
+
     @RequestMapping(value = "/leaderboard")
     public List<Object[]> getLeaderBoard() {
         return getUsers().stream().map(user -> new Object[]{user, Integer.toString(calculatePointsFor(user.email))}).collect(toList());
@@ -71,18 +107,10 @@ public class Sweepstake {
 
     @RequestMapping(value = "/table/{groupName}")
     public List<TableEntry> currentStandingsForGroup(@PathVariable String groupName) {
-
-        System.out.println("Getting admin user");
         User admin = userRepository.findAdminUser();
-        System.out.println("admin user" + admin);
         List<Result> results = resultsFor(admin.email);
-
-        System.out.println("Admin Results " + results.size());
         Group group = new GroupRepository(context).read(groupName);
-
-        System.out.println("Group " + groupName + " " + group );
         List<TableEntry> tableEntries =  group.teams.stream().map(team -> recordForTeam(team, admin.email, results)).sorted().collect(toList());
-        System.out.println("Admin Results " + tableEntries.size());
         return tableEntries;
     }
 
@@ -105,7 +133,7 @@ public class Sweepstake {
     }
 
 
-    public int calculatePointsFor(String user) {
+    private int calculatePointsFor(String user) {
         List<Match> matches = matchRepository.read();
         int matchScore = matches.stream().map(
                 match -> match.scoreFor(user))
@@ -117,7 +145,7 @@ public class Sweepstake {
         return matchScore + groupScore;
     }
 
-    public int scoreTable(TablePrediction tablePrediction) {
+    private int scoreTable(TablePrediction tablePrediction) {
 
         int score = 0;
 

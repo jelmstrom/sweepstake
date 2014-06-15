@@ -5,7 +5,11 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toMap;
 
 
 public class Match implements Comparable<Match>{
@@ -62,7 +66,6 @@ public class Match implements Comparable<Match>{
             return 0;
         }
 
-
         int points = 0;
         if (userResult.winner() == adminResult.winner()) {
             points++;
@@ -95,4 +98,5 @@ public class Match implements Comparable<Match>{
     public int compareTo(Match o) {
         return matchStart.compareTo(o.matchStart);
     }
+
 }

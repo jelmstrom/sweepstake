@@ -66,4 +66,8 @@ public class Result {
     public int hashCode(){
         return 31 * (homeGoals * awayGoals * userEmail.hashCode() * match.id.hashCode());
     }
+
+    public int score() {
+        return this.match.scoreFor(this.userEmail);
+    }
 }

@@ -71,8 +71,11 @@ public class AcceptanceTest {
 
         new Result(matches.get(5), 1, 2, ADMIN_EMAIL);
 
-        MATCH_REPOSITORY.store(matches);
+
         USER_REPOSITORY.store(new User("admin", ADMIN_EMAIL, true, ""));
+        USER_REPOSITORY.store(new User("user", USER_EMAIL, false, ""));
+
+        MATCH_REPOSITORY.store(matches);
     }
 
     @After
@@ -98,7 +101,7 @@ public class AcceptanceTest {
 
     @Test
     public void pointsForUserShouldBeCalculatedBasedOnAdminResults(){
-        int points = sweepstake.calculatePointsFor(USER_EMAIL);
+        int points = pointsForUser();
         assertThat(points, is(9));
     }
 
@@ -107,8 +110,20 @@ public class AcceptanceTest {
 
         List<String> userPrediction = asList(brazil, argentina, australia, germany);
         TablePrediction prediction = new TablePrediction(USER_EMAIL, groupA.groupName, userPrediction);
-        int score = sweepstake.scoreTable(prediction);
-        assertThat(score, is(7));
+        TABLE_REPOSITORY.store(prediction);
+        int points = pointsForUser();
+        assertThat(points, is(16));
+    }
+
+
+    @Test
+    public void leaderBoardScoreForUserShouldBeSixteen(){
+
+        List<String> userPrediction = asList(brazil, argentina, australia, germany);
+        TablePrediction prediction = new TablePrediction(USER_EMAIL, groupA.groupName, userPrediction);
+        TABLE_REPOSITORY.store(prediction);
+        int points = sweepstake.fasterLeaderboard().get(USER_EMAIL);
+        assertThat(points, is(7 + 9));
     }
 
     @Test
@@ -117,9 +132,9 @@ public class AcceptanceTest {
         List<String> userPrediction = asList(brazil, argentina, germany, australia);
         TablePrediction prediction = new TablePrediction(USER_EMAIL, groupA.groupName, userPrediction);
 
-        int score = sweepstake.scoreTable(prediction);
-
-        assertThat(score, is(4));
+        TABLE_REPOSITORY.store(prediction);
+        int points = pointsForUser();
+        assertThat(points, is(4 +9));
 
     }
 
@@ -129,9 +144,9 @@ public class AcceptanceTest {
         List<String> userPrediction = asList( argentina,brazil, germany, australia);
         TablePrediction prediction = new TablePrediction(USER_EMAIL, groupA.groupName, userPrediction);
 
-        int score = sweepstake.scoreTable(prediction);
-
-        assertThat(score, is(2));
+        TABLE_REPOSITORY.store(prediction);
+        int points = pointsForUser();
+        assertThat(points, is(2 +9));
 
     }
 
@@ -141,9 +156,9 @@ public class AcceptanceTest {
         List<String> userPrediction = asList( germany, australia, argentina,brazil);
         TablePrediction prediction = new TablePrediction(USER_EMAIL, groupA.groupName, userPrediction);
 
-        int score = sweepstake.scoreTable(prediction);
-
-        assertThat(score, is(0));
+        TABLE_REPOSITORY.store(prediction);
+        int points = pointsForUser();
+        assertThat(points, is(0 +9));
 
     }
 
@@ -154,9 +169,8 @@ public class AcceptanceTest {
         List<String> userPrediction = asList(brazil, argentina, australia, germany);
         TablePrediction prediction = new TablePrediction(USER_EMAIL, groupA.groupName, userPrediction);
         TABLE_REPOSITORY.store(prediction);
-
-        int score = sweepstake.calculatePointsFor(USER_EMAIL);
-        assertThat(score, is(16));
+        int points = pointsForUser();
+        assertThat(points, is(16));
     }
 
     @Test
@@ -165,14 +179,15 @@ public class AcceptanceTest {
         List<String> userPrediction = asList(brazil, argentina, australia, germany);
         TablePrediction prediction = new TablePrediction(USER_EMAIL, groupA.groupName, userPrediction);
         TABLE_REPOSITORY.store(prediction);
-        List<String> userPrediction2 = asList("1", "2", "3", "4");
+        List<String> userPrediction2 = asList("4", "3", "2", "1");
 
         prediction = new TablePrediction(USER_EMAIL, "GroupB", userPrediction2);
         TABLE_REPOSITORY.store(prediction);
-
-        int score = sweepstake.calculatePointsFor(USER_EMAIL);
-        assertThat(score, is(16));
+        int points = pointsForUser();
+        assertThat(points, is(16));
     }
 
-
+    public int pointsForUser() {
+        return sweepstake.fasterLeaderboard().get(USER_EMAIL);
+    }
 }
