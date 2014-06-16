@@ -17,7 +17,7 @@ public class ResultTest {
     @Test
     public void homeTeamWinsIfScoringMoreGoals(){
         Match newMatch = new Match(brazil, germany, null, "A1");
-        Result result = new Result(newMatch, 2,1, "Johan");
+        Result result = new Result(newMatch, 2,1, "Johan", "");
         assertThat(result.winner(), is(1));
 
     }
@@ -25,21 +25,21 @@ public class ResultTest {
     @Test
     public void awayTeamWinsIfScoringMoreGoals(){
         Match newMatch = new Match(brazil, germany, null, "A1");
-        Result result = new Result(newMatch, 0,1, "Johan");
+        Result result = new Result(newMatch, 0,1, "Johan", "");
         assertThat(result.winner() , is(-1));
     }
 
     @Test
     public void equalGoalsMeansDraw(){
         Match newMatch = new Match(brazil, germany, null, "A1");
-        Result result = new Result(newMatch, 1,1, "Johan");
+        Result result = new Result(newMatch, 1,1, "Johan", "");
         assertThat(result.winner() , is(0));
     }
 
     @Test
     public void homeTeamGetsAllThreePointsForWin(){
         Match newMatch = new Match(brazil, germany, null, "A1");
-        Result result = new Result(newMatch, 2,1, "Johan");
+        Result result = new Result(newMatch, 2,1, "Johan", "");
         assertThat(result.pointsFor(brazil), is(3));
         assertThat(result.pointsFor(germany), is(0));
 
@@ -48,7 +48,7 @@ public class ResultTest {
     @Test
     public void awayTeamGetsAllThreePointsForWin(){
         Match newMatch = new Match(brazil, germany, null, "A1");
-        Result result = new Result(newMatch, 1,2, "Johan");
+        Result result = new Result(newMatch, 1,2, "Johan", "");
         assertThat(result.pointsFor(germany), is(3));
         assertThat(result.pointsFor(brazil), is(0));
     }
@@ -57,7 +57,7 @@ public class ResultTest {
     public void bothTeamGetsOnePointsForDraw(){
         Match newMatch = new Match(brazil, germany, null, "A1");
 
-        Result result = new Result(newMatch, 1,1, "Johan");
+        Result result = new Result(newMatch, 1,1, "Johan", "");
         assertThat(result.pointsFor(germany), is(1));
         assertThat(result.pointsFor(brazil), is(1));
     }
@@ -65,7 +65,7 @@ public class ResultTest {
     @Test
     public void nonTeamGetsZeroPointsForDraw(){
         Match newMatch = new Match(brazil, germany, null, "A1");
-        Result result = new Result(newMatch, 2,1, "Johan");
+        Result result = new Result(newMatch, 2,1, "Johan", "");
         assertThat(result.pointsFor("Argentina"), is(0));
     }
 

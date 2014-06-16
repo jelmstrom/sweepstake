@@ -60,7 +60,7 @@
             <tbody>
                 <tr th:each="user : ${userList}" th:if="${not (user.displayName == 'Admin')}">
                     <td>
-                        <a href="" th:href="@{'user/'+ ${user.displayName}}" th:text="${user.displayName}"></a>
+                        <a href="" th:href="@{'/user/'+ ${user.displayName}}" th:text="${user.displayName}"></a>
                     </td>
                     <td th:text="${user.email}">email</td>
                     <td>
@@ -80,8 +80,8 @@
                 <th>Points</th>
             </thead>
             <tbody>
-                <tr th:each="entry : ${leaderBoard}" th:if="${not (entry.user == 'Admin')}">
-                    <td><label th:text="${entry.user}">displayname</label></td>
+                <tr th:each="entry : ${leaderBoard}" th:if="${not (entry.user.admin)}">
+                    <td><label th:text="${entry.user.displayName}">displayname</label></td>
                     <td><label th:text="${entry.points}">points</label></td>
                 </tr>
             </tbody>

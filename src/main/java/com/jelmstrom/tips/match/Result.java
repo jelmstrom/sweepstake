@@ -1,6 +1,8 @@
 package com.jelmstrom.tips.match;
 
+import ch.qos.logback.core.joran.util.StringToObjectConverter;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import org.springframework.util.StringUtils;
 
 public class Result {
     @JsonBackReference
@@ -8,17 +10,20 @@ public class Result {
     public final int homeGoals;
     public final int awayGoals;
     public final String userEmail;
+    public String userId;
 
-    public Result(Match match, int homeGoals, int awayGoals, String userEmail) {
+    public Result(Match match, int homeGoals, int awayGoals, String userEmail, String userId) {
         this.match = match;
         this.homeGoals = homeGoals;
         this.awayGoals = awayGoals;
         this.userEmail = userEmail;
+        this.userId = userId;
         match.add(this);
     }
 
+
     public static Result emptyResult() {
-        return new Result(new Match("", "", null, ""), 0, 0, "");
+        return new Result(new Match("", "", null, ""), 0, 0, "", "");
     }
 
     public int goalsAgainst(String team) {
@@ -28,6 +33,10 @@ public class Result {
             return homeGoals;
         }
         return 0;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public int goalsFor(String team) {

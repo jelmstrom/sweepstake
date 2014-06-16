@@ -4,6 +4,8 @@ import com.jelmstrom.tips.group.Group;
 import com.jelmstrom.tips.group.GroupRepository;
 import com.jelmstrom.tips.match.Match;
 import com.jelmstrom.tips.match.MatchRepository;
+import com.jelmstrom.tips.table.TablePrediction;
+import com.jelmstrom.tips.table.TableRepository;
 import com.jelmstrom.tips.user.User;
 import com.jelmstrom.tips.user.UserRepository;
 import java.text.DateFormat;
@@ -59,6 +61,43 @@ public class ConfigurationLoader {
     public static final Group GROUP_H = new Group("GroupH", Arrays.asList(BELGIUM, ALGERIA, RUSSIA, SOUTH_KOREA));
 
     private static final DateFormat dateFormat = new SimpleDateFormat("dd MM yyyy hh:mm");
+    private static MatchRepository matchRepository;
+    private static UserRepository userRepo;
+    private static TableRepository tableRepository;
+
+
+    public static void initialiseData(String context) {
+        GroupRepository groupRepository = new GroupRepository(context);
+        userRepo = new UserRepository(context);
+        matchRepository = new MatchRepository(context);
+        tableRepository = new TableRepository(context);
+
+        if(groupRepository.groupCollection.find().count() == 0){
+            System.out.println("Create groups");
+            createGroups(groupRepository);
+            System.out.println("Create matches");
+            createMatches(matchRepository);
+            System.out.println("Create Admin user");
+            createAdminUser(userRepo);
+            System.out.println("Data configured");
+        }
+        User admin = userRepo.findByEmail("none@noreply.zzz") ;
+        userRepo.store(new User(admin.id, "Admin", "none@noreply.zzz", true, "__admin__"));
+
+        patchResultUsers();
+    }
+
+    private static void patchResultUsers() {
+        List<Match> matches = matchRepository.read();
+        matches.stream().flatMap(match -> match.results.stream())
+            .forEach(res -> res.setUserId(userRepo.findByEmail(res.userEmail).id));
+        matchRepository.store(matches);
+
+        List<TablePrediction> predictions = tableRepository.read();
+        predictions.forEach(tp -> tp.setUserId(userRepo.findByEmail(tp.user).id));
+        tableRepository.store(predictions);
+
+    }
 
 
     private static void createGroups(GroupRepository groupRepository) {
@@ -72,22 +111,6 @@ public class ConfigurationLoader {
             groupRepository.store(GROUP_G);
             groupRepository.store(GROUP_H);
         }
-    }
-
-    public static void initialiseData(String context) {
-        GroupRepository groupRepository = new GroupRepository(context);
-        UserRepository userRepo = new UserRepository(context);
-        if(groupRepository.groupCollection.find().count() == 0){
-            System.out.println("Create groups");
-            createGroups(groupRepository);
-            System.out.println("Create matches");
-            createMatches(new MatchRepository(context));
-            System.out.println("Create Admin user");
-            createAdminUser(userRepo);
-            System.out.println("Data configured");
-        }
-        User admin = userRepo.findByEmail("none@noreply.zzz") ;
-        userRepo.store(new User(admin.id, "Admin", "none@noreply.zzz", true, "__admin__"));
     }
 
     private static void createAdminUser(UserRepository userRepo) {

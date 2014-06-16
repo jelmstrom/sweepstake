@@ -25,7 +25,8 @@ public class MatchRepository extends MongoRepository {
                 match.results.stream()
                         .map(result -> new BasicDBObject("homeGoals", result.homeGoals)
                                 .append("awayGoals", result.awayGoals)
-                                .append("userEmail", result.userEmail))
+                                .append("userEmail", result.userEmail)
+                                .append("userId", result.userId))
                         .collect(toList());
 
         DBObject entry = new BasicDBObject("homeTeam", match.homeTeam)
@@ -63,9 +64,10 @@ public class MatchRepository extends MongoRepository {
         dbResults.toArray(dbObjects);
         for (BasicDBObject dbResult : dbObjects) {
             new Result(match
-                    , Integer.parseInt(dbResult.get("homeGoals").toString())
-                    , Integer.parseInt(dbResult.get("awayGoals").toString())
-                    , dbResult.get("userEmail").toString());
+                    , dbResult.getInt("homeGoals")
+                    , dbResult.getInt("awayGoals")
+                    , dbResult.getString("userEmail")
+                    , dbResult.getString("userId"));
         }
         return match;
     }

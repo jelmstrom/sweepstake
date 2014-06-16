@@ -1,10 +1,8 @@
 package com.jelmstrom.tips.table;
 
-import com.jelmstrom.tips.match.Match;
 import com.jelmstrom.tips.match.Result;
 
 import java.util.List;
-import java.util.Objects;
 
 import static java.util.stream.Collectors.toList;
 
@@ -15,10 +13,17 @@ public class TablePrediction {
 
     public final List<String> tablePrediction;
 
-    public TablePrediction(String user, String group, List<String> tablePrediction) {
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String userId;
+
+    public TablePrediction(String user, String group, String userId, List<String> tablePrediction) {
         this.user = user;
         this.group = group;
         this.tablePrediction = tablePrediction;
+        this.userId = userId;
     }
 
     @SuppressWarnings("RedundantIfStatement")
@@ -37,8 +42,7 @@ public class TablePrediction {
         return true;
     }
 
-    public int score(List<Match> matches){
-        List <Result> adminResult = matches.stream().map(match -> match.resultFor("none@noreply.zzz")).filter(Objects::nonNull).collect(toList());
+    public int score(List<Result> adminResult){
         List<TableEntry> tableEntries =  this.tablePrediction.stream().map(team -> TableEntry.recordForTeam(team, adminResult)).sorted().collect(toList());
         return scoreTable(tableEntries);
     }

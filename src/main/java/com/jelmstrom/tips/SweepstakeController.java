@@ -43,7 +43,10 @@ public class SweepstakeController {
         String pos2 = request.getParameter("prediction2");
         String pos3 = request.getParameter("prediction3");
         String pos4 = request.getParameter("prediction4");
-        new Sweepstake(context).saveUserPrediction(new TablePrediction(sessionUserEmail(request), "Group" + groupLetter, Arrays.asList(pos1, pos2, pos3, pos4)));
+
+        Sweepstake sweepstake = new Sweepstake(context);
+        User user = sweepstake.getUser(sessionUserEmail(request));
+        sweepstake.saveUserPrediction(new TablePrediction(user.email, "Group" + groupLetter, user.id, Arrays.asList(pos1, pos2, pos3, pos4)));
 
         return showGroup(uiModel, groupLetter, request);
     }
@@ -88,7 +91,8 @@ public class SweepstakeController {
         return new Result(new Match("", "", null, key)
                 , resultPair[0]
                 , resultPair[1]
-                , user.email);
+                , user.email
+                , user.id);
     }
 
 
@@ -110,7 +114,7 @@ public class SweepstakeController {
         uiModel.addAttribute("group", groupLetter);
         uiModel.addAttribute("currentStandings", tableEntries);
         uiModel.addAttribute("teams", tableEntries.stream().map(entry -> entry.team).collect(toList()));
-        uiModel.addAttribute("maybe", maybe.orElse(new TablePrediction("", "", Collections.emptyList())));
+        uiModel.addAttribute("maybe", maybe.orElse(new TablePrediction("", "", "", Collections.emptyList())));
         uiModel.addAttribute("prediction", maybe.isPresent() ? maybe.get().tablePrediction : Arrays.asList("", "", "", ""));
         setSessionUsers(request, uiModel);
         return "group";
@@ -160,7 +164,6 @@ public class SweepstakeController {
         Sweepstake sweepstake = new Sweepstake(context);
         User user;
         if ("update".equals(request.getParameter("action"))) {
-            System.out.println("Update");
             User sessionUser = sessionUser(request);
             user = updateUser(request, sweepstake);
             if(user.id.equals(sessionUser.id)){
@@ -189,7 +192,7 @@ public class SweepstakeController {
                 , null != request.getParameter("isAdmin")
                 , UUID.randomUUID().toString());
         user = sweepstake.saveUser(user);
-        System.out.println(String.format("user %s updated %s", user.email, (user.admin?" -> admin <-":"")));
+        System.out.println(String.format("user %s updated %s", user.displayName, (user.admin?" -> admin <-":"")));
         return user;
     }
 

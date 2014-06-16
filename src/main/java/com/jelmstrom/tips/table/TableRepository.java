@@ -18,12 +18,18 @@ public class TableRepository extends MongoRepository {
         tablePredictionCollection = getDb().getCollection("tablePreditions");
     }
 
+    public void store(List<TablePrediction> predictions){
+        predictions.forEach(this::store);
+    }
+
     public void store(TablePrediction prediction){
             BasicDBObject dbPrediction = new BasicDBObject()
                     .append("group", prediction.group)
                     .append("userEmail", prediction.user)
-                    .append("prediction", prediction.tablePrediction);
-        if(readPrediction(prediction.user, prediction.group).tablePrediction.isEmpty()){
+                    .append("prediction", prediction.tablePrediction)
+                    .append("userId", prediction.userId);
+        TablePrediction storedPrediction = readPrediction(prediction);
+        if(storedPrediction.tablePrediction.isEmpty()){
             tablePredictionCollection.insert(dbPrediction);
         } else  {
             tablePredictionCollection.update(new BasicDBObject()
@@ -33,19 +39,26 @@ public class TableRepository extends MongoRepository {
         }
     }
 
-    public TablePrediction readPrediction(String user, String group) {
-        DBObject dbPrediction = tablePredictionCollection.findOne(new BasicDBObject("userEmail", user).append("group", group));
+    public TablePrediction readPrediction(TablePrediction user) {
+        DBObject dbPrediction = tablePredictionCollection.findOne(new BasicDBObject("userEmail", user.user).append("group", user.group));
         if(dbPrediction != null && null != dbPrediction.get("userEmail")){
             return buildTablePrediction(dbPrediction);
         }
-        return new TablePrediction(user, group, Collections.emptyList());
+        return new TablePrediction(user.user, user.group, user.userId, Collections.emptyList());
+    }
+
+    public TablePrediction readPrediction(String user, String group) {
+        return readPrediction(new TablePrediction(user, group, null, null));
     }
 
     private TablePrediction buildTablePrediction(DBObject dbMatch) {
 
         List<String> predictions = new ArrayList<>();
         ((BasicDBList) dbMatch.get("prediction")).forEach(entry -> predictions.add((String) entry));
-        return new TablePrediction(dbMatch.get("userEmail").toString(), dbMatch.get("group").toString(), predictions);
+        return new TablePrediction(dbMatch.get("userEmail").toString()
+                                , dbMatch.get("group").toString()
+                                , (String) dbMatch.get("userId")
+                                , predictions);
     }
 
     public List<TablePrediction> read() {

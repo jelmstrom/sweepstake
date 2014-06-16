@@ -13,6 +13,9 @@ import com.jelmstrom.tips.user.User;
 import com.jelmstrom.tips.user.UserRepository;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +29,7 @@ import static java.util.stream.Collectors.toMap;
 
 @SuppressWarnings("UnusedDeclaration")
 @RestController
+@ConfigurationProperties("sweepstake")
 public class Sweepstake {
     private final Logger logger = LogManager.getLogger(Sweepstake.class);
     private final String context;
@@ -43,7 +47,6 @@ public class Sweepstake {
     }
 
     public Sweepstake(String context) {
-        ConfigurationLoader.initialiseData(context);
         this.context = context;
         matchRepository = new MatchRepository(context);
         userRepository = new UserRepository(context);
@@ -69,18 +72,18 @@ public class Sweepstake {
         List<Match> matches = getMatches();
         Map<String, Integer> matchScores = matches.stream()
                 .flatMap(match -> match.results.stream())
-                .collect(toMap(p -> p.userEmail, Result::score, Math::addExact));
+                .collect(toMap(result -> result.userId, Result::score, Math::addExact));
 
         List<TablePrediction> tablePredictions = tableRepository.read();
+        List<Result> adminResults = matches.stream().map(match -> match.resultFor("none@noreply.zzz")).filter(Objects::nonNull).collect(toList());
 
-        Map<String, Integer> tables = tablePredictions
-                    .stream()
-                .collect(toMap(p -> p.user, p2 -> p2.score(matches), Math::addExact));
+        Map<String, Integer> tables = tablePredictions.stream()
+                .collect(toMap(pred -> pred.userId, pred -> pred.score(adminResults), Math::addExact));
 
         Map<String, Integer> leaderboardmap =  mergeMaps(matchScores, tables);
         return leaderboardmap.entrySet().stream()
-                .map(entry -> new LeaderboardEntry(entry.getKey(), entry.getValue()))
-                .filter(entry -> !StringUtils.isEmpty(entry.user.trim()))
+                .map(entry -> new LeaderboardEntry(userRepository.read(entry.getKey()), entry.getValue()))
+                .filter(entry -> !StringUtils.isEmpty(entry.user.id))
                 .sorted()
                 .collect(toList());
 
@@ -145,7 +148,8 @@ public class Sweepstake {
                             findMatch(matches, result.match.id)
                             , result.homeGoals
                             , result.awayGoals
-                            , result.userEmail));
+                            , result.userEmail
+                            , result.userId));
         matchRepository.store(matches);
 
     }

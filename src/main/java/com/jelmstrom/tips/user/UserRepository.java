@@ -41,7 +41,7 @@ public class UserRepository extends MongoRepository {
         return findByEmail(user.email);
     }
 
-    private User read(String id) {
+    public User read(String id) {
         if(StringUtils.isEmpty(id)) {
             return User.emptyUser();
         } else {
@@ -59,8 +59,8 @@ public class UserRepository extends MongoRepository {
     }
 
     private User buildUser(DBObject dbUser) {
-        if(dbUser != null && null != dbUser.get("_id")){
-              return new User(dbUser.get("_id").toString()
+        if(dbUser != null && null != dbUser.get(ID)){
+              return new User(dbUser.get(ID).toString()
                 , dbUser.get(DISPLAY_NAME).toString()
                 , dbUser.get(EMAIL).toString()
                 , Boolean.parseBoolean(dbUser.get(ADMIN).toString())
