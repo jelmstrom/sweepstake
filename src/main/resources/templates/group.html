@@ -138,7 +138,7 @@
             <td >
                 <input type="text" size="2"
                        id="${match.id}_home"
-                       th:value="${match.homeGoalsAsStringFor(activeUser.email)}"
+                       th:value="${match.homeGoalsAsStringFor(activeUser.id)}"
                        name=""
                        th:name="${match.id+'_h'}"
                        th:if="${canEdit}"/>
@@ -150,14 +150,14 @@
                 <input type="text" size="2"
                        id="${match.id}_away"
                        name="away"
-                       th:value="${match.awayGoalsAsStringFor(activeUser.email)}"
+                       th:value="${match.awayGoalsAsStringFor(activeUser.id)}"
                        th:name="${match.id+'_a'}"
                        th:if="${canEdit}"/>
             </td>
 
             <td th:if="${activeUser != null}">
                 <label th:if="${match.hasResult()}"
-                       th:text="${match.scoreFor(activeUser.email?: '_anonymous_') + 'p'}"/>
+                       th:text="${match.scoreFor(activeUser.id) + 'p'}"/>
             </td>
         </tr>
         <tr>

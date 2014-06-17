@@ -40,8 +40,8 @@ public class IntegrationTest {
     @Test
     public void matchStoredInDb(){
         Match match = new Match("TeamA", "TeamB", new Date(), UUID.randomUUID().toString());
-        new Result(match, 2, 1, "Johan", "111");
-        new Result(match, 2, 2, "Christian", "2222");
+        new Result(match, 2, 1, "111");
+        new Result(match, 2, 2, "2222");
         matchRepo.store(match);
         Match persisted = matchRepo.read(match.id);
         assertThat(persisted.equals(match), is(true));
@@ -51,11 +51,11 @@ public class IntegrationTest {
     @Test
     public void getAllMatchesShouldReturnListOfMatchesGreaterThanOne(){
         Match match = new Match("TeamA", "TeamB", new Date(), UUID.randomUUID().toString());
-        new Result(match, 2, 2, "Johan", "");
-        new Result(match, 2, 2, "Christian", "");
+        new Result(match, 2, 2, "");
+        new Result(match, 2, 2, "");
         Match match2 = new Match("TeamA", "TeamB", new Date(), UUID.randomUUID().toString());
-        new Result(match, 2, 1, "Johan", "");
-        new Result(match, 2, 2, "Christian", "");
+        new Result(match, 2, 1, "");
+        new Result(match, 2, 2, "");
         matchRepo.store(match);
         matchRepo.store(match2);
         List<Match> persisted = matchRepo.read();
@@ -66,11 +66,11 @@ public class IntegrationTest {
     @Test
     public void saveExistingMatchUpdates(){
         Match match = new Match("TeamA", "TeamB", new Date(), UUID.randomUUID().toString());
-        new Result(match, 2, 1, "Johan", "");
+        new Result(match, 2, 1, "1023920139012");
         matchRepo.store(match);
 
         Match versionOne = matchRepo.read(match.id);
-        new Result(match, 2, 2, "Christian", "");
+        new Result(match, 2, 2, "3123y18263912673");
         matchRepo.store(match);
 
         Match versionTwo = matchRepo.read(match.id);
@@ -81,9 +81,9 @@ public class IntegrationTest {
 
     @Test
     public void tablePredictionsAreStoredAndReadInCorrectOrder(){
-        TablePrediction prediction = new TablePrediction("user", "grp","" , Arrays.asList("teamB", "teamA", "teamC", "teamD"));
+        TablePrediction prediction = new TablePrediction("grp","1111", Arrays.asList("teamB", "teamA", "teamC", "teamD"));
         tableRepo.store(prediction);
-        TablePrediction stored = tableRepo.readPrediction(prediction.user, prediction.group);
+        TablePrediction stored = tableRepo.readPrediction(prediction.userId, prediction.group);
         assertThat(stored, equalTo(prediction));
 
     }

@@ -5,12 +5,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toMap;
-
 
 public class Match implements Comparable<Match>{
     public final String homeTeam;
@@ -19,6 +14,9 @@ public class Match implements Comparable<Match>{
     @JsonManagedReference
     public final HashSet<Result> results;
     public final String id;
+    private Result correctResult;
+
+
 
     public Match(String homeTeam, String awayTeam, Date matchStart, String id) {
         this.homeTeam = homeTeam;
@@ -29,11 +27,12 @@ public class Match implements Comparable<Match>{
     }
 
     public void add(Result result){
+        results.remove(result);
         results.add(result);
     }
 
-    public Result resultFor(String userEmail) {
-        Optional<Result> option = results.stream().filter(result -> result.userEmail.equals(userEmail)).findFirst();
+    public Result resultFor(String userId) {
+        Optional<Result> option = results.stream().filter(result -> result.userId.equals(userId)).findFirst();
         if(option.isPresent()){
             return option.get();
         } else {
@@ -60,35 +59,44 @@ public class Match implements Comparable<Match>{
     }
 
     private int userScore(Result userResult) {
-        Result adminResult;
-        if(null == userResult
-                || (adminResult =  resultFor("none@noreply.zzz")) == null){
+        if(null == userResult || correctResult == null){
             return 0;
         }
 
         int points = 0;
-        if (userResult.winner() == adminResult.winner()) {
+        if (userResult.winner() == correctResult.winner()) {
             points++;
         }
-        if (userResult.homeGoals == adminResult.homeGoals) {
+        if (userResult.homeGoals == correctResult.homeGoals) {
             points++;
         }
-        if (userResult.awayGoals == adminResult.awayGoals) {
+        if (userResult.awayGoals == correctResult.awayGoals) {
             points++;
         }
 
         return points;
     }
 
-    @SuppressWarnings("UnusedDeclaration")
-    public boolean hasResult(){
-        return resultFor("none@noreply.zzz") != null;
+    public void setCorrectResult(Result correctResult) {
+        this.correctResult = correctResult;
     }
 
+    public Result getCorrectResult() {
+        return correctResult;
+    }
+
+
+    @SuppressWarnings("UnusedDeclaration")
+    public boolean hasResult(){
+        return correctResult != null;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
     public String homeGoalsAsStringFor(String email){
         Result result =  resultFor(email);
         return result==null?"":Integer.toString(result.homeGoals);
     }
+    @SuppressWarnings("UnusedDeclaration")
     public String awayGoalsAsStringFor(String email){
         Result result =  resultFor(email);
         return result==null?"":Integer.toString(result.awayGoals);

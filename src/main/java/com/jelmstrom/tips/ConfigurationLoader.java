@@ -90,11 +90,11 @@ public class ConfigurationLoader {
     private static void patchResultUsers() {
         List<Match> matches = matchRepository.read();
         matches.stream().flatMap(match -> match.results.stream())
-            .forEach(res -> res.setUserId(userRepo.findByEmail(res.userEmail).id));
+            .forEach(res -> res.setUserId(userRepo.read(res.userId).id));
         matchRepository.store(matches);
 
         List<TablePrediction> predictions = tableRepository.read();
-        predictions.forEach(tp -> tp.setUserId(userRepo.findByEmail(tp.user).id));
+        predictions.forEach(tp -> tp.setUserId(userRepo.findByEmail(tp.userId).id));
         tableRepository.store(predictions);
 
     }

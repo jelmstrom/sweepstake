@@ -13,8 +13,6 @@ import com.jelmstrom.tips.user.User;
 import com.jelmstrom.tips.user.UserRepository;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -64,18 +62,20 @@ public class Sweepstake {
     }
 
     @RequestMapping(value = "/predictions/{user}")
-    public List<TablePrediction> getPredictions(@PathVariable String user) {
-        return tableRepository.read().stream().filter(prediction -> prediction.user.equals(user)).collect(toList());
+    public List<TablePrediction> getPredictions(@PathVariable String userId) {
+        User user = userRepository.read(userId);
+        return tableRepository.read().stream().filter(prediction -> prediction.userId.equals(user.id)).collect(toList());
     }
 
     public List<LeaderboardEntry> fasterLeaderboard(){
+        User adminUser = userRepository.findAdminUser();
         List<Match> matches = getMatches();
         Map<String, Integer> matchScores = matches.stream()
                 .flatMap(match -> match.results.stream())
-                .collect(toMap(result -> result.userId, Result::score, Math::addExact));
+                .collect(toMap(result -> result.userId, result -> result.score(), Math::addExact));
 
         List<TablePrediction> tablePredictions = tableRepository.read();
-        List<Result> adminResults = matches.stream().map(match -> match.resultFor("none@noreply.zzz")).filter(Objects::nonNull).collect(toList());
+        List<Result> adminResults = matches.stream().map(match -> match.resultFor(adminUser.id)).filter(Objects::nonNull).collect(toList());
 
         Map<String, Integer> tables = tablePredictions.stream()
                 .collect(toMap(pred -> pred.userId, pred -> pred.score(adminResults), Math::addExact));
@@ -112,7 +112,7 @@ public class Sweepstake {
     @RequestMapping(value = "/table/{groupName}")
     public List<TableEntry> currentStandingsForGroup(@PathVariable String groupName) {
         User admin = userRepository.findAdminUser();
-        List<Result> results = resultsFor(admin.email);
+        List<Result> results = resultsFor(admin.id);
         Group group = new GroupRepository(context).read(groupName);
         return group.teams.stream().map(team -> TableEntry.recordForTeam(team, results)).sorted().collect(toList());
     }
@@ -123,13 +123,13 @@ public class Sweepstake {
     }
 
 
-    public User getUser(String email) {
-        return userRepository.findByEmail(email);
+    public User getUser(String userId) {
+        return userRepository.read(userId);
     }
 
     public User saveUser(User user) {
         User updated = userRepository.store(user);
-        new EmailNotification(userRepository.findAdminUser()).sendMail(updated);
+        //new EmailNotification(userRepository.findAdminUser()).sendMail(updated);
         return updated;
     }
 
@@ -144,14 +144,23 @@ public class Sweepstake {
     public void saveResults(List<Result> resultList, User user) {
         List<Match> matches = getMatches();
         System.out.println(String.format("Storing results %s", resultList));
-        resultList.stream().forEach(result -> new Result(
-                            findMatch(matches, result.match.id)
-                            , result.homeGoals
-                            , result.awayGoals
-                            , result.userEmail
-                            , result.userId));
+        resultList.stream().forEach(result -> addResultToMatch(matches, result, user));
         matchRepository.store(matches);
 
+    }
+
+    private Result addResultToMatch(List<Match> matches, Result result, User user) {
+        Match match = findMatch(matches, result.match.id);
+        Result modified = new Result(
+                match
+                , result.homeGoals
+                , result.awayGoals
+                , result.userId);
+
+        if(user.admin){
+            match.setCorrectResult(result);
+        }
+        return modified;
     }
 
     private Match findMatch(List<Match> matches, String id) {

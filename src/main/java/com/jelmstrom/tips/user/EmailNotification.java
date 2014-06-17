@@ -52,7 +52,7 @@ public class EmailNotification {
             message.setSubject("Uppdatering från VM tipset");
             message.setText("Hej " + user.displayName + "\n\n Din uppdatering har registrerats " +
                     "\n\n" +
-                    "Logga in på http://54.76.168.51:8080//authenticate/" + user.token +
+                    "Logga in på http://54.76.168.51:8080/authenticate/" + user.token +
                     "\n Mvh Admin \n\n bit.ly/vm_tips" ) ;
 
             Transport.send(message);

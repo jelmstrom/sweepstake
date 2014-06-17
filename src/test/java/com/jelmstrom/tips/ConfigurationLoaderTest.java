@@ -48,15 +48,15 @@ public class ConfigurationLoaderTest{
     @Test
     public void configurationLoaderShouldPatchUsers(){
         ConfigurationLoader.initialiseData("matches");
-        new UserRepository("matches").store(new User("display", "test", false, ""));
-        new UserRepository("matches").store(new User("display2", "test2", false, ""));
+        String id = new UserRepository("matches").store(new User("display", "test", false, "")).id;
+        String id2 = new UserRepository("matches").store(new User("display2", "test2", false, "")).id;
         Match m = matches.read("A1");
-        new Result(m, 1, 1, "test", "");
-        new Result(m, 1, 1, "test2", "");
+        new Result(m, 1, 1, id);
+        new Result(m, 1, 1, id2);
         matches.store(m);
         ConfigurationLoader.initialiseData("matches");
-        assertThat(matches.read("A1").resultFor("test").userId, is(notNullValue()));
-        assertThat(matches.read("A1").resultFor("test2").userId, is(notNullValue()));
+        assertThat(matches.read("A1").resultFor(id).userId, is(notNullValue()));
+        assertThat(matches.read("A1").resultFor(id2).userId, is(notNullValue()));
 
     }
 
@@ -64,8 +64,8 @@ public class ConfigurationLoaderTest{
     @Test
     public void configurationLoaderShouldPatchPredictions(){
         ConfigurationLoader.initialiseData("matches");
-        tables.store(new TablePrediction("test", "A", "", Arrays.asList("one", "two")));
-        tables.store(new TablePrediction("test2", "B","", Arrays.asList("one", "two")));
+        tables.store(new TablePrediction("A", "", Arrays.asList("one", "two")));
+        tables.store(new TablePrediction("B","", Arrays.asList("one", "two")));
         new UserRepository("matches").store(new User("display2", "test2", false, ""));
         new UserRepository("matches").store(new User("display", "test", false, ""));
         ConfigurationLoader.initialiseData("matches");

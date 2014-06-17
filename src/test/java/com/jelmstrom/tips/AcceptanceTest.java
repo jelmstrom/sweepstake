@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -40,43 +41,45 @@ public class AcceptanceTest {
 
     private Sweepstake sweepstake = new Sweepstake(TEST_REPO);
     private String ADMIN_ID;
+    private Match matchA1;
+    private Date matchStart = new Date();
+    private User user;
+    private Result resultA1;
 
     @Before
     public void setup(){
         GROUP_REPOSITORY.store(groupA);
         ADMIN_ID = USER_REPOSITORY.store(new User("adminöö", ADMIN_EMAIL, true, "")).id;
-        USER_ID = USER_REPOSITORY.store(new User("useråö", USER_EMAIL, false, "")).id;
+        user = USER_REPOSITORY.store(new User("useråö", USER_EMAIL, false, ""));
+        USER_ID = user.id;
 
 
         List<Match> matches = new ArrayList<>();
-        Date matchStart = new Date();
-        matches.add(new Match(brazil, germany, matchStart, "A1"));
+        matchA1 = new Match(brazil, germany, matchStart, "A1");
+        matches.add(matchA1);
         matches.add(new Match(brazil, argentina, matchStart, "A2"));
         matches.add(new Match(brazil, australia, matchStart, "A3"));
         matches.add(new Match(germany, australia, matchStart, "A4"));
         matches.add(new Match(germany, argentina, matchStart, "A5"));
         matches.add(new Match(australia, argentina, matchStart, "A6"));
 
-        new Result(matches.get(0), 2, 0, USER_EMAIL, USER_ID);
-        new Result(matches.get(1), 2, 0, USER_EMAIL, USER_ID);
-        new Result(matches.get(2), 2, 0, USER_EMAIL, USER_ID);
+        resultA1 = new Result(matches.get(0), 2, 0, USER_ID);
+        new Result(matches.get(1), 2, 0, USER_ID);
+        new Result(matches.get(2), 2, 0, USER_ID);
 
-        new Result(matches.get(3), 2, 0, USER_EMAIL, USER_ID);
-        new Result(matches.get(4), 0, 0, USER_EMAIL, USER_ID);
-        new Result(matches.get(5), 1, 5, USER_EMAIL, USER_ID);
-
-
-
-        new Result(matches.get(0), 2, 1, ADMIN_EMAIL, ADMIN_ID);
-        new Result(matches.get(1), 2, 0, ADMIN_EMAIL, ADMIN_ID);
-        new Result(matches.get(2), 0, 0, ADMIN_EMAIL, ADMIN_ID);
-
-        new Result(matches.get(3), 1, 3, ADMIN_EMAIL, ADMIN_ID);
-        new Result(matches.get(4), 0, 1, ADMIN_EMAIL, ADMIN_ID);
-
-        new Result(matches.get(5), 1, 2, ADMIN_EMAIL, ADMIN_ID);
+        new Result(matches.get(3), 2, 0, USER_ID);
+        new Result(matches.get(4), 0, 0, USER_ID);
+        new Result(matches.get(5), 1, 5, USER_ID);
 
 
+
+        matches.get(0).setCorrectResult(new Result(matches.get(0), 2, 1, ADMIN_ID));
+        matches.get(1).setCorrectResult(new Result(matches.get(1), 2, 0, ADMIN_ID));
+        matches.get(2).setCorrectResult(new Result(matches.get(2), 0, 0, ADMIN_ID));
+        matches.get(3).setCorrectResult(new Result(matches.get(3), 1, 3, ADMIN_ID));
+        matches.get(4).setCorrectResult(new Result(matches.get(4), 0, 1, ADMIN_ID));
+
+        matches.get(5).setCorrectResult(new Result(matches.get(5), 1, 2, ADMIN_ID));
 
         MATCH_REPOSITORY.store(matches);
 
@@ -113,7 +116,7 @@ public class AcceptanceTest {
     public void groupScoreForCompletelyCorrectTableShouldBeSeven(){
 
         List<String> userPrediction = asList(brazil, argentina, australia, germany);
-        TablePrediction prediction = new TablePrediction(USER_EMAIL, groupA.groupName, USER_ID, userPrediction);
+        TablePrediction prediction = new TablePrediction(groupA.groupName, USER_ID, userPrediction);
         TABLE_REPOSITORY.store(prediction);
         int points = pointsForUser();
         assertThat(points, is(7+9));
@@ -123,7 +126,7 @@ public class AcceptanceTest {
     public void groupScoreForFirstTwoTeamsIsFourIfCompletelyCorrect(){
 
         List<String> userPrediction = asList(brazil, argentina, germany, australia);
-        TablePrediction prediction = new TablePrediction(USER_EMAIL, groupA.groupName, USER_ID,userPrediction);
+        TablePrediction prediction = new TablePrediction(groupA.groupName, USER_ID,userPrediction);
 
         TABLE_REPOSITORY.store(prediction);
         int points = pointsForUser();
@@ -135,7 +138,7 @@ public class AcceptanceTest {
     public void groupScoreForFirstTwoTeamsIsTwoIfOrderedIncorrectlyCorrect(){
 
         List<String> userPrediction = asList( argentina,brazil, germany, australia);
-        TablePrediction prediction = new TablePrediction(USER_EMAIL, groupA.groupName, USER_ID,userPrediction);
+        TablePrediction prediction = new TablePrediction(groupA.groupName, USER_ID,userPrediction);
 
         TABLE_REPOSITORY.store(prediction);
         int points = pointsForUser();
@@ -147,7 +150,7 @@ public class AcceptanceTest {
     public void groupScoreAddsZeroZeroIfCompletelyWrong(){
 
         List<String> userPrediction = asList( germany, australia, argentina,brazil);
-        TablePrediction prediction = new TablePrediction(USER_EMAIL, groupA.groupName, USER_ID, userPrediction);
+        TablePrediction prediction = new TablePrediction(groupA.groupName, USER_ID, userPrediction);
 
         TABLE_REPOSITORY.store(prediction);
         int points = pointsForUser();
@@ -160,7 +163,7 @@ public class AcceptanceTest {
     public void totalScoreForGamesAndTableShouldBeSixteen(){
 
         List<String> userPrediction = asList(brazil, argentina, australia, germany);
-        TablePrediction prediction = new TablePrediction(USER_EMAIL, groupA.groupName, USER_ID, userPrediction);
+        TablePrediction prediction = new TablePrediction(groupA.groupName, USER_ID, userPrediction);
         TABLE_REPOSITORY.store(prediction);
         int points = pointsForUser();
         assertThat(points, is(16));
@@ -170,14 +173,26 @@ public class AcceptanceTest {
     public void totalScoreCalculationHandlesEmptyActualGroupPositions(){
 
         List<String> userPrediction = asList(brazil, argentina, australia, germany);
-        TablePrediction prediction = new TablePrediction(USER_EMAIL, groupA.groupName, USER_ID,userPrediction);
+        TablePrediction prediction = new TablePrediction(groupA.groupName, USER_ID,userPrediction);
         TABLE_REPOSITORY.store(prediction);
         List<String> userPrediction2 = asList("4", "3", "2", "1");
 
-        prediction = new TablePrediction(USER_EMAIL, "GroupB", "", userPrediction2);
+        prediction = new TablePrediction("GroupB", "", userPrediction2);
         TABLE_REPOSITORY.store(prediction);
         int points = pointsForUser();
         assertThat(points, is(16));
+    }
+
+    @Test
+    public void updateResultreplacesExistingValue(){
+        int originalCount = matchA1.results.size();
+        Result result = new Result(matchA1, 2, 2, USER_ID);
+        List<Result> results = Arrays.asList(result);
+
+        sweepstake.saveResults(results, user);
+        Match fromDb = MATCH_REPOSITORY.read(matchA1.id);
+        assertThat(fromDb.results.size(), is(originalCount));
+        assertThat(fromDb.resultFor(USER_ID).awayGoals, is(2));
     }
 
     public int pointsForUser() {
