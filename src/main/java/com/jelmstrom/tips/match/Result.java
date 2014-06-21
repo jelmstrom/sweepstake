@@ -8,12 +8,23 @@ public class Result {
     public final int homeGoals;
     public final int awayGoals;
     public String userId;
+    public final String promoted;
 
     public Result(Match match, int homeGoals, int awayGoals, String userId) {
         this.match = match;
         this.homeGoals = homeGoals;
         this.awayGoals = awayGoals;
         this.userId = userId;
+        promoted = "";
+        match.add(this);
+    }
+
+    public Result(Match match, int homeGoals, int awayGoals, String userId, String promoted) {
+        this.match = match;
+        this.homeGoals = homeGoals;
+        this.awayGoals = awayGoals;
+        this.userId = userId;
+        this.promoted = promoted;
         match.add(this);
     }
 

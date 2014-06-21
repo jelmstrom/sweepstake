@@ -48,11 +48,11 @@ public class TablePrediction {
     }
 
 
-    private int scoreTable(List<TableEntry> table) {
+    private int scoreTable(List<TableEntry> correctTable) {
 
         int score = 0;
 
-        List<String> correctOrder = table.stream().map(entry -> entry.team).collect(toList());
+        List<String> correctOrder = correctTable.stream().map(entry -> entry.team).collect(toList());
         List<String> userPrediction = this.tablePrediction;
         if (userPrediction.equals(correctOrder)) {
             score = 7;

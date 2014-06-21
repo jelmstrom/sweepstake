@@ -5,6 +5,9 @@ import com.jelmstrom.tips.match.Match;
 import com.jelmstrom.tips.match.Result;
 import org.junit.Test;
 
+import java.util.Date;
+
+import static com.jelmstrom.tips.match.Match.Stage.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -68,6 +71,58 @@ public class ResultTest {
         Result result = new Result(newMatch, 2,1, "");
         assertThat(result.pointsFor("Argentina"), is(0));
     }
+
+
+
+
+    @Test
+    public void pointsForCorrectLast16GameShouldBe7(){
+        Match lsMatch = new Match("a", "b", new Date(), "qf1", LAST_SIXTEEN);
+        lsMatch.setCorrectResult(new Result(lsMatch, 1, 2, "12345", "b"));
+        Result userResult = new Result(lsMatch, 1, 2, "54312", "b");
+        assertThat(userResult.score(), is(7));
+    }
+
+    @Test
+    public void pointsForCorrectQuarterFinalGameShouldBe11(){
+        Match lsMatch = new Match("a", "b", new Date(), "qf1", QUARTER_FINAL);
+        lsMatch.setCorrectResult(new Result(lsMatch, 1, 2, "12345","b"));
+        Result userResult = new Result(lsMatch, 1, 2, "54312", "b");
+        assertThat(userResult.score(), is(11));
+    }
+
+    @Test
+    public void pointsForCorrectWinnerInQuarterFinalShouldBe8(){
+        Match lsMatch = new Match("a", "b", new Date(), "qf1", QUARTER_FINAL);
+        lsMatch.setCorrectResult(new Result(lsMatch, 1, 1, "12345","a"));
+        Result userResult = new Result(lsMatch, 2, 0, "54312", "a");
+        assertThat(userResult.score(), is(8));
+    }
+
+    @Test
+    public void pointsForCorrectWinnerInSemiFinalShouldBe16(){
+        Match lsMatch = new Match("a", "b", new Date(), "qf1", SEMI_FINAL);
+        lsMatch.setCorrectResult(new Result(lsMatch, 1, 1, "12345","a"));
+        Result userResult = new Result(lsMatch, 2, 0, "54312", "a");
+        assertThat(userResult.score(), is(16));
+    }
+
+    @Test
+    public void pointsForCorrectSemiFinalShouldBe19(){
+        Match lsMatch = new Match("a", "b", new Date(), "qf1", SEMI_FINAL);
+        lsMatch.setCorrectResult(new Result(lsMatch, 2, 0, "12345","a"));
+        Result userResult = new Result(lsMatch, 2, 0, "54312", "a");
+        assertThat(userResult.score(), is(19));
+    }
+
+    @Test
+    public void pointsForCorrectFinalShouldBe32(){
+        Match lsMatch = new Match("a", "b", new Date(), "qf1", FINAL);
+        lsMatch.setCorrectResult(new Result(lsMatch, 0, 0, "12345","a"));
+        Result userResult = new Result(lsMatch, 2, 1, "54312", "a");
+        assertThat(userResult.score(), is(32));
+    }
+
 
 
 }

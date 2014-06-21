@@ -1,8 +1,11 @@
 package com.jelmstrom.tips.table;
 
+import com.jelmstrom.tips.match.Match;
 import com.jelmstrom.tips.match.Result;
 
 import java.util.List;
+
+import static com.jelmstrom.tips.match.Match.Stage.GROUP;
 
 public class TableEntry implements Comparable<TableEntry>{
 

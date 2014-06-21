@@ -12,6 +12,7 @@ import com.jelmstrom.tips.user.User;
 import com.jelmstrom.tips.user.UserRepository;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import static com.jelmstrom.tips.match.Match.Stage.*;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -44,13 +46,16 @@ public class AcceptanceTest {
     private Match matchA1;
     private Date matchStart = new Date();
     private User user;
+    private User playoffUser;
     private Result resultA1;
 
     @Before
     public void setup(){
         GROUP_REPOSITORY.store(groupA);
         ADMIN_ID = USER_REPOSITORY.store(new User("adminöö", ADMIN_EMAIL, true, "")).id;
-        user = USER_REPOSITORY.store(new User("useråö", USER_EMAIL, false, ""));
+        user = USER_REPOSITORY.store(new User("useråö", USER_EMAIL, false, "3213ou1+297319u"));
+        playoffUser = USER_REPOSITORY.store(new User("playoff", "aaaaaaa", false, "1231243179287"));
+
         USER_ID = user.id;
 
 
@@ -63,6 +68,11 @@ public class AcceptanceTest {
         matches.add(new Match(germany, argentina, matchStart, "A5"));
         matches.add(new Match(australia, argentina, matchStart, "A6"));
 
+        matches.add(new Match(australia, germany, matchStart, "LS1", Match.Stage.LAST_SIXTEEN));
+        matches.add(new Match(australia, germany, matchStart, "QF1", Match.Stage.QUARTER_FINAL));
+        matches.add(new Match(australia, germany, matchStart, "SF1", Match.Stage.SEMI_FINAL));
+        matches.add(new Match(australia, germany, matchStart, "F", Match.Stage.FINAL));
+
         resultA1 = new Result(matches.get(0), 2, 0, USER_ID);
         new Result(matches.get(1), 2, 0, USER_ID);
         new Result(matches.get(2), 2, 0, USER_ID);
@@ -71,6 +81,12 @@ public class AcceptanceTest {
         new Result(matches.get(4), 0, 0, USER_ID);
         new Result(matches.get(5), 1, 5, USER_ID);
 
+        new Result(matches.get(6), 1, 1, playoffUser.id, argentina); // 1 + 4 =  5
+        new Result(matches.get(7), 1, 2, playoffUser.id, germany); // 1+1+8 = 10
+        new Result(matches.get(8), 2, 0, playoffUser.id, argentina); //  = 0
+        new Result(matches.get(9), 1, 5, playoffUser.id, argentina); // 0+0+32 = 32
+                                                                       // => 47
+
 
 
         matches.get(0).setCorrectResult(new Result(matches.get(0), 2, 1, ADMIN_ID));
@@ -78,8 +94,14 @@ public class AcceptanceTest {
         matches.get(2).setCorrectResult(new Result(matches.get(2), 0, 0, ADMIN_ID));
         matches.get(3).setCorrectResult(new Result(matches.get(3), 1, 3, ADMIN_ID));
         matches.get(4).setCorrectResult(new Result(matches.get(4), 0, 1, ADMIN_ID));
-
         matches.get(5).setCorrectResult(new Result(matches.get(5), 1, 2, ADMIN_ID));
+
+        matches.get(6).setCorrectResult(new Result(matches.get(6), 2, 2, ADMIN_ID, argentina));
+        matches.get(7).setCorrectResult(new Result(matches.get(7), 0, 2, ADMIN_ID, germany));
+        matches.get(8).setCorrectResult(new Result(matches.get(8), 1, 2, ADMIN_ID, germany));
+        matches.get(9).setCorrectResult(new Result(matches.get(9), 3, 1, ADMIN_ID, argentina));
+
+
 
         MATCH_REPOSITORY.store(matches);
 
@@ -107,9 +129,15 @@ public class AcceptanceTest {
     }
 
     @Test
-    public void pointsForUserShouldBeCalculatedBasedOnAdminResults(){
-        int points = pointsForUser();
+    public void pointsForUserShouldBeNine(){
+        int points = pointsForUser(user);
         assertThat(points, is(9));
+    }
+
+    @Test
+    public void pointsForPLayoffUserShouldBe47(){
+        int points = pointsForUser(playoffUser);
+        assertThat(points, is(47));
     }
 
     @Test
@@ -118,9 +146,11 @@ public class AcceptanceTest {
         List<String> userPrediction = asList(brazil, argentina, australia, germany);
         TablePrediction prediction = new TablePrediction(groupA.groupName, USER_ID, userPrediction);
         TABLE_REPOSITORY.store(prediction);
-        int points = pointsForUser();
+        int points = pointsForUser(user);
         assertThat(points, is(7+9));
     }
+
+
 
     @Test
     public void groupScoreForFirstTwoTeamsIsFourIfCompletelyCorrect(){
@@ -129,7 +159,7 @@ public class AcceptanceTest {
         TablePrediction prediction = new TablePrediction(groupA.groupName, USER_ID,userPrediction);
 
         TABLE_REPOSITORY.store(prediction);
-        int points = pointsForUser();
+        int points = pointsForUser(user);
         assertThat(points, is(4+9));
 
     }
@@ -141,7 +171,7 @@ public class AcceptanceTest {
         TablePrediction prediction = new TablePrediction(groupA.groupName, USER_ID,userPrediction);
 
         TABLE_REPOSITORY.store(prediction);
-        int points = pointsForUser();
+        int points = pointsForUser(user);
         assertThat(points, is(2+9));
 
     }
@@ -153,7 +183,7 @@ public class AcceptanceTest {
         TablePrediction prediction = new TablePrediction(groupA.groupName, USER_ID, userPrediction);
 
         TABLE_REPOSITORY.store(prediction);
-        int points = pointsForUser();
+        int points = pointsForUser(user);
         assertThat(points, is(9));
 
     }
@@ -165,7 +195,7 @@ public class AcceptanceTest {
         List<String> userPrediction = asList(brazil, argentina, australia, germany);
         TablePrediction prediction = new TablePrediction(groupA.groupName, USER_ID, userPrediction);
         TABLE_REPOSITORY.store(prediction);
-        int points = pointsForUser();
+        int points = pointsForUser(user);
         assertThat(points, is(16));
     }
 
@@ -179,7 +209,7 @@ public class AcceptanceTest {
 
         prediction = new TablePrediction("GroupB", "", userPrediction2);
         TABLE_REPOSITORY.store(prediction);
-        int points = pointsForUser();
+        int points = pointsForUser(user);
         assertThat(points, is(16));
     }
 
@@ -195,8 +225,8 @@ public class AcceptanceTest {
         assertThat(fromDb.resultFor(USER_ID).awayGoals, is(2));
     }
 
-    public int pointsForUser() {
-        return sweepstake.fasterLeaderboard().stream().filter(entry -> entry.user.id.equals(USER_ID)).findFirst().get().points;
+    public int pointsForUser(User user) {
+        return sweepstake.fasterLeaderboard().stream().filter(entry -> entry.user.id.equals(user.id)).findFirst().get().points;
     }
 
 }

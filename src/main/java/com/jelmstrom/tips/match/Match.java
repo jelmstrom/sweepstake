@@ -13,11 +13,20 @@ public class Match implements Comparable<Match>{
     public final String homeTeam;
     public final String awayTeam;
     public final Date matchStart;
+    public final Stage stage;
     @JsonManagedReference
     public final HashSet<Result> results;
     public final String id;
     private Result correctResult;
 
+
+    public enum Stage {
+        GROUP(0), LAST_SIXTEEN(4), QUARTER_FINAL(8), SEMI_FINAL(16), FINAL(32);
+        public final int factor;
+        Stage(int factor) {
+            this.factor = factor;
+        }
+    }
 
 
     public Match(String homeTeam, String awayTeam, Date matchStart, String id) {
@@ -25,6 +34,16 @@ public class Match implements Comparable<Match>{
         this.awayTeam = awayTeam;
         this.matchStart = matchStart;
         this.id = id;
+        this.stage = Stage.GROUP;
+        results = new HashSet<>();
+    }
+
+    public Match(String homeTeam, String awayTeam, Date matchStart, String id, Stage stage) {
+        this.homeTeam = homeTeam;
+        this.awayTeam = awayTeam;
+        this.matchStart = matchStart;
+        this.id = id;
+        this.stage = stage;
         results = new HashSet<>();
     }
 
@@ -74,6 +93,11 @@ public class Match implements Comparable<Match>{
         }
         if (userResult.awayGoals == correctResult.awayGoals) {
             points++;
+        }
+
+        if(!userResult.promoted.equals("") &&
+                userResult.promoted.equals(correctResult.promoted)){
+            points = points+ stage.factor;
         }
 
         return points;

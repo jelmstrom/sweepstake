@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
+
+import static com.jelmstrom.tips.match.Match.Stage.GROUP;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
@@ -75,7 +77,7 @@ public class Sweepstake {
                 .collect(toMap(result -> result.userId, result -> result.score(), Math::addExact));
 
         List<TablePrediction> tablePredictions = tableRepository.read();
-        List<Result> adminResults = matches.stream().map(match -> match.resultFor(adminUser.id)).filter(Objects::nonNull).collect(toList());
+        List<Result> adminResults = matches.stream().filter(match -> match.stage == GROUP).map(match -> match.getCorrectResult()).filter(Objects::nonNull).collect(toList());
 
         Map<String, Integer> tables = tablePredictions.stream()
                 .collect(toMap(pred -> pred.userId, pred -> pred.score(adminResults), Math::addExact));
@@ -111,17 +113,11 @@ public class Sweepstake {
 
     @RequestMapping(value = "/table/{groupName}")
     public List<TableEntry> currentStandingsForGroup(@PathVariable String groupName) {
-        User admin = userRepository.findAdminUser();
-        List<Result> results = resultsFor(admin.id);
+
+        List<Result> adminResults = getMatches().stream().filter(match -> match.stage == GROUP).map(match -> match.getCorrectResult()).filter(Objects::nonNull).collect(toList());
         Group group = new GroupRepository(context).read(groupName);
-        return group.teams.stream().map(team -> TableEntry.recordForTeam(team, results)).sorted().collect(toList());
+        return group.teams.stream().map(team -> TableEntry.recordForTeam(team, adminResults)).sorted().collect(toList());
     }
-
-
-    private List<Result> resultsFor(String userEmail) {
-        return matchRepository.read().stream().map(match -> match.resultFor(userEmail)).filter(Objects::nonNull).collect(toList());
-    }
-
 
     public User getUser(String userId) {
         return userRepository.read(userId);
