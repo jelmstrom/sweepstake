@@ -2,6 +2,8 @@ package com.jelmstrom.tips.match;
 
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.jelmstrom.tips.configuration.Config;
+import com.jelmstrom.tips.user.User;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -105,6 +107,14 @@ public class Match implements Comparable<Match>{
     @Override
     public int compareTo(Match o) {
         return matchStart.compareTo(o.matchStart);
+    }
+
+    public boolean editable(User user){
+        if(user.admin){
+            return true;
+        } else {
+            return new Date().before(Config.startDate);
+        }
     }
 
 }

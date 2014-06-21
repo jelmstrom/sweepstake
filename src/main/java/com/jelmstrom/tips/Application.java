@@ -1,5 +1,7 @@
 package com.jelmstrom.tips;
 
+import com.jelmstrom.tips.configuration.Config;
+import com.jelmstrom.tips.configuration.ConfigurationLoader;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory;
@@ -21,7 +23,7 @@ public class Application {
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
-        ConfigurationLoader.initialiseData(SweepstakeController.context);
+        ConfigurationLoader.initialiseData(Config.context);
 
     }
 

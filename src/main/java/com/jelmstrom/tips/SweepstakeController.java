@@ -1,12 +1,12 @@
 package com.jelmstrom.tips;
 
 
+import com.jelmstrom.tips.configuration.Config;
 import com.jelmstrom.tips.match.Match;
 import com.jelmstrom.tips.match.Result;
 import com.jelmstrom.tips.table.TableEntry;
 import com.jelmstrom.tips.table.TablePrediction;
 import com.jelmstrom.tips.user.User;
-import com.jelmstrom.tips.user.UserRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,13 +25,12 @@ import static java.util.stream.Collectors.toList;
 @RequestMapping(value = "/")
 public class SweepstakeController {
 
-    public static final String context = "vmtips";
     public static final String SESSION_USER = "activeUser";
     public static final String USER = "user";
     private final Sweepstake sweepstake;
 
     public SweepstakeController() {
-        sweepstake = new Sweepstake(context);
+        sweepstake = new Sweepstake(Config.context);
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -40,6 +39,14 @@ public class SweepstakeController {
         uiModel.addAttribute("leaderBoard", sweepstake.fasterLeaderboard());
         setSessionUsers(request, uiModel);
         return "index";
+    }
+
+
+    @RequestMapping(value = "/playoff",  method = RequestMethod.GET)
+    public String playoff(Model uiModel, HttpServletRequest request) {
+        setSessionUsers(request, uiModel);
+        uiModel.addAttribute("playoff", Arrays.asList(new Match("a", "a", null, ""), new Match("b", "b", null, "")));
+        return "playoff";
     }
 
     @RequestMapping(value = "/prediction/{groupLetter}", method = RequestMethod.POST)
@@ -119,7 +126,7 @@ public class SweepstakeController {
         uiModel.addAttribute("currentStandings", tableEntries);
         uiModel.addAttribute("teams", tableEntries.stream().map(entry -> entry.team).collect(toList()));
         uiModel.addAttribute("maybe", maybe.orElse(new TablePrediction("", "", Collections.emptyList())));
-        uiModel.addAttribute("prediction", maybe.isPresent() ? maybe.get().tablePrediction : Arrays.asList("", "", "", ""));
+        uiModel.addAttribute("prediction", maybe.isPresent() ? maybe.get() : new TablePrediction("", "", Arrays.asList("", "", "", "")));
         return "group";
     }
 
@@ -230,11 +237,11 @@ public class SweepstakeController {
 
         System.out.println(String.format("User : %s", user.email));
         boolean editable = (user.isValid() && user.equals(sessionUser)) || sessionUser.admin;
-        System.out.println("can edit : " + user.isValid() + " " + user.equals(sessionUser) +  " " + sessionUser.admin );
         model.addAttribute("canEdit", editable);
         model.addAttribute(USER, user);
         model.addAttribute(SESSION_USER, sessionUser);
     }
+
 
     private User sessionUser(HttpServletRequest request) {
         String currentSessionUser = sessionUserId(request);

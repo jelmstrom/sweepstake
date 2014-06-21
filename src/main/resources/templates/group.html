@@ -79,25 +79,25 @@
                         <td width="5%">1</td>
 
                         <td width="95%">
-                            <input type="text" id="prediction1" name="prediction1" th:value="${prediction.get(0)}"/>
+                            <input type="text" id="prediction1" name="prediction1" th:value="${prediction.tablePrediction.get(0)}"/>
                         </td>
                     </tr>
                     <tr>
                         <td width="5%"> 2</td>
                         <td width="95%">
-                            <input type="text" id="prediction2" name="prediction2" th:value="${prediction.get(1)}"/>
+                            <input type="text" id="prediction2" name="prediction2" th:value="${prediction.tablePrediction.get(1)}"/>
                         </td>
                     </tr>
                     <tr>
                         <td width="5%">3</td>
                         <td width="95%">
-                            <input type="text" id="prediction3" name="prediction3" th:value="${prediction.get(2)}"/>
+                            <input type="text" id="prediction3" name="prediction3" th:value="${prediction.tablePrediction.get(2)}"/>
                         </td>
                     </tr>
                     <tr>
                         <td width="5%">4</td>
                         <td width="95%">
-                            <input type="text" id="prediction4" name="prediction4" th:value="${prediction.get(3)}"/>
+                            <input type="text" id="prediction4" name="prediction4" th:value="${prediction.tablePrediction.get(3)}"/>
                         </td>
                     </tr>
                     <tr>
@@ -105,7 +105,7 @@
 
                         </td>
                         <td align="left" width="95%" colspan="2">
-                            <button type="submit" class="btn btn-sm btn-success">Submit</button>
+                            <button type="submit" th:if="${prediction.editable(activeUser)}" class="btn btn-sm btn-success">Submit</button>
                         </td>
                     </tr>
                 </table>
@@ -135,25 +135,35 @@
             <td th:text="${match.homeTeam}">home</td>
             <td>-</td>
             <td th:text="${match.awayTeam}">Away</td>
-            <td >
-                <input type="text" size="2"
-                       id="${match.id}_home"
-                       th:value="${match.homeGoalsAsStringFor(activeUser.id)}"
-                       name=""
-                       th:name="${match.id+'_h'}"
-                       th:if="${canEdit}"/>
-            </td>
-            <td>
-                <label th:if="${canEdit}">-</label>
-            </td>
-            <td >
-                <input type="text" size="2"
-                       id="${match.id}_away"
-                       name="away"
-                       th:value="${match.awayGoalsAsStringFor(activeUser.id)}"
-                       th:name="${match.id+'_a'}"
-                       th:if="${canEdit}"/>
-            </td>
+            <th:block th:if="${match.editable(activeUser)}">
+                <td align="right">
+                    <input type="text" size="2"
+                           id="${match.id}_home"
+                           th:value="${match.homeGoalsAsStringFor(activeUser.id)}"
+                           name=""
+                           th:name="${match.id+'_h'}"
+                           th:if="${match.editable(activeUser)}"/>
+                </td>
+                <td><label>-</label></td>
+                <td>
+                    <input type="text" size="2"
+                           id="${match.id}_away"
+                           name="away"
+                           th:value="${match.awayGoalsAsStringFor(activeUser.id)}"
+                           th:name="${match.id+'_a'}"
+                           th:if="${match.editable(activeUser)}"/>
+                </td>
+            </th:block>
+
+            <th:block th:if="not ${match.editable(activeUser)}">
+                <td align="right">
+                    <label th:text="${match.homeGoalsAsStringFor(activeUser.id)}">&nbsp;</label>
+                </td>
+                <td><label>-</label></td>
+                <td>
+                    <label th:text="${match.awayGoalsAsStringFor(activeUser.id)}">&nbsp;</label>
+                </td>
+            </th:block>
 
             <td th:if="${activeUser != null}">
                 <label th:if="${match.hasResult()}"

@@ -1,7 +1,10 @@
 package com.jelmstrom.tips.table;
 
+import com.jelmstrom.tips.configuration.Config;
 import com.jelmstrom.tips.match.Result;
+import com.jelmstrom.tips.user.User;
 
+import java.util.Date;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -78,6 +81,14 @@ public class TablePrediction {
         }
         return score;
     }
+    public boolean editable(User user){
+        if(user.admin){
+            return true;
+        } else {
+            return new Date().before(Config.startDate);
+        }
+    }
+
     @Override
     public int hashCode() {
         int result = userId != null ? userId.hashCode() : 0;
