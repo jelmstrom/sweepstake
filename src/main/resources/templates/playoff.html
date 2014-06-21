@@ -35,5 +35,273 @@
     <!--/.nav-collapse -->
 </div>
 playoff...
+<form action="/playoff" method="post">
+<table>
+    <thead>
+    <th width="24%">Last sixteen</th>
+    <th width="1%">&nbsp;</th>
+    <th width="24%">Quarter Finals</th>
+    <th width="1%">&nbsp;</th>
+    <th width="24%">Semi Finals</th>
+    <th width="1%">&nbsp;</th>
+    <th width="25%">Final</th>
+    </thead>
+    <tbody>
+        <tr>
+            <td width="24%"> <!-- 16 -->
+                <table class="table table-striped" width="100%">
+                    <thead>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                    </thead>
+                    <tbody>
+                        <th:block th:each="match : ${last16}">
+                            <tr>
+                                <td colspan="3">
+                                    <label th:text="${#dates.format(match.matchStart,'dd MMMM yyyy HH:mm')}">
+                                        start</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="5%"> <input type="checkbox" th:name="${match.id +'_h_win'}"/> </td>
+                                <td width="90%">
+                                    <label th:if="${not activeUser.admin}" th:text="${match.homeTeam}"></label>
+                                    <input type="text"
+                                           th:value="${match.homeTeam}"
+                                           th:id="${match.id +'homeTeam'}"
+                                           th:name="${match.id +'homeTeam'}"
+                                           th:if="${activeUser.admin}"/>
+
+                                </td>
+                                <td width="5%">
+                                    <input type="text" size="2" maxlength="2"
+                                           th:id="${match.id + '_h'}"
+                                           name="away"
+                                           th:value="${match.homeGoalsAsStringFor(activeUser.id)}"
+                                           th:name="${match.id+'_h'}"
+                                           th:if="${match.editable(activeUser)}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td> <input type="checkbox" th:name="${match.id + '_a_win'}"/> </td>
+                                <td>
+                                    <label th:if="${not activeUser.admin}" th:text="${match.awayTeam}"></label>
+                                    <input type="text"
+                                           th:value="${match.awayTeam}"
+                                           th:id="${match.id +'awayTeam'}"
+                                           th:name="${match.id +'awayTeam'}"
+                                           th:if="${activeUser.admin}"/>
+                                </td>
+                                <td>
+                                    <input type="text" size="2" maxlength="2"
+                                           th:id="${match.id+'_a'}"
+                                           name="away"
+                                           th:value="${match.homeGoalsAsStringFor(activeUser.id)}"
+                                           th:name="${match.id+'_a'}"
+                                           th:if="${match.editable(activeUser)}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="3">&nbsp;</td>
+                            </tr>
+                        </th:block>
+                    </tbody>
+                </table>
+            </td>
+            <td>&nbsp;</td>
+            <td> <!-- QF -->
+                <table class="table table-striped" width="100%">
+                    <thead>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    </thead>
+                    <tbody>
+                    <th:block th:each="match : ${quarterFinal}">
+                        <tr>
+                            <td colspan="3">
+                                <label th:text="${#dates.format(match.matchStart,'dd MMMM yyyy HH:mm')}">
+                                    start</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="5%"> <input type="checkbox" th:name="${match.id +'_h_win'}"/> </td>
+                            <td width="90%">
+                                <label th:if="${not activeUser.admin}" th:text="${match.homeTeam}"></label>
+                                <input type="text"
+                                       th:value="${match.homeTeam}"
+                                       th:id="${match.id +'homeTeam'}"
+                                       th:name="${match.id +'homeTeam'}"
+                                       th:if="${activeUser.admin}"/>
+
+                            </td>
+                            <td width="5%">
+                                <input type="text" size="2" maxlength="2"
+                                       th:id="${match.id + '_h'}"
+                                       name="away"
+                                       th:value="${match.homeGoalsAsStringFor(activeUser.id)}"
+                                       th:name="${match.id+'_h'}"
+                                       th:if="${match.editable(activeUser)}"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td> <input type="checkbox" th:name="${match.id + '_a_win'}"/> </td>
+                            <td>
+                                <label th:if="${not activeUser.admin}" th:text="${match.awayTeam}"></label>
+                                <input type="text"
+                                       th:value="${match.awayTeam}"
+                                       th:id="${match.id +'awayTeam'}"
+                                       th:name="${match.id +'awayTeam'}"
+                                       th:if="${activeUser.admin}"/>
+                            </td>
+                            <td>
+                                <input type="text" size="2" maxlength="2"
+                                       th:id="${match.id+'_a'}"
+                                       name="away"
+                                       th:value="${match.homeGoalsAsStringFor(activeUser.id)}"
+                                       th:name="${match.id+'_a'}"
+                                       th:if="${match.editable(activeUser)}"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">&nbsp;</td>
+                        </tr>
+                    </th:block>
+                    </tbody>
+                </table>
+            </td>
+            <td>&nbsp;</td>
+            <td> <!-- SF -->
+                <table class="table table-striped" width="100%">
+                    <thead>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    </thead>
+                    <tbody>
+                    <th:block th:each="match : ${semiFinal}">
+                        <tr>
+                            <td colspan="3">
+                                <label th:text="${#dates.format(match.matchStart,'dd MMMM yyyy HH:mm')}">
+                                    start</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="5%"> <input type="checkbox" th:name="${match.id +'_h_win'}"/> </td>
+                            <td width="90%">
+                                <label th:if="${not activeUser.admin}" th:text="${match.homeTeam}"></label>
+                                <input type="text"
+                                       th:value="${match.homeTeam}"
+                                       th:id="${match.id +'homeTeam'}"
+                                       th:name="${match.id +'homeTeam'}"
+                                       th:if="${activeUser.admin}"/>
+
+                            </td>
+                            <td width="5%">
+                                <input type="text" size="2" maxlength="2"
+                                       th:id="${match.id + '_h'}"
+                                       name="away"
+                                       th:value="${match.homeGoalsAsStringFor(activeUser.id)}"
+                                       th:name="${match.id+'_h'}"
+                                       th:if="${match.editable(activeUser)}"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td> <input type="checkbox" th:name="${match.id + '_a_win'}"/> </td>
+                            <td>
+                                <label th:if="${not activeUser.admin}" th:text="${match.awayTeam}"></label>
+                                <input type="text"
+                                       th:value="${match.awayTeam}"
+                                       th:id="${match.id +'awayTeam'}"
+                                       th:name="${match.id +'awayTeam'}"
+                                       th:if="${activeUser.admin}"/>
+                            </td>
+                            <td>
+                                <input type="text" size="2" maxlength="2"
+                                       th:id="${match.id+'_a'}"
+                                       name="away"
+                                       th:value="${match.homeGoalsAsStringFor(activeUser.id)}"
+                                       th:name="${match.id+'_a'}"
+                                       th:if="${match.editable(activeUser)}"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">&nbsp;</td>
+                        </tr>
+                    </th:block>
+                    </tbody>
+                </table>
+            </td>
+            <td>&nbsp;</td>
+            <td> <!-- F -->
+                <table class="table table-striped" width="100%">
+                    <thead>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    </thead>
+                    <tbody>
+                    <th:block th:each="match : ${final}">
+                        <tr>
+                            <td colspan="3">
+                                <label th:text="${#dates.format(match.matchStart,'dd MMMM yyyy HH:mm')}">
+                                    start</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="5%"> <input type="checkbox" th:name="${match.id +'_h_win'}"/> </td>
+                            <td width="90%">
+                                <label th:if="${not activeUser.admin}" th:text="${match.homeTeam}"></label>
+                                <input type="text"
+                                       th:value="${match.homeTeam}"
+                                       th:id="${match.id +'homeTeam'}"
+                                       th:name="${match.id +'homeTeam'}"
+                                       th:if="${activeUser.admin}"/>
+
+                            </td>
+                            <td width="5%">
+                                <input type="text" size="2" maxlength="2"
+                                       th:id="${match.id + '_h'}"
+                                       name="away"
+                                       th:value="${match.homeGoalsAsStringFor(activeUser.id)}"
+                                       th:name="${match.id+'_h'}"
+                                       th:if="${match.editable(activeUser)}"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td> <input type="checkbox" th:name="${match.id + '_a_win'}"/> </td>
+                            <td>
+                                <label th:if="${not activeUser.admin}" th:text="${match.awayTeam}"></label>
+                                <input type="text"
+                                       th:value="${match.awayTeam}"
+                                       th:id="${match.id +'awayTeam'}"
+                                       th:name="${match.id +'awayTeam'}"
+                                       th:if="${activeUser.admin}"/>
+                            </td>
+                            <td>
+                                <input type="text" size="2" maxlength="2"
+                                       th:id="${match.id+'_a'}"
+                                       name="away"
+                                       th:value="${match.homeGoalsAsStringFor(activeUser.id)}"
+                                       th:name="${match.id+'_a'}"
+                                       th:if="${match.editable(activeUser)}"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">&nbsp;</td>
+                        </tr>
+                    </th:block>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr th:if="${canEdit}">
+            <td colspan="3"></td>
+            <td colspan="4"><button type="submit" name="action" value="update">Update</button></td>
+        </tr>
+    </tbody>
+</table>
+</form>
 </body>
 </html>

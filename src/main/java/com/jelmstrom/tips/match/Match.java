@@ -2,12 +2,14 @@ package com.jelmstrom.tips.match;
 
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.jelmstrom.tips.configuration.Config;
 import com.jelmstrom.tips.user.User;
 
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Optional;
+
+import static com.jelmstrom.tips.configuration.Config.startDate;
+import static com.jelmstrom.tips.match.Match.Stage.GROUP;
 
 public class Match implements Comparable<Match>{
     public final String homeTeam;
@@ -34,7 +36,7 @@ public class Match implements Comparable<Match>{
         this.awayTeam = awayTeam;
         this.matchStart = matchStart;
         this.id = id;
-        this.stage = Stage.GROUP;
+        this.stage = GROUP;
         results = new HashSet<>();
     }
 
@@ -128,16 +130,21 @@ public class Match implements Comparable<Match>{
         return result==null?"":Integer.toString(result.awayGoals);
     }
 
+    @SuppressWarnings("NullableProblems")
     @Override
     public int compareTo(Match o) {
-        return matchStart.compareTo(o.matchStart);
+       return matchStart.compareTo(o.matchStart);
     }
 
+    @SuppressWarnings("UnusedDeclaration")
     public boolean editable(User user){
         if(user.admin){
             return true;
+        } else if(user.isValid()){
+            Date date = new Date();
+            return stage==GROUP?date.before(startDate) : date.before(matchStart);
         } else {
-            return new Date().before(Config.startDate);
+            return false;
         }
     }
 

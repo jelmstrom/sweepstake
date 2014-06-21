@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static com.jelmstrom.tips.match.Match.Stage.*;
 import static java.util.stream.Collectors.toList;
 
 @SuppressWarnings("UnusedDeclaration")
@@ -45,8 +46,20 @@ public class SweepstakeController {
     @RequestMapping(value = "/playoff",  method = RequestMethod.GET)
     public String playoff(Model uiModel, HttpServletRequest request) {
         setSessionUsers(request, uiModel);
-        uiModel.addAttribute("playoff", Arrays.asList(new Match("a", "a", null, ""), new Match("b", "b", null, "")));
+        List<Match> allMatches = sweepstake.getMatches();
+        List<Match> last16 = allMatches.stream().filter(match-> match.stage == LAST_SIXTEEN).sorted().collect(toList());
+        List<Match> quarterFinal = allMatches.stream().filter(match-> match.stage == QUARTER_FINAL).sorted().collect(toList());
+        List<Match> semiFinal = allMatches.stream().filter(match-> match.stage == SEMI_FINAL).sorted().collect(toList());
+        List<Match> finals = allMatches.stream().filter(match-> match.stage == FINAL).sorted().collect(toList());
+        uiModel.addAttribute("last16", last16);
+        uiModel.addAttribute("quarterFinal", quarterFinal);
+        uiModel.addAttribute("semiFinal", semiFinal);
+        uiModel.addAttribute("final", finals);
         return "playoff";
+    }
+    @RequestMapping(value = "/playoff",  method = RequestMethod.POST)
+    public String savePlayoff(Model uiModel, HttpServletRequest request) {
+        return playoff(uiModel, request);
     }
 
     @RequestMapping(value = "/prediction/{groupLetter}", method = RequestMethod.POST)

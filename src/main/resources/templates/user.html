@@ -68,10 +68,6 @@
 
                         </td>
                     </tr>
-                    <tr th:if="${not (activeUser == null)}">
-                        <td><label>Admin user</label></td>
-                        <td><input type="checkbox" name="isAdmin" th:if="${activeUser.admin}" th:checked="${user.admin}"/></td>
-                    </tr>
                     <tr th:if="${canEdit}">
                         <td></td>
                         <td><button type="submit" name="action" value="update">Update</button></td>

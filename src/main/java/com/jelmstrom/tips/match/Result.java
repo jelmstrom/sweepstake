@@ -24,7 +24,7 @@ public class Result {
         this.homeGoals = homeGoals;
         this.awayGoals = awayGoals;
         this.userId = userId;
-        this.promoted = promoted;
+        this.promoted = null==promoted?"":promoted;
         match.add(this);
     }
 
