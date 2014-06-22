@@ -3,6 +3,7 @@ package com.jelmstrom.tips.match;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.jelmstrom.tips.user.User;
+import org.springframework.util.ObjectUtils;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -20,6 +21,7 @@ public class Match implements Comparable<Match>{
     public final HashSet<Result> results;
     public final String id;
     private Result correctResult;
+
 
 
     public enum Stage {
@@ -59,7 +61,7 @@ public class Match implements Comparable<Match>{
         if(option.isPresent()){
             return option.get();
         } else {
-            return null;
+            return Result.emptyResult();
         }
     }
 
@@ -70,9 +72,10 @@ public class Match implements Comparable<Match>{
             return this.awayTeam.equals(((Match) other).awayTeam)
                     && this.homeTeam.equals(that.homeTeam)
                     && this.matchStart.equals(that.matchStart)
-                    && this.results.hashCode() == that.results.hashCode()
-                    && this.id.equals(that.id);
-
+                    && this.results.equals(that.results)
+                    && this.id.equals(that.id)
+                    && this.stage.equals(that.stage)
+                    && ObjectUtils.nullSafeEquals(this.correctResult, that.correctResult);
         }
         return false;
     }
@@ -119,17 +122,6 @@ public class Match implements Comparable<Match>{
         return correctResult != null;
     }
 
-    @SuppressWarnings("UnusedDeclaration")
-    public String homeGoalsAsStringFor(String email){
-        Result result =  resultFor(email);
-        return result==null?"":Integer.toString(result.homeGoals);
-    }
-    @SuppressWarnings("UnusedDeclaration")
-    public String awayGoalsAsStringFor(String email){
-        Result result =  resultFor(email);
-        return result==null?"":Integer.toString(result.awayGoals);
-    }
-
     @SuppressWarnings("NullableProblems")
     @Override
     public int compareTo(Match o) {
@@ -146,6 +138,21 @@ public class Match implements Comparable<Match>{
         } else {
             return false;
         }
+    }
+    @Override
+    public String toString() {
+        return "Match{" +
+                "homeTeam='" + homeTeam + '\'' +
+                ", awayTeam='" + awayTeam + '\'' +
+                ", matchStart=" + matchStart +
+                ", stage=" + stage +
+                ", id='" + id + '\'' +
+                ", correctResult=" + (correctResult==null?"null":(correctResult.homeGoals +":" +correctResult.awayGoals))+
+                '}';
+    }
+
+    public boolean isValid() {
+        return !(homeTeam.equals("") || awayTeam.equals("") || startDate == null || stage == null || id.equals("")) ;
     }
 
 }

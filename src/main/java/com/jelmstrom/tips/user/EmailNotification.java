@@ -31,7 +31,7 @@ public class EmailNotification {
                 });
         InternetAddress local = null;
         try {
-            local = new InternetAddress(adminUser.email);
+            local = new InternetAddress("chrilles.vmtips@gmail.com");
         } catch (AddressException e) {
             System.out.println("Failed to create user for FROM address");
         }

@@ -12,7 +12,6 @@ import com.jelmstrom.tips.user.User;
 import com.jelmstrom.tips.user.UserRepository;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -20,7 +19,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import static com.jelmstrom.tips.match.Match.Stage.*;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -42,17 +40,15 @@ public class AcceptanceTest {
     private Group groupA = new Group("GroupA",asList(brazil, germany, argentina, australia));
 
     private Sweepstake sweepstake = new Sweepstake(TEST_REPO);
-    private String ADMIN_ID;
     private Match matchA1;
     private Date matchStart = new Date();
     private User user;
     private User playoffUser;
-    private Result resultA1;
 
     @Before
     public void setup(){
         GROUP_REPOSITORY.store(groupA);
-        ADMIN_ID = USER_REPOSITORY.store(new User("adminöö", ADMIN_EMAIL, true, "")).id;
+        String ADMIN_ID = USER_REPOSITORY.store(new User("adminöö", ADMIN_EMAIL, true, "")).id;
         user = USER_REPOSITORY.store(new User("useråö", USER_EMAIL, false, "3213ou1+297319u"));
         playoffUser = USER_REPOSITORY.store(new User("playoff", "aaaaaaa", false, "1231243179287"));
 
@@ -73,7 +69,7 @@ public class AcceptanceTest {
         matches.add(new Match(australia, germany, matchStart, "SF1", Match.Stage.SEMI_FINAL));
         matches.add(new Match(australia, germany, matchStart, "F", Match.Stage.FINAL));
 
-        resultA1 = new Result(matches.get(0), 2, 0, USER_ID);
+        new Result(matches.get(0), 2, 0, USER_ID);
         new Result(matches.get(1), 2, 0, USER_ID);
         new Result(matches.get(2), 2, 0, USER_ID);
 
@@ -216,8 +212,8 @@ public class AcceptanceTest {
     @Test
     public void updateResultreplacesExistingValue(){
         int originalCount = matchA1.results.size();
-        Result result = new Result(matchA1, 2, 2, USER_ID);
-        List<Result> results = Arrays.asList(result);
+        new Result(matchA1, 2, 2, USER_ID);
+        List<Match> results = Arrays.asList(matchA1);
 
         sweepstake.saveResults(results, user);
         Match fromDb = MATCH_REPOSITORY.read(matchA1.id);

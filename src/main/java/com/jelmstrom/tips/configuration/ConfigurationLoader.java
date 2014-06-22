@@ -189,21 +189,21 @@ public class ConfigurationLoader {
     }
 
     private static void createPlayoffMatches(MatchRepository matchRepository){
-        if(matchRepository.read("1LS").id.isEmpty()){
+        if(matchRepository.read("LS0").id.isEmpty()){
             List<Match> matches = new ArrayList<>();
             try {
                 int index = 0;
-                matches.add(new Match("{A1}", "{B2}", Config.dateFormat.parse("28 06 2014 17:00"),"LS" + (index++), Match.Stage.LAST_SIXTEEN));
-                matches.add(new Match("{C1}", "{D2}", Config.dateFormat.parse("28 06 2014 21:00"),"LS" + (index++), Match.Stage.LAST_SIXTEEN));
+                matches.add(new Match("{A1}", "{B2}", Config.dateFormat.parse("28 06 2014 18:00"),"LS" + (index++), Match.Stage.LAST_SIXTEEN));
+                matches.add(new Match("{C1}", "{D2}", Config.dateFormat.parse("28 06 2014 22:00"),"LS" + (index++), Match.Stage.LAST_SIXTEEN));
 
-                matches.add(new Match("{B1}", "{A2}", Config.dateFormat.parse("29 06 2014 17:00"),"LS" + (index++), Match.Stage.LAST_SIXTEEN));
-                matches.add(new Match("{D1}", "{C2}", Config.dateFormat.parse("29 06 2014 21:00"),"LS" + (index++), Match.Stage.LAST_SIXTEEN));
+                matches.add(new Match("{B1}", "{A2}", Config.dateFormat.parse("29 06 2014 18:00"),"LS" + (index++), Match.Stage.LAST_SIXTEEN));
+                matches.add(new Match("{D1}", "{C2}", Config.dateFormat.parse("29 06 2014 22:00"),"LS" + (index++), Match.Stage.LAST_SIXTEEN));
 
-                matches.add(new Match("{E1}", "{F2}", Config.dateFormat.parse("30 06 2014 17:00"),"LS" + (index++), Match.Stage.LAST_SIXTEEN));
-                matches.add(new Match("{G1}", "{H2}", Config.dateFormat.parse("30 06 2014 21:00"),"LS" + (index++), Match.Stage.LAST_SIXTEEN));
+                matches.add(new Match("{E1}", "{F2}", Config.dateFormat.parse("30 06 2014 18:00"),"LS" + (index++), Match.Stage.LAST_SIXTEEN));
+                matches.add(new Match("{G1}", "{H2}", Config.dateFormat.parse("30 06 2014 22:00"),"LS" + (index++), Match.Stage.LAST_SIXTEEN));
 
-                matches.add(new Match("{F1}", "{E2}", Config.dateFormat.parse("01 07 2014 17:00"),"LS" + (index++), Match.Stage.LAST_SIXTEEN));
-                matches.add(new Match("{H1}", "{G2}", Config.dateFormat.parse("01 07 2014 21:00"),"LS" + (index++), Match.Stage.LAST_SIXTEEN));
+                matches.add(new Match("{F1}", "{E2}", Config.dateFormat.parse("01 07 2014 18:00"),"LS" + (index++), Match.Stage.LAST_SIXTEEN));
+                matches.add(new Match("{H1}", "{G2}", Config.dateFormat.parse("01 07 2014 22:00"),"LS" + (index++), Match.Stage.LAST_SIXTEEN));
 
                 matchRepository.store(matches);
             } catch (ParseException e) {
@@ -212,15 +212,15 @@ public class ConfigurationLoader {
             }
        }
 
-        if(matchRepository.read("1QF").id.isEmpty()){
+        if(matchRepository.read("QF1").id.isEmpty()){
             List<Match> matches = new ArrayList<>();
             try {
                 int index = 0;
-                matches.add(new Match("{LS1}", "{LS2}", Config.dateFormat.parse("04 07 2014 21:00"),"QF" + (index++), Match.Stage.QUARTER_FINAL));
-                matches.add(new Match("{LS5}", "{LS6}", Config.dateFormat.parse("04 06 2014 17:00"),"QF" + (index++), Match.Stage.QUARTER_FINAL));
+                matches.add(new Match("{LS1}", "{LS2}", Config.dateFormat.parse("04 07 2014 22:00"),"QF" + (index++), Match.Stage.QUARTER_FINAL));
+                matches.add(new Match("{LS5}", "{LS6}", Config.dateFormat.parse("04 07 2014 18:00"),"QF" + (index++), Match.Stage.QUARTER_FINAL));
 
-                matches.add(new Match("{LS3}", "{LS4}", Config.dateFormat.parse("05 07 2014 21:00"),"QF" + (index++), Match.Stage.QUARTER_FINAL));
-                matches.add(new Match("{LS7}", "{LS8}", Config.dateFormat.parse("05 07 2014 17:00"),"QF" + (index++), Match.Stage.QUARTER_FINAL));
+                matches.add(new Match("{LS3}", "{LS4}", Config.dateFormat.parse("05 07 2014 22:00"),"QF" + (index++), Match.Stage.QUARTER_FINAL));
+                matches.add(new Match("{LS7}", "{LS8}", Config.dateFormat.parse("05 07 2014 18:00"),"QF" + (index++), Match.Stage.QUARTER_FINAL));
 
                 matchRepository.store(matches);
             } catch (ParseException e) {
@@ -229,14 +229,14 @@ public class ConfigurationLoader {
             }
         }
 
-        if(matchRepository.read("1SF").id.isEmpty()){
+        if(matchRepository.read("SF1").id.isEmpty()){
             List<Match> matches = new ArrayList<>();
             try {
                 int index = 0;
-                matches.add(new Match("{QF1}", "{QF2}", Config.dateFormat.parse("28 06 2014 17:00"),"SF" + (index++), Match.Stage.SEMI_FINAL));
-                matches.add(new Match("{QF3}", "{QF4}", Config.dateFormat.parse("28 06 2014 21:00"),"SF" + (index++), Match.Stage.SEMI_FINAL));
+                matches.add(new Match("{QF1}", "{QF2}", Config.dateFormat.parse("08 07 2014 22:00"),"SF" + (index++), Match.Stage.SEMI_FINAL));
+                matches.add(new Match("{QF3}", "{QF4}", Config.dateFormat.parse("09 07 2014 22:00"),"SF" + (index++), Match.Stage.SEMI_FINAL));
 
-                matches.add(new Match("{SF1}", "{SF2}", Config.dateFormat.parse("30 06 2014 17:00"),"F1", Match.Stage.FINAL));
+                matches.add(new Match("{SF1}", "{SF2}", Config.dateFormat.parse("13 07 2014 21:00"),"FINAL", Match.Stage.FINAL));
 
                 matchRepository.store(matches);
             } catch (ParseException e) {

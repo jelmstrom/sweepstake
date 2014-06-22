@@ -5,12 +5,12 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 public class Result {
     @JsonBackReference
     public final Match match;
-    public final int homeGoals;
-    public final int awayGoals;
+    public final Integer homeGoals;
+    public final Integer awayGoals;
     public String userId;
     public final String promoted;
 
-    public Result(Match match, int homeGoals, int awayGoals, String userId) {
+    public Result(Match match, Integer homeGoals, Integer awayGoals, String userId) {
         this.match = match;
         this.homeGoals = homeGoals;
         this.awayGoals = awayGoals;
@@ -19,7 +19,7 @@ public class Result {
         match.add(this);
     }
 
-    public Result(Match match, int homeGoals, int awayGoals, String userId, String promoted) {
+    public Result(Match match, Integer homeGoals, Integer awayGoals, String userId, String promoted) {
         this.match = match;
         this.homeGoals = homeGoals;
         this.awayGoals = awayGoals;
@@ -30,7 +30,7 @@ public class Result {
 
 
     public static Result emptyResult() {
-        return new Result(new Match("", "", null, ""), 0, 0, "");
+        return new Result(new Match("", "", null, ""), null, null, "");
     }
 
     public int goalsAgainst(String team) {
@@ -83,5 +83,20 @@ public class Result {
 
     public int score() {
         return this.match.scoreFor(this.userId);
+    }
+
+    @Override
+    public String toString() {
+        return "Result{" +
+                "match=" + match.id +
+                ", homeGoals=" + homeGoals +
+                ", awayGoals=" + awayGoals +
+                ", userId='" + userId + '\'' +
+                ", promoted='" + promoted + '\'' +
+                '}';
+    }
+
+    public boolean isValid(){
+        return !this.equals(emptyResult());
     }
 }

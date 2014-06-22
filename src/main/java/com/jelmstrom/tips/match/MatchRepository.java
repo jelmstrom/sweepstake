@@ -83,8 +83,8 @@ public class MatchRepository extends MongoRepository {
         if(null != dbStage){
             stage = Stage.valueOf(dbStage);
         }
-        Match match = new Match(dbMatch.get(HOME_TEAM).toString()
-                , dbMatch.get(AWAY_TEAM).toString()
+        Match match = new Match((String)dbMatch.get(HOME_TEAM)
+                , (String)dbMatch.get(AWAY_TEAM)
                 , new Date(Long.parseLong(dbMatch.get(MATCH_START).toString()))
                 , dbMatch.get(MATCH_ID).toString()
                 , stage

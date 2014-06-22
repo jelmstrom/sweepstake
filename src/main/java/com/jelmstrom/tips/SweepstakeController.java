@@ -59,6 +59,10 @@ public class SweepstakeController {
     }
     @RequestMapping(value = "/playoff",  method = RequestMethod.POST)
     public String savePlayoff(Model uiModel, HttpServletRequest request) {
+        User user = sweepstake.getUser(sessionUserId(request));
+        List<Match> resultList = getResults(request, user);
+        System.out.println("Saving playoff results " + resultList);
+        sweepstake.saveResults(resultList, user);
         return playoff(uiModel, request);
     }
 
@@ -78,35 +82,91 @@ public class SweepstakeController {
 
     @RequestMapping(value = "/group/{groupLetter}", method = RequestMethod.POST)
     public String storeGroup(Model uiModel, @PathVariable String groupLetter, HttpServletRequest request) {
-        Enumeration<String> parameterNames = request.getParameterNames();
-
         User user = sweepstake.getUser(sessionUserId(request));
-        Map<String, int[]> results = new HashMap<>();
 
-        while (parameterNames.hasMoreElements()) {
-            String parameterName = parameterNames.nextElement();
-            String parameter = request.getParameter(parameterName);
-            if (StringUtils.isEmpty(parameter)) {
-                continue;
-            }
-            String matchId = parameterName.substring(0, 2);
-            int[] resultPair = results.get(matchId);
-            if (null == resultPair) {
-                resultPair = new int[2];
-            }
-            int position = parameterName.endsWith("h") ? 0 : 1;
-            resultPair[position] = Integer.parseInt(parameter);
-            results.put(matchId, resultPair);
-        }
-
-        List<Result> resultList = results.keySet().stream()
-                .map(key -> buildResult(user, results, key))
-                .collect(toList());
+        List<Match> resultList = getResults(request, user);
 
         System.out.println("Saving results " + resultList);
         sweepstake.saveResults(resultList, user);
         return showGroup(uiModel, groupLetter, request);
 
+    }
+
+    private List<Match> getResults(HttpServletRequest request, User user) {
+        Enumeration<String> parameterNames = request.getParameterNames();
+        Map<String, Match> matchUpdates = new HashMap<>();
+
+        while (parameterNames.hasMoreElements()) {
+            String parameterName = parameterNames.nextElement();
+            String value = request.getParameter(parameterName);
+            System.out.println("Parameter : " + parameterName + " = " + value);
+            int endIndex = parameterName.indexOf("_");
+
+            if(endIndex == -1){
+                continue;
+            }
+
+            String matchId = parameterName.substring(0, endIndex);
+
+            if(matchUpdates.containsKey(matchId)){
+                continue;
+            }
+
+            Match stored = sweepstake.getMatch(matchId);
+            Match updatedMatch = updateMatchTeams(request, matchId, stored);
+            addResultToMatch(request, user, updatedMatch);
+            matchUpdates.put(matchId, updatedMatch);
+        }
+
+        return matchUpdates.entrySet().stream().map(entry -> entry.getValue()).collect(toList());
+    }
+
+    private Match updateMatchTeams(HttpServletRequest request, String matchId, Match stored) {
+        Match updatedMatch;
+        String homeTeam = request.getParameter(matchId + "_homeTeam");
+        String awayTeam = request.getParameter(matchId + "_awayTeam");
+        if((StringUtils.isEmptyOrWhitespace(homeTeam)|| StringUtils.isEmpty(homeTeam))
+            || (homeTeam.equals(stored.homeTeam) && awayTeam.equals(stored.awayTeam))
+           ) {
+            //no change keep stored.
+            updatedMatch = stored;
+        } else {
+            //preserve details that are not possible to change
+            updatedMatch = new Match(homeTeam, awayTeam, stored.matchStart, matchId, stored.stage);
+            System.out.println("Updated match details : " + updatedMatch);
+            updatedMatch.results.addAll(stored.results);
+        }
+        return updatedMatch;
+    }
+
+    public void addResultToMatch(HttpServletRequest request, User user, Match match) {
+        String homeGoals = request.getParameter(match.id + "_h");
+        String awayGoals = request.getParameter(match.id + "_a");
+        boolean homeWin =    request.getParameter(match.id + "_h_win") != null;
+        boolean awayWin =    request.getParameter(match.id + "_a_win") != null;
+
+        String winner = request.getParameter(match.id + "_win");
+
+
+        if(hasResults(homeGoals, awayGoals)){
+            Result result = new Result(match,
+                    StringUtils.isEmptyOrWhitespace(homeGoals)? 0: Integer.parseInt(homeGoals),
+                    StringUtils.isEmptyOrWhitespace(awayGoals)? 0: Integer.parseInt(awayGoals),
+                    user.id,
+                    winner);
+             System.out.println("Added result : " + result);
+            if(user.admin){
+                match.setCorrectResult(result);
+                System.out.println("Added Correct result : " + match);
+            }
+        }
+    }
+
+    public boolean hasResults(String homeGoals, String awayGoals) {
+        boolean result = !(StringUtils.isEmptyOrWhitespace(homeGoals)
+                && StringUtils.isEmptyOrWhitespace(awayGoals));
+        System.out.println(" result : " + homeGoals +":"+ awayGoals + " => " + result);
+        return result;
     }
 
     private Result buildResult(User user, Map<String, int[]> results, String key) {
@@ -131,7 +191,7 @@ public class SweepstakeController {
         List<TableEntry> tableEntries = sweepstake.currentStandingsForGroup("Group" + groupLetter);
         List<TablePrediction> predictions = sweepstake.getPredictions(sessionUserId(request));
         Optional<TablePrediction> maybe = predictions.stream().filter(entry -> entry.group.equals("Group" + groupLetter)).findFirst();
-        List<Match> groupMatches = sweepstake.getMatches().stream().filter(match -> match.id.contains(groupLetter)).sorted().collect(toList());
+        List<Match> groupMatches = sweepstake.getMatches().stream().filter(match -> match.id.contains(groupLetter) && match.stage.equals(GROUP)).sorted().collect(toList());
         setSessionUsers(request, uiModel);
 
         uiModel.addAttribute("matches", groupMatches);

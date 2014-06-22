@@ -74,10 +74,10 @@ public class Sweepstake {
         List<Match> matches = getMatches();
         Map<String, Integer> matchScores = matches.stream()
                 .flatMap(match -> match.results.stream())
-                .collect(toMap(result -> result.userId, result -> result.score(), Math::addExact));
+                .collect(toMap(result -> result.userId, Result::score, Math::addExact));
 
         List<TablePrediction> tablePredictions = tableRepository.read();
-        List<Result> adminResults = matches.stream().filter(match -> match.stage == GROUP).map(match -> match.getCorrectResult()).filter(Objects::nonNull).collect(toList());
+        List<Result> adminResults = matches.stream().filter(match -> match.stage == GROUP).map(Match::getCorrectResult).filter(Objects::nonNull).collect(toList());
 
         Map<String, Integer> tables = tablePredictions.stream()
                 .collect(toMap(pred -> pred.userId, pred -> pred.score(adminResults), Math::addExact));
@@ -114,7 +114,7 @@ public class Sweepstake {
     @RequestMapping(value = "/table/{groupName}")
     public List<TableEntry> currentStandingsForGroup(@PathVariable String groupName) {
 
-        List<Result> adminResults = getMatches().stream().filter(match -> match.stage == GROUP).map(match -> match.getCorrectResult()).filter(Objects::nonNull).collect(toList());
+        List<Result> adminResults = getMatches().stream().filter(match -> match.stage == GROUP).map(Match::getCorrectResult).filter(Objects::nonNull).collect(toList());
         Group group = new GroupRepository(context).read(groupName);
         return group.teams.stream().map(team -> TableEntry.recordForTeam(team, adminResults)).sorted().collect(toList());
     }
@@ -137,26 +137,9 @@ public class Sweepstake {
         return userRepository.findByToken(token);
     }
 
-    public void saveResults(List<Result> resultList, User user) {
-        List<Match> matches = getMatches();
-        System.out.println(String.format("Storing results %s", resultList));
-        resultList.stream().forEach(result -> addResultToMatch(matches, result, user));
-        matchRepository.store(matches);
+    public void saveResults(List<Match> resultList, User user) {
+        matchRepository.store(resultList);
 
-    }
-
-    private Result addResultToMatch(List<Match> matches, Result result, User user) {
-        Match match = findMatch(matches, result.match.id);
-        Result modified = new Result(
-                match
-                , result.homeGoals
-                , result.awayGoals
-                , result.userId);
-
-        if(user.admin){
-            match.setCorrectResult(result);
-        }
-        return modified;
     }
 
     private Match findMatch(List<Match> matches, String id) {
@@ -170,5 +153,9 @@ public class Sweepstake {
 
     public void deleteUser(String userId) {
         userRepository.remove(userId);
+    }
+
+    public Match getMatch(String matchId) {
+        return matchRepository.read(matchId);
     }
 }
