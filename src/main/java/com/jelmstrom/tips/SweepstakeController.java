@@ -142,11 +142,7 @@ public class SweepstakeController {
     public void addResultToMatch(HttpServletRequest request, User user, Match match) {
         String homeGoals = request.getParameter(match.id + "_h");
         String awayGoals = request.getParameter(match.id + "_a");
-        boolean homeWin =    request.getParameter(match.id + "_h_win") != null;
-        boolean awayWin =    request.getParameter(match.id + "_a_win") != null;
-
         String winner = request.getParameter(match.id + "_win");
-
 
         if(hasResults(homeGoals, awayGoals)){
             Result result = new Result(match,

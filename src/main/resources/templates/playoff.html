@@ -63,7 +63,12 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td width="5%"> <input type="checkbox" th:name="${match.id +'_h_win'}"/> </td>
+                                <td width="5%">
+                                    <input type="radio"
+                                           th:name="${match.id + '_win'}"
+                                           th:value="${match.homeTeam}"
+                                           th:checked="${match.homeTeam.equals(match.resultFor(activeUser.id).promoted)}"/>
+                                </td>
                                 <td width="90%">
                                     <label th:if="${not activeUser.admin}" th:text="${match.homeTeam}"></label>
                                     <input type="text"
@@ -88,7 +93,12 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td> <input type="checkbox" th:name="${match.id + '_a_win'}"/> </td>
+                                <td>
+                                    <input type="radio"
+                                           th:name="${match.id + '_win'}"
+                                           th:value="${match.awayTeam}"
+                                           th:checked="${match.awayTeam.equals(match.resultFor(activeUser.id).promoted)}"/>
+                                </td>
                                 <td>
                                     <label th:if="${not activeUser.admin}" th:text="${match.awayTeam}"></label>
                                     <input type="text"
@@ -133,7 +143,13 @@
                             </td>
                         </tr>
                         <tr>
-                            <td width="5%"> <input type="checkbox" th:name="${match.id +'_h_win'}"/> </td>
+                            <td width="5%">
+                                <input type="radio"
+                                       th:name="${match.id + '_win'}"
+                                       th:value="${match.homeTeam}"
+                                       th:checked="${match.homeTeam.equals(match.resultFor(activeUser.id).promoted)}"/>
+
+                            </td>
                             <td width="90%">
                                 <label th:if="${not activeUser.admin}" th:text="${match.homeTeam}"></label>
                                 <input type="text"
@@ -157,7 +173,13 @@
                             </td>
                         </tr>
                         <tr>
-                            <td> <input type="checkbox" th:name="${match.id + '_a_win'}"/> </td>
+                            <td>
+                                <input type="radio"
+                                        th:name="${match.id + '_win'}"
+                                        th:value="${match.awayTeam}"
+                                        th:checked="${match.awayTeam.equals(match.resultFor(activeUser.id).promoted)}"/>
+
+                            </td>
                             <td>
                                 <label th:if="${not activeUser.admin}" th:text="${match.awayTeam}"></label>
                                 <input type="text"
@@ -200,7 +222,12 @@
                             </td>
                         </tr>
                         <tr>
-                            <td width="5%"> <input type="checkbox" th:name="${match.id +'_h_win'}"/> </td>
+                            <td width="5%">
+                                <input type="radio"
+                                       th:name="${match.id + '_win'}"
+                                       th:value="${match.homeTeam}"
+                                       th:checked="${match.homeTeam.equals(match.resultFor(activeUser.id).promoted)}"/>
+                            </td>
                             <td width="90%">
                                 <label th:if="${not activeUser.admin}" th:text="${match.homeTeam}"></label>
                                 <input type="text"
@@ -225,7 +252,13 @@
                             </td>
                         </tr>
                         <tr>
-                            <td> <input type="checkbox" th:name="${match.id + '_a_win'}"/> </td>
+                            <td>
+                            <input type="radio"
+                                    th:name="${match.id + '_win'}"
+                                    th:value="${match.awayTeam}"
+                                    th:checked="${match.awayTeam.equals(match.resultFor(activeUser.id).promoted)}"/>
+
+                            </td>
                             <td>
                                 <label th:if="${not activeUser.admin}" th:text="${match.awayTeam}"></label>
                                 <input type="text"
@@ -270,7 +303,11 @@
                         </tr>
                         <tr>
                             <td width="5%">
-                                <input type="checkbox" th:name="${match.id +'_h_win'}"/>
+                                <input type="radio"
+                                       th:name="${match.id + '_win'}"
+                                       th:value="${match.homeTeam}"
+                                       th:checked="${match.homeTeam.equals(match.resultFor(activeUser.id).promoted)}"/>
+
                             </td>
                             <td width="90%">
                                 <label th:if="${not activeUser.admin}" th:text="${match.homeTeam}"></label>
@@ -297,8 +334,12 @@
                         </tr>
                         <tr>
                             <td>
-                                <input type="checkbox" th:name="${match.id +'_a_win'}"/>
-                              </td>
+                                <input type="radio"
+                                       th:name="${match.id + '_win'}"
+                                       th:value="${match.awayTeam}"
+                                       th:checked="${match.awayTeam.equals(match.resultFor(activeUser.id).promoted)}"/>
+
+                            </td>
                             <td>
                                 <label th:if="${not activeUser.admin}" th:text="${match.awayTeam}"></label>
                                 <input type="text"
