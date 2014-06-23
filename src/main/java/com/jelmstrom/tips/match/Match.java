@@ -85,7 +85,7 @@ public class Match implements Comparable<Match>{
     }
 
     private int userScore(Result userResult) {
-        if(null == userResult || correctResult == null){
+        if(null == userResult || !userResult.isValid() || correctResult == null){
             return 0;
         }
 
@@ -93,10 +93,10 @@ public class Match implements Comparable<Match>{
         if (userResult.winner() == correctResult.winner()) {
             points++;
         }
-        if (userResult.homeGoals == correctResult.homeGoals) {
+        if (userResult.homeGoals.equals(correctResult.homeGoals)) {
             points++;
         }
-        if (userResult.awayGoals == correctResult.awayGoals) {
+        if (userResult.awayGoals.equals(correctResult.awayGoals)) {
             points++;
         }
 
@@ -151,6 +151,7 @@ public class Match implements Comparable<Match>{
                 '}';
     }
 
+    @SuppressWarnings("UnusedDeclaration")
     public boolean isValid() {
         return !(homeTeam.equals("") || awayTeam.equals("") || startDate == null || stage == null || id.equals("")) ;
     }

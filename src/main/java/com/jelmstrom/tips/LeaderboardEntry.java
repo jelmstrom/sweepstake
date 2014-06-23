@@ -13,6 +13,7 @@ public class LeaderboardEntry implements Comparable {
     }
 
 
+    @SuppressWarnings("NullableProblems")
     @Override
     public int compareTo(Object o) {
         LeaderboardEntry that = (LeaderboardEntry) o;

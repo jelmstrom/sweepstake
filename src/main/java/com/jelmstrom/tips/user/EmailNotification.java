@@ -16,7 +16,7 @@ public class EmailNotification {
     private final InternetAddress internetAddress;
 
 
-    public EmailNotification(User adminUser)  {
+    public EmailNotification()  {
 
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");

@@ -203,7 +203,7 @@ public class ConfigurationLoader {
                 matches.add(new Match("{G1}", "{H2}", Config.dateFormat.parse("30 06 2014 22:00"),"LS" + (index++), Match.Stage.LAST_SIXTEEN));
 
                 matches.add(new Match("{F1}", "{E2}", Config.dateFormat.parse("01 07 2014 18:00"),"LS" + (index++), Match.Stage.LAST_SIXTEEN));
-                matches.add(new Match("{H1}", "{G2}", Config.dateFormat.parse("01 07 2014 22:00"),"LS" + (index++), Match.Stage.LAST_SIXTEEN));
+                matches.add(new Match("{H1}", "{G2}", Config.dateFormat.parse("01 07 2014 22:00"),"LS" + (index), Match.Stage.LAST_SIXTEEN));
 
                 matchRepository.store(matches);
             } catch (ParseException e) {
@@ -220,7 +220,7 @@ public class ConfigurationLoader {
                 matches.add(new Match("{LS5}", "{LS6}", Config.dateFormat.parse("04 07 2014 18:00"),"QF" + (index++), Match.Stage.QUARTER_FINAL));
 
                 matches.add(new Match("{LS3}", "{LS4}", Config.dateFormat.parse("05 07 2014 22:00"),"QF" + (index++), Match.Stage.QUARTER_FINAL));
-                matches.add(new Match("{LS7}", "{LS8}", Config.dateFormat.parse("05 07 2014 18:00"),"QF" + (index++), Match.Stage.QUARTER_FINAL));
+                matches.add(new Match("{LS7}", "{LS8}", Config.dateFormat.parse("05 07 2014 18:00"),"QF" + (index), Match.Stage.QUARTER_FINAL));
 
                 matchRepository.store(matches);
             } catch (ParseException e) {
@@ -234,7 +234,7 @@ public class ConfigurationLoader {
             try {
                 int index = 0;
                 matches.add(new Match("{QF1}", "{QF2}", Config.dateFormat.parse("08 07 2014 22:00"),"SF" + (index++), Match.Stage.SEMI_FINAL));
-                matches.add(new Match("{QF3}", "{QF4}", Config.dateFormat.parse("09 07 2014 22:00"),"SF" + (index++), Match.Stage.SEMI_FINAL));
+                matches.add(new Match("{QF3}", "{QF4}", Config.dateFormat.parse("09 07 2014 22:00"),"SF" + (index), Match.Stage.SEMI_FINAL));
 
                 matches.add(new Match("{SF1}", "{SF2}", Config.dateFormat.parse("13 07 2014 21:00"),"FINAL", Match.Stage.FINAL));
 

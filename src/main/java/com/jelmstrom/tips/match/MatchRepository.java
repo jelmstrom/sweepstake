@@ -35,7 +35,7 @@ public class MatchRepository extends MongoRepository {
     public void store(Match match) {
         List<DBObject> results =
                 match.results.stream()
-                        .map(result -> buildDbObject(result))
+                        .map(this::buildDbObject)
                         .collect(toList());
 
         DBObject entry = new BasicDBObject(HOME_TEAM, match.homeTeam)
@@ -113,15 +113,4 @@ public class MatchRepository extends MongoRepository {
     public void store(List<Match> matches) {
         matches.stream().forEach(this::store);
     }
-
-    public void remove(List<Match> matches) {
-        matches.stream().forEach(this::remove);
-    }
-
-    public void remove(Match match) {
-        matchCollection.remove(new BasicDBObject(MATCH_ID, match.id));
-
-    }
-
-
 }

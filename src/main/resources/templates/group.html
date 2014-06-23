@@ -175,7 +175,7 @@
         <tr>
             <td colspan="5"></td>
             <td colspan="3" align="left">
-                <button class="btn btn-sm btn-success" type="submit" th:if="${canEdit}">Submit</button>
+                <button class="btn btn-sm btn-success" type="submit" th:if="${prediction.editable(activeUser)}">Submit</button>
             </td>
         </tr>
         </tbody>

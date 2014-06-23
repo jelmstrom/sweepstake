@@ -81,12 +81,11 @@ public class TablePrediction {
         }
         return score;
     }
+
+
+    @SuppressWarnings("UnusedDeclaration")
     public boolean editable(User user){
-        if(user.admin){
-            return true;
-        } else {
-            return new Date().before(Config.startDate);
-        }
+        return user.admin || new Date().before(Config.startDate);
     }
 
     @Override

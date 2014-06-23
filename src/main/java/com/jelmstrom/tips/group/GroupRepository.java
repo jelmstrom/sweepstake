@@ -7,9 +7,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
-
-
 public class GroupRepository extends MongoRepository {
 
     public final DBCollection groupCollection;
@@ -45,14 +42,5 @@ public class GroupRepository extends MongoRepository {
         List<String> teams = new ArrayList<>();
         ((BasicDBList) dbGroup.get(TEAMS)).forEach(entry -> teams.add((String) entry));
         return new Group(dbGroup.get(NAME).toString(), teams);
-    }
-
-    public void remove(String group) {
-        groupCollection.remove(new BasicDBObject(NAME, group));
-    }
-
-    public List<Group> read() {
-        return groupCollection.find().toArray().stream().map(this::buildGroup).collect(toList());
-
     }
 }

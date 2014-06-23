@@ -139,7 +139,7 @@ public class IntegrationTest {
     @Ignore
     @Test
     public void sendMailDoesNotFail(){
-        new EmailNotification(new User("", "admin.user@gmail.com", false, ""))
+        new EmailNotification()
                 .sendMail(new User("...userName...", "johan.elmstrom@gmail.com", false, ""));
     }
 }
