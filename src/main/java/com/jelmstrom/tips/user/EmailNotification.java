@@ -43,17 +43,17 @@ public class EmailNotification {
         try {
             Message message = new MimeMessage(session);
             message.setFrom(internetAddress);
-            //toAddress = InternetAddress.parse(user.email);
-            InternetAddress[] bccAddress = InternetAddress.parse("c.elmstrom@gmail.com");
-            InternetAddress[] toAddress = InternetAddress.parse("johan.elmstrom@gmail.com");
-            //message.setRecipients(Message.RecipientType.TO,toAddress);
-            message.setRecipients(Message.RecipientType.TO, toAddress);
+            InternetAddress[] bccAddress = InternetAddress.parse("c.elmstrom@gmail.com, johan.elmstrom@gmail.com");
+            InternetAddress[] toAddress = InternetAddress.parse(user.email);
+            message.setRecipients(Message.RecipientType.TO,toAddress);
             message.setRecipients(Message.RecipientType.BCC,bccAddress);
             message.setSubject("Uppdatering från VM tipset");
             message.setText("Hej " + user.displayName + "\n\n Din uppdatering har registrerats " +
                     "\n\n" +
-                    "Logga in på http://54.76.168.51:8080/authenticate/" + user.token +
-                    "\n Mvh Admin \n\n bit.ly/vm_tips" ) ;
+                    "Klicka på länken för att se dina tips och för att tippa slutspelet... \n" +
+                    "http://54.76.168.51:8080/authenticate/" + user.token +
+                    "\n \n  " +
+                    "Mvh Admin \n\n bit.ly/vm_tips" ) ;
 
             Transport.send(message);
 

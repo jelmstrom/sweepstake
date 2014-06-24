@@ -4,15 +4,20 @@ import com.jelmstrom.tips.group.Group;
 import com.jelmstrom.tips.group.GroupRepository;
 import com.jelmstrom.tips.match.Match;
 import com.jelmstrom.tips.match.MatchRepository;
+import com.jelmstrom.tips.match.Result;
 import com.jelmstrom.tips.table.TablePrediction;
 import com.jelmstrom.tips.table.TableRepository;
 import com.jelmstrom.tips.user.User;
 import com.jelmstrom.tips.user.UserRepository;
+import org.springframework.util.StringUtils;
 
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
+
+import static java.util.stream.Collectors.toList;
 
 
 public class ConfigurationLoader {
@@ -82,23 +87,8 @@ public class ConfigurationLoader {
         User admin = userRepo.findByEmail("none@noreply.zzz") ;
         userRepo.store(new User(admin.id, "Admin", "none@noreply.zzz", true, "__admin__"));
 
-        patchResultUsers();
-
         createPlayoffMatches(matchRepository);
     }
-
-    private static void patchResultUsers() {
-        List<Match> matches = matchRepository.read();
-        matches.stream().flatMap(match -> match.results.stream())
-            .forEach(res -> res.setUserId(userRepo.read(res.userId).id));
-        matchRepository.store(matches);
-
-        List<TablePrediction> predictions = tableRepository.read();
-        predictions.forEach(tp -> tp.setUserId(userRepo.findByEmail(tp.userId).id));
-        tableRepository.store(predictions);
-
-    }
-
 
     private static void createGroups(GroupRepository groupRepository) {
         if(groupRepository.read("GroupA").teams.isEmpty()){

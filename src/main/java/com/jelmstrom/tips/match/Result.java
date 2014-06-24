@@ -1,6 +1,8 @@
 package com.jelmstrom.tips.match;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import org.hsqldb.lib.StringUtil;
+import org.springframework.util.StringUtils;
 
 public class Result {
     @JsonBackReference
@@ -97,6 +99,9 @@ public class Result {
     }
 
     public boolean isValid(){
-        return !this.equals(emptyResult());
+        return this.homeGoals != null
+                && this.awayGoals != null
+                && !StringUtils.isEmpty(this.userId)
+                && !StringUtils.isEmpty(this.match.id);
     }
 }
