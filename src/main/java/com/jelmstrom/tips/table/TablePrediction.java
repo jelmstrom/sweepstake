@@ -13,11 +13,8 @@ public class TablePrediction {
 
     public final String group;
     public final List<String> tablePrediction;
-    public String userId;
+    public final String userId;
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
 
 
     public TablePrediction(String group, String userId, List<String> tablePrediction) {

@@ -18,10 +18,6 @@ public class TableRepository extends MongoRepository {
         tablePredictionCollection = getDb().getCollection("tablePreditions");
     }
 
-    public void store(List<TablePrediction> predictions){
-        predictions.forEach(this::store);
-    }
-
     public void store(TablePrediction prediction){
             BasicDBObject dbPrediction = new BasicDBObject()
                     .append("group", prediction.group)
