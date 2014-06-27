@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
+
 public class GroupRepository extends MongoRepository {
 
     public final DBCollection groupCollection;
@@ -35,6 +37,11 @@ public class GroupRepository extends MongoRepository {
             return buildGroup(teams);
         }
         return new Group(groupName, Collections.emptyList());
+    }
+
+    public List<Group> allGroups() {
+        DBCursor groups = groupCollection.find();
+        return groups.toArray().stream().map(group -> buildGroup(group)).collect(toList());
     }
 
     private Group buildGroup(DBObject dbGroup) {

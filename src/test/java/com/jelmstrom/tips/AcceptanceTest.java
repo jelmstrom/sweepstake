@@ -131,9 +131,9 @@ public class AcceptanceTest {
     }
 
     @Test
-    public void pointsForPLayoffUserShouldBe47(){
+    public void pointsForPLayoffUserShouldBe25(){
         int points = pointsForUser(playoffUser);
-        assertThat(points, is(47));
+        assertThat(points, is(25));
     }
 
     @Test
@@ -210,12 +210,13 @@ public class AcceptanceTest {
     }
 
     @Test
-    public void updateResultreplacesExistingValue(){
+    public void updateResultReplacesExistingValue(){
         int originalCount = matchA1.results.size();
         new Result(matchA1, 2, 2, USER_ID);
         List<Match> results = Arrays.asList(matchA1);
 
         sweepstake.saveResults(results, user);
+
         Match fromDb = MATCH_REPOSITORY.read(matchA1.id);
         assertThat(fromDb.results.size(), is(originalCount));
         assertThat(fromDb.resultFor(USER_ID).awayGoals, is(2));

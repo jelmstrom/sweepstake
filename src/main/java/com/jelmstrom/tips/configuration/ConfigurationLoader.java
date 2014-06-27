@@ -221,5 +221,16 @@ public class ConfigurationLoader {
                 throw new IllegalStateException("Incorrect configuration, failed to parse date");
             }
         }
+
+        if (matchRepository.read("BRONZE").id.isEmpty()) {
+            List<Match> matches = new ArrayList<>();
+            try {
+                matches.add(new Match("{SF1}", "{SF2}", Config.dateFormat.parse("12 07 2014 22:00"), "BRONZE", Match.Stage.BRONZE));
+                matchRepository.store(matches);
+            } catch (ParseException e) {
+                e.printStackTrace();
+                throw new IllegalStateException("Incorrect configuration, failed to parse date");
+            }
+        }
     }
 }

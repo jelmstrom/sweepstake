@@ -36,6 +36,7 @@ public class Sweepstake {
     private final MatchRepository matchRepository;
     private final UserRepository userRepository;
     private final TableRepository tableRepository;
+    private final GroupRepository groupRepository;
 
     Sweepstake(){
         //only used for rest controller..
@@ -44,6 +45,7 @@ public class Sweepstake {
         matchRepository = null;
         userRepository = null;
         tableRepository = null;
+        groupRepository = null;
     }
 
     public Sweepstake(String context) {
@@ -51,6 +53,7 @@ public class Sweepstake {
         matchRepository = new MatchRepository(context);
         userRepository = new UserRepository(context);
         tableRepository = new TableRepository(context);
+        groupRepository = new GroupRepository(context);
     }
 
     @RequestMapping("/matches")
@@ -157,5 +160,9 @@ public class Sweepstake {
 
     public Match getMatch(String matchId) {
         return matchRepository.read(matchId);
+    }
+
+    public List<String> getAllTeams() {
+        return groupRepository.allGroups().stream().flatMap(group -> group.teams.stream()).sorted().collect(toList());
     }
 }

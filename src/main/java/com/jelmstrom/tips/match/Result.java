@@ -66,7 +66,11 @@ public class Result {
     }
 
     public int winner() {
-        return Integer.signum(Integer.compare(homeGoals, awayGoals));
+        if(isValid()){
+            return Integer.signum(Integer.compare(homeGoals, awayGoals));
+        } else {
+            return 0;
+        }
     }
 
     public boolean equals(Object other) {

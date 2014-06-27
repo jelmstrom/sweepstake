@@ -25,7 +25,7 @@ public class Match implements Comparable<Match>{
 
 
     public enum Stage {
-        GROUP(0), LAST_SIXTEEN(4), QUARTER_FINAL(8), SEMI_FINAL(16), FINAL(32);
+        GROUP(0), LAST_SIXTEEN(2), QUARTER_FINAL(4), SEMI_FINAL(8), FINAL(16), BRONZE(12);
         public final int factor;
         Stage(int factor) {
             this.factor = factor;
@@ -85,7 +85,8 @@ public class Match implements Comparable<Match>{
     }
 
     private int userScore(Result userResult) {
-        if(null == userResult || !userResult.isValid() || correctResult == null){
+        if(null == userResult || !userResult.isValid()
+           || correctResult == null || !correctResult.isValid()){
             return 0;
         }
 
@@ -139,6 +140,8 @@ public class Match implements Comparable<Match>{
             return false;
         }
     }
+
+
     @Override
     public String toString() {
         return "Match{" +

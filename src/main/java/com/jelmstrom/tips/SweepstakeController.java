@@ -45,16 +45,19 @@ public class SweepstakeController {
 
     @RequestMapping(value = "/playoff",  method = RequestMethod.GET)
     public String playoff(Model uiModel, HttpServletRequest request) {
-        setSessionUsers(request, uiModel);
+        User sessionUser = setSessionUsers(request, uiModel);
         List<Match> allMatches = sweepstake.getMatches();
         List<Match> last16 = allMatches.stream().filter(match-> match.stage == LAST_SIXTEEN).sorted().collect(toList());
         List<Match> quarterFinal = allMatches.stream().filter(match-> match.stage == QUARTER_FINAL).sorted().collect(toList());
         List<Match> semiFinal = allMatches.stream().filter(match-> match.stage == SEMI_FINAL).sorted().collect(toList());
-        List<Match> finals = allMatches.stream().filter(match-> match.stage == FINAL).sorted().collect(toList());
+        List<Match> finals = allMatches.stream().filter(match-> match.stage == FINAL || match.stage == BRONZE).sorted().collect(toList());
+        List<String> teams = sweepstake.getAllTeams();
         uiModel.addAttribute("last16", last16);
         uiModel.addAttribute("quarterFinal", quarterFinal);
         uiModel.addAttribute("semiFinal", semiFinal);
         uiModel.addAttribute("final", finals);
+        uiModel.addAttribute("teams", teams);
+        uiModel.addAttribute("playoffTreeEditable", new Boolean(sessionUser.admin || new Date().before(Config.playoffStart)));
         return "playoff";
     }
     @RequestMapping(value = "/playoff",  method = RequestMethod.POST)
@@ -140,22 +143,48 @@ public class SweepstakeController {
     }
 
     public void addResultToMatch(HttpServletRequest request, User user, Match match) {
-        String homeGoals = request.getParameter(match.id + "_h");
-        String awayGoals = request.getParameter(match.id + "_a");
-        String winner = request.getParameter(match.id + "_win");
+        Result previousResult = match.resultFor(user.id);
 
-        if(hasResults(homeGoals, awayGoals)){
-            Result result = new Result(match,
-                    StringUtils.isEmptyOrWhitespace(homeGoals)? 0: Integer.parseInt(homeGoals),
-                    StringUtils.isEmptyOrWhitespace(awayGoals)? 0: Integer.parseInt(awayGoals),
-                    user.id,
-                    winner);
-             System.out.println("Added result : " + result);
-            if(user.admin){
-                match.setCorrectResult(result);
-                System.out.println("Added Correct result : " + match);
-            }
+        Result result = new Result(match,
+                getHomeGoals(request, match, previousResult),
+                getAwayGoals(request, match, previousResult),
+                user.id,
+                getWinner(request, match, previousResult));
+
+        System.out.println("Added result : " + result);
+
+        if(user.admin){
+            match.setCorrectResult(result);
+            System.out.println("Added Correct result : " + match);
         }
+
+    }
+
+    public String getWinner(HttpServletRequest request, Match match, Result previousResult) {
+        String winner = request.getParameter(match.id + "_promoted");
+
+        if(winner == null){
+            winner = previousResult.promoted;
+        }
+        return winner;
+    }
+
+    public Integer getAwayGoals(HttpServletRequest request, Match match, Result previousResult) {
+        String awayGoals = request.getParameter(match.id + "_a");
+        Integer away_Goals = StringUtils.isEmptyOrWhitespace(awayGoals) ? null : Integer.parseInt(awayGoals);
+        if(away_Goals == null ){
+            away_Goals = previousResult.awayGoals;
+        }
+        return away_Goals;
+    }
+
+    public Integer getHomeGoals(HttpServletRequest request, Match match, Result previousResult) {
+        String homeGoals = request.getParameter(match.id + "_h");
+        Integer home_Goals = StringUtils.isEmptyOrWhitespace(homeGoals) ? null : Integer.parseInt(homeGoals);
+        if(home_Goals == null ){
+            home_Goals = previousResult.homeGoals;
+        }
+        return home_Goals;
     }
 
     public boolean hasResults(String homeGoals, String awayGoals) {
@@ -294,11 +323,11 @@ public class SweepstakeController {
     }
 
 
-    private void setSessionUsers(HttpServletRequest request, Model uiModel) {
-        setSessionUsers(request, User.emptyUser(), uiModel);
+    private User setSessionUsers(HttpServletRequest request, Model uiModel) {
+        return setSessionUsers(request, User.emptyUser(), uiModel);
     }
 
-    private void setSessionUsers(HttpServletRequest request, User user, Model model) {
+    private User setSessionUsers(HttpServletRequest request, User user, Model model) {
         User sessionUser = sessionUser(request);
         if (!user.isValid()) {
             user = sessionUser;
@@ -309,6 +338,7 @@ public class SweepstakeController {
         model.addAttribute("canEdit", editable);
         model.addAttribute(USER, user);
         model.addAttribute(SESSION_USER, sessionUser);
+        return sessionUser;
     }
 
 

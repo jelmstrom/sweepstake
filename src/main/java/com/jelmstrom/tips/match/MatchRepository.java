@@ -8,6 +8,7 @@ import com.mongodb.DBObject;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import static com.jelmstrom.tips.match.Match.Stage;
 import static java.util.stream.Collectors.toList;
@@ -103,9 +104,17 @@ public class MatchRepository extends MongoRepository {
         if(dbResult == null){
             return null;
         }
+
+        Integer homeGoals = dbResult.get(HOME_GOALS)==null?
+                        null:
+                        dbResult.getInt(HOME_GOALS);
+        Integer awayGoals = dbResult.get(AWAY_GOALS)==null?
+                        null:
+                        dbResult.getInt(AWAY_GOALS);
+
         return new Result(match
-                , dbResult.getInt(HOME_GOALS)
-                , dbResult.getInt(AWAY_GOALS)
+                , homeGoals
+                , awayGoals
                 , dbResult.getString(USER_ID)
                 , dbResult.getString(PROMOTED));
     }
