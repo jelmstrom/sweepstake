@@ -56,13 +56,13 @@
                         <th></th>
                     </thead>
                     <tbody>
-                        <th:block class="label label-info" th:each="match : ${last16}">
+                        <th:block th:each="match : ${last16}">
                             <tr>
                                 <td>
-                                    <label  th:text="${match.id}"></label>
+                                    <label  class="label label-default" th:text="${match.id}"></label>
                                 </td>
                                 <td>
-                                    <label th:text="${#dates.format(match.matchStart,'dd MM HH:mm')}"> start</label>
+                                    <label class="badge" th:text="${#dates.format(match.matchStart,'dd MMMM HH:mm')}"> start</label>
                                 </td>
                                 <td>
                                     <select th:name="${match.id + '_promoted'}" th:disabled="not ${playoffTreeEditable}">
@@ -143,11 +143,10 @@
                     <th:block th:each="match : ${quarterFinal}">
                         <tr>
                             <td>
-                                <label class="label label-info"  th:text="${match.id}"></label>
+                                <label  class="label label-info" th:text="${match.id}"></label>
                             </td>
                             <td>
-                                <label th:text="${#dates.format(match.matchStart,'dd MM HH:mm')}">
-                                    start</label>
+                                <label class="badge" th:text="${#dates.format(match.matchStart,'dd MMMM HH:mm')}"> start</label>
                             </td>
                             <td>
                                 <select th:name="${match.id + '_promoted'}" th:disabled="not ${playoffTreeEditable}">
@@ -226,11 +225,10 @@
                     <th:block th:each="match : ${semiFinal}">
                         <tr>
                             <td>
-                                <label  class="label label-info" th:text="${match.id}"></label>
+                                <label  class="label label-warning" th:text="${match.id}"></label>
                             </td>
                             <td>
-                                <label class="badge" th:text="${#dates.format(match.matchStart,'dd MM HH:mm')}">
-                                    start</label>
+                                <label class="badge" th:text="${#dates.format(match.matchStart,'dd MMMM HH:mm')}"> start</label>
                             </td>
                             <td>
                                 <select th:name="${match.id + '_promoted'}" th:disabled="not ${playoffTreeEditable}">
@@ -311,11 +309,10 @@
                     <th:block th:each="match : ${final}">
                         <tr>
                             <td>
-                                <label class="label label-info" th:text="${match.id}"></label>
+                                <label  class="label label-success" th:text="${match.id}"></label>
                             </td>
                             <td>
-                                <label th:text="${#dates.format(match.matchStart,'dd MM HH:mm')}">
-                                    start</label>
+                                <label class="badge" th:text="${#dates.format(match.matchStart,'dd MMMM HH:mm')}"> start</label>
                             </td>
                             <td>
                                 <select th:name="${match.id + '_promoted'}" th:disabled="not ${playoffTreeEditable}">

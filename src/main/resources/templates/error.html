@@ -7,38 +7,8 @@
     <link rel="stylesheet" href="http://getbootstrap.com/examples/dashboard/dashboard.css" />
 </head>
 <body>
-<div class="navbar navbar-default">
-    <div class="container">
-        <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                <li><a href="/">Leaderboard</a></li>
-                <li><a href="/group/A">GroupA</a></li>
-                <li><a href="/group/B">GroupB</a></li>
-                <li><a href="/group/C">GroupC</a></li>
-                <li><a href="/group/D">GroupD</a></li>
-                <li><a href="/group/E">GroupE</a></li>
-                <li><a href="/group/F">GroupF</a></li>
-                <li><a href="/group/G">GroupG</a></li>
-                <li><a href="/group/H">GroupH</a></li>
-                <li><a href="/playoff">Playoff</a></li>
-                <li class="divider"></li>
-                <li><a href="user"
-                       th:href="@{'/user/'+activeUser.displayName}"
-                       th:text="${activeUser.displayName}"></a>
-                </li>
-                <li><a href="/user"
-                       th:if="${activeUser.email == null}">Register</a>
-                </li>
-                <li><a href="/logout">Logout</a></li>
-            </ul>
-        </div>
-        <!--/.nav-collapse -->
-    </div>
-</div>
-
 <p>
     That didn't go too well....
-
 </p>
 </body>
 </html>
