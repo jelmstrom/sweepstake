@@ -56,7 +56,7 @@
                         <th></th>
                     </thead>
                     <tbody>
-                        <th:block th:each="match : ${last16}">
+                        <th:block class="label label-info" th:each="match : ${last16}">
                             <tr>
                                 <td>
                                     <label  th:text="${match.id}"></label>
@@ -143,7 +143,7 @@
                     <th:block th:each="match : ${quarterFinal}">
                         <tr>
                             <td>
-                                <label  th:text="${match.id}"></label>
+                                <label class="label label-info"  th:text="${match.id}"></label>
                             </td>
                             <td>
                                 <label th:text="${#dates.format(match.matchStart,'dd MM HH:mm')}">
@@ -226,10 +226,10 @@
                     <th:block th:each="match : ${semiFinal}">
                         <tr>
                             <td>
-                                <label  th:text="${match.id}"></label>
+                                <label  class="label label-info" th:text="${match.id}"></label>
                             </td>
                             <td>
-                                <label th:text="${#dates.format(match.matchStart,'dd MM HH:mm')}">
+                                <label class="badge" th:text="${#dates.format(match.matchStart,'dd MM HH:mm')}">
                                     start</label>
                             </td>
                             <td>
@@ -311,7 +311,7 @@
                     <th:block th:each="match : ${final}">
                         <tr>
                             <td>
-                                <label  th:text="${match.id}"></label>
+                                <label class="label label-info" th:text="${match.id}"></label>
                             </td>
                             <td>
                                 <label th:text="${#dates.format(match.matchStart,'dd MM HH:mm')}">

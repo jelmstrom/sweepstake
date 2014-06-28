@@ -6,11 +6,13 @@ import com.jelmstrom.tips.match.Match;
 import com.jelmstrom.tips.match.MatchRepository;
 import com.jelmstrom.tips.user.User;
 import com.jelmstrom.tips.user.UserRepository;
+import org.joda.time.DateTime;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+
+import static java.util.stream.Collectors.toList;
+import static org.hamcrest.core.Is.is;
 
 public class ConfigurationLoader {
 
@@ -57,7 +59,7 @@ public class ConfigurationLoader {
     public static final Group GROUP_H = new Group("GroupH", Arrays.asList(BELGIUM, ALGERIA, RUSSIA, SOUTH_KOREA));
 
 
-    public static void initialiseData(String context) {
+    public static void initialiseData(String context) throws ParseException {
         GroupRepository groupRepository = new GroupRepository(context);
         UserRepository userRepo = new UserRepository(context);
         MatchRepository matchRepository = new MatchRepository(context);
@@ -75,6 +77,29 @@ public class ConfigurationLoader {
         userRepo.store(new User(admin.id, "Admin", "none@noreply.zzz", true, "__admin__"));
 
         createPlayoffMatches(matchRepository);
+
+        patchMatchStartTimes(matchRepository);
+    }
+
+    private static void patchMatchStartTimes(MatchRepository matchRepository) throws ParseException {
+        if(matchRepository.read("BRONZE").matchStart.equals(Config.dateFormat.parse("12 07 2014 22:00"))){
+            List<Match> matches = matchRepository.read();
+            matchRepository.store(matches.stream().map(match -> fixDate(match)).collect(toList()));
+        }
+
+    }
+
+    private static Match fixDate(Match match) {
+        Date modifiedTime = new DateTime(match.matchStart).minusHours(2).toDate();
+
+        Match modified = new Match(
+            match.homeTeam
+            , match.awayTeam
+            , modifiedTime
+            , match.id
+            , match.stage
+        );
+        return modified;
     }
 
     private static void createGroups(GroupRepository groupRepository) {

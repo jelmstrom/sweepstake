@@ -14,6 +14,7 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletContext;
+import java.text.ParseException;
 import java.util.EnumSet;
 
 @Configuration
@@ -21,7 +22,7 @@ import java.util.EnumSet;
 @ComponentScan
 public class Application {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ParseException {
         SpringApplication.run(Application.class, args);
         ConfigurationLoader.initialiseData(Config.context);
 
