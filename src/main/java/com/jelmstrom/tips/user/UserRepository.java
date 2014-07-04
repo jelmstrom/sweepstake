@@ -20,6 +20,8 @@ public class UserRepository extends MongoRepository {
     public static final String EMAIL = "email";
     public static final String DISPLAY_NAME = "displayName";
     public static final String ADMIN = "isAdmin";
+    public static final String SCORER = "topScorer";
+    public static final String WINNER = "winner";
 
     public UserRepository(String context) {
         super(context);
@@ -32,7 +34,9 @@ public class UserRepository extends MongoRepository {
             BasicDBObject dbUser = new BasicDBObject(EMAIL, user.email.trim())
                     .append(DISPLAY_NAME, user.displayName.trim())
                     .append(ADMIN, user.admin)
-                    .append(TOKEN, token.trim());
+                    .append(TOKEN, token.trim())
+                    .append(SCORER, user.getTopScorer())
+                    .append(WINNER, user.getWinner());
         if(existingUser.isValid() && existingUser.id.equals(user.id)){
             userCollection.update(new BasicDBObject(ID, new ObjectId(existingUser.id)), dbUser);
         } else  {
@@ -60,11 +64,14 @@ public class UserRepository extends MongoRepository {
 
     private User buildUser(DBObject dbUser) {
         if(dbUser != null && null != dbUser.get(ID)){
-              return new User(dbUser.get(ID).toString()
-                , dbUser.get(DISPLAY_NAME).toString()
-                , dbUser.get(EMAIL).toString()
-                , Boolean.parseBoolean(dbUser.get(ADMIN).toString())
-                , (String) dbUser.get(TOKEN));
+            User user = new User(dbUser.get(ID).toString()
+                    , dbUser.get(DISPLAY_NAME).toString()
+                    , dbUser.get(EMAIL).toString()
+                    , Boolean.parseBoolean(dbUser.get(ADMIN).toString())
+                    , (String) dbUser.get(TOKEN));
+            user.setTopScorer((String)dbUser.get(SCORER));
+            user.setWinner((String)dbUser.get(WINNER));
+            return user;
         } else {
             return User.emptyUser();
         }

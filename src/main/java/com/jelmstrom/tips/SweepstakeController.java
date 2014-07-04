@@ -51,11 +51,11 @@ public class SweepstakeController {
         List<Match> quarterFinal = allMatches.stream().filter(match-> match.stage == QUARTER_FINAL).sorted().collect(toList());
         List<Match> semiFinal = allMatches.stream().filter(match-> match.stage == SEMI_FINAL).sorted().collect(toList());
         List<Match> finals = allMatches.stream().filter(match-> match.stage == FINAL || match.stage == BRONZE).sorted().collect(toList());
-        List<String> teams = sweepstake.getAllTeams();
         uiModel.addAttribute("last16", last16);
         uiModel.addAttribute("quarterFinal", quarterFinal);
         uiModel.addAttribute("semiFinal", semiFinal);
         uiModel.addAttribute("final", finals);
+        List<String> teams = sweepstake.getAllTeams();
         uiModel.addAttribute("teams", teams);
         uiModel.addAttribute("playoffTreeEditable", new Boolean(sessionUser.admin || new Date().before(Config.playoffStart)));
         return "playoff";
@@ -233,6 +233,8 @@ public class SweepstakeController {
     public String getUser(Model uiModel, @PathVariable String displayName, HttpServletRequest request) {
 
         setSessionUsers(request, sweepstake.findUser(displayName), uiModel);
+        List<String> teams = sweepstake.getAllTeams();
+        uiModel.addAttribute("teams", teams);
         return "user";
     }
 
@@ -243,6 +245,8 @@ public class SweepstakeController {
     @RequestMapping(value = "/user", method = RequestMethod.GET)
     public String getUser(Model uiModel, HttpServletRequest request) {
         setSessionUsers(request, uiModel);
+        List<String> teams = sweepstake.getAllTeams();
+        uiModel.addAttribute("teams", teams);
         return "user";
     }
 
@@ -253,6 +257,8 @@ public class SweepstakeController {
         if(user.isValid()){
             request.getSession().setAttribute(SESSION_USER, user.id);
             setSessionUsers(request, user, uiModel);
+            List<String> teams = sweepstake.getAllTeams();
+            uiModel.addAttribute("teams", teams);
             return "user";
         } else {
             return index(uiModel, request);
@@ -273,7 +279,7 @@ public class SweepstakeController {
         User user;
         if ("update".equals(request.getParameter("action"))) {
             User sessionUser = sessionUser(request);
-            user = updateUser(request, sweepstake);
+            user = saveUserDetails(request, sweepstake);
             if(user.id.equals(sessionUser.id)){
                 request.getSession().setAttribute(SESSION_USER, user.id);
             }
@@ -287,10 +293,12 @@ public class SweepstakeController {
         }
 
         setSessionUsers(request, user, uiModel);
+        List<String> teams = sweepstake.getAllTeams();
+        uiModel.addAttribute("teams", teams);
         return "user";
     }
 
-    private User updateUser(HttpServletRequest request, Sweepstake sweepstake) {
+    private User saveUserDetails(HttpServletRequest request, Sweepstake sweepstake) {
         System.out.println(String.format("updating user %s, %s %s",  request.getParameter("userId")
                 ,request.getParameter("displayName")
                 , request.getParameter("email")));
@@ -299,6 +307,8 @@ public class SweepstakeController {
                 , request.getParameter("email")
                 , null != request.getParameter("isAdmin")
                 , UUID.randomUUID().toString());
+        user.setTopScorer(request.getParameter("topScorer"));
+        user.setWinner(request.getParameter("winner"));
         user = sweepstake.saveUser(user);
         System.out.println(String.format("user %s updated %s", user.displayName, (user.admin?" -> admin <-":"")));
         return user;

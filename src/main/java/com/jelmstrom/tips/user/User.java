@@ -8,6 +8,8 @@ public class User {
     public final boolean admin;
     public final String token;
     public final String id;
+    private String topScorer;
+    private String winner;
 
     public User(String displayName, String email, boolean admin, String token) {
         this.displayName = displayName;
@@ -62,5 +64,35 @@ public class User {
 
     public static User emptyUser() {
        return new User("","", false, "");
+    }
+
+    public void setTopScorer(String topScorer) {
+        this.topScorer = topScorer;
+    }
+
+    public String getTopScorer() {
+        return topScorer;
+    }
+
+    public int score(User adminUser) {
+        int score = 0;
+
+        if(!StringUtils.isEmpty(topScorer)){
+            score += topScorer.equals(adminUser.topScorer)?10:0;
+        }
+
+        if(!StringUtils.isEmpty(winner)){
+            score += winner.equals(adminUser.winner)?10:0;
+        }
+
+        return score;
+    }
+
+    public void setWinner(String winner) {
+        this.winner = winner;
+    }
+
+    public String getWinner() {
+        return winner;
     }
 }

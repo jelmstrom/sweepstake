@@ -44,13 +44,15 @@ public class AcceptanceTest {
     private Date matchStart = new Date();
     private User user;
     private User playoffUser;
+    private User adminUser;
 
     @Before
     public void setup(){
         GROUP_REPOSITORY.store(groupA);
-        String ADMIN_ID = USER_REPOSITORY.store(new User("adminöö", ADMIN_EMAIL, true, "")).id;
+        adminUser = USER_REPOSITORY.store(new User("adminöö", ADMIN_EMAIL, true, ""));
         user = USER_REPOSITORY.store(new User("useråö", USER_EMAIL, false, "3213ou1+297319u"));
         playoffUser = USER_REPOSITORY.store(new User("playoff", "aaaaaaa", false, "1231243179287"));
+        String ADMIN_ID = adminUser.id;
 
         USER_ID = user.id;
 
@@ -108,7 +110,7 @@ public class AcceptanceTest {
        MATCH_REPOSITORY.matchCollection.drop();
        GROUP_REPOSITORY.groupCollection.drop();
        TABLE_REPOSITORY.tablePredictionCollection.drop();
-        USER_REPOSITORY.userCollection.drop();
+       USER_REPOSITORY.userCollection.drop();
     }
 
 
@@ -135,6 +137,34 @@ public class AcceptanceTest {
         int points = pointsForUser(playoffUser);
         assertThat(points, is(25));
     }
+
+    @Test
+    public void pointsForPlayoffUserShouldBe35WithCorrectTopScorer(){
+
+        adminUser.setTopScorer("someone");
+        playoffUser.setTopScorer("someone");
+        USER_REPOSITORY.store(adminUser);
+        USER_REPOSITORY.store(playoffUser);
+
+        int points = pointsForUser(playoffUser);
+        assertThat(points, is(35));
+    }
+
+    @Test
+    public void pointsForPlayoffUserShouldBe45WithCorrectTopScorerAndWinner(){
+
+        adminUser.setTopScorer("scorer");
+        adminUser.setWinner("winner");
+        playoffUser.setTopScorer("scorer");
+        playoffUser.setWinner("winner");
+
+        USER_REPOSITORY.store(adminUser);
+        USER_REPOSITORY.store(playoffUser);
+
+        int points = pointsForUser(playoffUser);
+        assertThat(points, is(45));
+    }
+
 
     @Test
     public void groupScoreForCompletelyCorrectTableShouldBeSeven(){
@@ -194,6 +224,8 @@ public class AcceptanceTest {
         int points = pointsForUser(user);
         assertThat(points, is(16));
     }
+
+
 
     @Test
     public void totalScoreCalculationHandlesEmptyActualGroupPositions(){

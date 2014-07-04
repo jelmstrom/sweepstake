@@ -85,7 +85,14 @@ public class Sweepstake {
         Map<String, Integer> tables = tablePredictions.stream()
                 .collect(toMap(pred -> pred.userId, pred -> pred.score(adminResults), Math::addExact));
 
-        Map<String, Integer> leaderboardmap =  mergeMaps(matchScores, tables);
+        List<User> users = userRepository.read();
+        Map<String, Integer> userPoint
+                =  users.stream().collect(toMap(user -> user.id, user ->  user.score(adminUser), Math::addExact));
+
+
+        Map<String, Integer> user =  mergeMaps(tables, userPoint);
+        Map<String, Integer> leaderboardmap =  mergeMaps(matchScores, user);
+
         return leaderboardmap.entrySet().stream()
                 .map(entry -> new LeaderboardEntry(userRepository.read(entry.getKey()), entry.getValue()))
                 .filter(entry -> !StringUtils.isEmpty(entry.user.id))

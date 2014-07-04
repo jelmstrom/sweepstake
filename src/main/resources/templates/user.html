@@ -35,70 +35,112 @@
     </div>
     <!--/.nav-collapse -->
 </div>
-<th:block th:if="${activeUser.isValid()}">
-<form action="/user" method="post">
-    <table width="50%">
-        <thead>
-        <th><h2>User details</h2></th>
-        </thead>
-        <tbody>
-        <tr>
-            <td width="50%">
-                <label>Display name</label>
-            </td>
-            <td width="50%">
-                <label th:text="${user.displayName}" th:if="${not(canEdit)}">displayname</label>
-                <input type="text" name="displayName" id="displayName" th:value="${user.displayName}" th:if="${canEdit}"/>
-            </td>
-        </tr>
-        <tr>
-            <td width="50%">
-                <label>Email</label>
-            </td>
-            <td width="50%">
-                <label th:text="${user.email}" th:if="${not(canEdit)}"></label>
-                <input type="text" name="email" id="email" th:value="${user.email}" th:if="${canEdit}"/>
-                <input type="hidden" name="userId" id="userId" th:value="${user.id}" th:if="${canEdit}"/>
+<table>
+    <tr>
+        <td width="40%">
+            <th:block th:if="${user.isValid()}">
+                <form action="/user" method="post">
+                    <table width="100%">
+                        <thead>
+                        <th><h2>User details</h2></th>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td width="50%">
+                                <label>Display name</label>
+                            </td>
+                            <td width="50%">
+                                <label th:text="${user.displayName}" th:if="${not(canEdit)}">displayname</label>
+                                <input type="text" name="displayName" id="displayName" th:value="${user.displayName}"
+                                       th:if="${canEdit}"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%">
+                                <label>Email</label>
+                            </td>
+                            <td width="50%">
+                                <label th:text="${user.email}" th:if="${not(canEdit)}"></label>
+                                <input type="text" name="email" id="email" th:value="${user.email}" th:if="${canEdit}"/>
+                                <input type="hidden" name="userId" id="userId" th:value="${user.id}"
+                                       th:if="${canEdit}"/>
 
-            </td>
-        </tr>
-        <tr th:if="${canEdit}">
-            <td></td>
-            <td><button class="btn btn-sm btn-success" type="submit" name="action" value="update">Update</button></td>
-        </tr>
-        </tbody>
-    </table>
-</form>
-</th:block>
-<th:block th:if="not ${activeUser.isValid()}">
-<form action="/user" method="post">
-    <table width="50%" th:if="${not activeUser.isValid()}">
-        <tbody>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%">
+                                <label>Top Scorer</label>
+                            </td>
+                            <td width="50%">
+                                <input type="text" name="topScorer" th:value="${user.getTopScorer()}" id="topScorer"/>
+                            </td>
+                        </tr>
+                        <tr></tr>
+                        <tr></tr>
+                        <tr>
+                            <td><label>Winner</label></td>
+                            <td><select th:name="winner">
+                                <option value="">--</option>
+                                <option th:each="team : ${teams}"
+                                        th:value="${team}"
+                                        th:text="${team}"
+                                        th:selected="${user.getWinner()}"> teams
+                                </option>
+                            </select></td>
+                        </tr>
+                        <tr th:if="${canEdit}">
+                            <td></td>
+                            <td>
+                                <button class="btn btn-sm btn-success" type="submit" name="action" value="update">
+                                    Update
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </th:block>
+        </td>
+        <td width="10%">&nbsp;</td>
+        <td width="40%">
+            <th:block th:if="not ${activeUser.isValid()}">
+                <form action="/user" method="post">
+                    <table width="100%" th:if="${not activeUser.isValid()}">
+                        <thead>
+                        <th><h2>Register</h2></th>
+                        </thead>
+                        <tbody>
 
-        <tr>
-            <td width="50%">
-                <label>Display name </label>
-            </td>
-            <td width="50%">
-                <input type="text" name="displayName" id="newDisplayName"/>
-            </td>
-        </tr>
-        <tr>
-            <td width="50%">
-                <label>Email</label>
-            </td>
-            <td width="50%">
-                <input type="text" name="email" id="newEmail"/>
-            </td>
-        </tr>
-        <tr>
-            <td></td>
-            <td><button class="btn btn-sm btn-success" type="submit" name="action" value="update">Register</button></td>
-        </tr>
-        </tbody>
-    </table>
-</form>
-</th:block>
-
+                        <tr>
+                            <td width="50%">
+                                <label>Display name </label>
+                            </td>
+                            <td width="50%">
+                                <input type="text" name="displayName" id="newDisplayName"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%">
+                                <label>Email</label>
+                            </td>
+                            <td width="50%">
+                                <input type="text" name="email" id="newEmail"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>
+                                <button class="btn btn-sm btn-success" type="submit" name="action" value="update">
+                                    Register
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </th:block>
+        </td>
+    </tr>
+</table>
 </body>
 </html>
