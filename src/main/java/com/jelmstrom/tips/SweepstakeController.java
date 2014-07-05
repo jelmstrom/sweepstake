@@ -19,7 +19,9 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static com.jelmstrom.tips.match.Match.Stage.*;
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 @SuppressWarnings("UnusedDeclaration")
 @Controller
@@ -42,7 +44,6 @@ public class SweepstakeController {
         return "index";
     }
 
-
     @RequestMapping(value = "/playoff",  method = RequestMethod.GET)
     public String playoff(Model uiModel, HttpServletRequest request) {
         User sessionUser = setSessionUsers(request, uiModel);
@@ -51,10 +52,8 @@ public class SweepstakeController {
         List<Match> quarterFinal = allMatches.stream().filter(match-> match.stage == QUARTER_FINAL).sorted().collect(toList());
         List<Match> semiFinal = allMatches.stream().filter(match-> match.stage == SEMI_FINAL).sorted().collect(toList());
         List<Match> finals = allMatches.stream().filter(match-> match.stage == FINAL || match.stage == BRONZE).sorted().collect(toList());
-        uiModel.addAttribute("last16", last16);
-        uiModel.addAttribute("quarterFinal", quarterFinal);
-        uiModel.addAttribute("semiFinal", semiFinal);
-        uiModel.addAttribute("final", finals);
+        uiModel.addAttribute("stages", Arrays.asList(last16,quarterFinal, semiFinal, finals));
+        uiModel.addAttribute("users", sweepstake.getUsers());
         List<String> teams = sweepstake.getAllTeams();
         uiModel.addAttribute("teams", teams);
         uiModel.addAttribute("playoffTreeEditable", new Boolean(sessionUser.admin || new Date().before(Config.playoffStart)));
@@ -62,7 +61,7 @@ public class SweepstakeController {
     }
     @RequestMapping(value = "/playoff",  method = RequestMethod.POST)
     public String savePlayoff(Model uiModel, HttpServletRequest request) {
-        User user = sweepstake.getUser(sessionUserId(request));
+        User user = sweepstake.getUser(request.getParameter("userId"));
         List<Match> resultList = getResults(request, user);
         System.out.println("Saving playoff results " + resultList);
         sweepstake.saveResults(resultList, user);
@@ -218,12 +217,10 @@ public class SweepstakeController {
         Optional<TablePrediction> maybe = predictions.stream().filter(entry -> entry.group.equals("Group" + groupLetter)).findFirst();
         List<Match> groupMatches = sweepstake.getMatches().stream().filter(match -> match.id.contains(groupLetter) && match.stage.equals(GROUP)).sorted().collect(toList());
         setSessionUsers(request, uiModel);
-
         uiModel.addAttribute("matches", groupMatches);
         uiModel.addAttribute("group", groupLetter);
         uiModel.addAttribute("currentStandings", tableEntries);
         uiModel.addAttribute("teams", tableEntries.stream().map(entry -> entry.team).collect(toList()));
-        uiModel.addAttribute("maybe", maybe.orElse(new TablePrediction("", "", Collections.emptyList())));
         uiModel.addAttribute("prediction", maybe.isPresent() ? maybe.get() : new TablePrediction("", "", Arrays.asList("", "", "", "")));
         return "group";
     }
@@ -305,7 +302,7 @@ public class SweepstakeController {
         User user = new User(request.getParameter("userId")
                 , request.getParameter("displayName")
                 , request.getParameter("email")
-                , null != request.getParameter("isAdmin")
+                , true
                 , UUID.randomUUID().toString());
         user.setTopScorer(request.getParameter("topScorer"));
         user.setWinner(request.getParameter("winner"));
@@ -334,7 +331,14 @@ public class SweepstakeController {
 
 
     private User setSessionUsers(HttpServletRequest request, Model uiModel) {
-        return setSessionUsers(request, User.emptyUser(), uiModel);
+        User user;
+        String userId = request.getParameter("userId");
+        if(StringUtils.isEmpty(userId)){
+            user = User.emptyUser();
+        } else {
+            user = sweepstake.getUser(userId);
+        }
+        return setSessionUsers(request, user , uiModel);
     }
 
     private User setSessionUsers(HttpServletRequest request, User user, Model model) {
