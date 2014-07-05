@@ -67,6 +67,16 @@
 
                             </td>
                         </tr>
+                        <tr th:if="${activeUser.admin}">
+                            <td width="50%">
+                                <label>Token</label>
+                            </td>
+                            <td width="50%">
+                                <label th:text="${user.token}">Token</label>
+                            </td>
+                        </tr>
+                        <tr></tr>
+                        <tr></tr>
                         <tr>
                             <td width="50%">
                                 <label>Top Scorer</label>
@@ -75,8 +85,6 @@
                                 <input type="text" name="topScorer" th:value="${user.getTopScorer()}" id="topScorer"/>
                             </td>
                         </tr>
-                        <tr></tr>
-                        <tr></tr>
                         <tr>
                             <td><label>Winner</label></td>
                             <td><select th:name="winner">

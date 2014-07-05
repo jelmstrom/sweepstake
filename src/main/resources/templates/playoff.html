@@ -93,12 +93,12 @@
                             </tr>
                             <tr>
                                 <td colspan="3">
-                                    <label th:if="${not activeUser.admin}" th:text="${match.homeTeam}"></label>
+                                    <label th:if="not ${user.admin and activeUser.admin }" th:text="${match.homeTeam}"></label>
                                     <input type="text"
                                            th:value="${match.homeTeam}"
                                            th:id="${match.id +'_homeTeam'}"
                                            th:name="${match.id +'_homeTeam'}"
-                                           th:if="${activeUser.admin}"/>
+                                           th:if="${user.admin and activeUser.admin }"/>
 
                                 </td>
                                 <td>
@@ -108,7 +108,7 @@
                                            th:value="${match.resultFor(user.id).homeGoals}"
                                            th:name="${match.id+'_h'}"
                                            th:if="${match.editable(activeUser) and canEdit} "/>
-                                    <th:block th:if="${activeUser.isValid()}">
+                                    <th:block th:if="${user.isValid()}">
                                         <label th:if="${not match.editable(activeUser)}"
                                                th:text="${match.resultFor(user.id).homeGoals}">
                                         </label>
@@ -117,12 +117,12 @@
                             </tr>
                             <tr>
                                 <td colspan="3">
-                                    <label th:if="${not activeUser.admin}" th:text="${match.awayTeam}"></label>
+                                    <label th:if="not ${user.admin and activeUser.admin}" th:text="${match.awayTeam}"></label>
                                     <input type="text"
                                            th:value="${match.awayTeam}"
                                            th:id="${match.id +'_awayTeam'}"
                                            th:name="${match.id +'_awayTeam'}"
-                                           th:if="${activeUser.admin}"/>
+                                           th:if="${user.admin and activeUser.admin}"/>
                                 </td>
                                 <td>
                                     <input type="text" size="2" maxlength="2"
@@ -131,7 +131,7 @@
                                            th:value="${match.resultFor(user.id).awayGoals}"
                                            th:name="${match.id+'_a'}"
                                            th:if="${match.editable(activeUser) and canEdit}"/>
-                                    <th:block th:if="${activeUser.isValid()}">
+                                    <th:block th:if="${user.isValid()}">
                                         <label th:if="${not match.editable(activeUser)}"
                                            th:text="${match.resultFor(user.id).awayGoals}"></label>
                                     </th:block>
