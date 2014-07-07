@@ -85,20 +85,21 @@ public class Match implements Comparable<Match>{
     }
 
     private int userScore(Result userResult) {
-        if(null == userResult || !userResult.isValid()
-           || correctResult == null || !correctResult.isValid()){
+        if(null == userResult || correctResult == null){
             return 0;
         }
 
         int points = 0;
-        if (userResult.winner() == correctResult.winner()) {
-            points++;
-        }
-        if (userResult.homeGoals.equals(correctResult.homeGoals)) {
-            points++;
-        }
-        if (userResult.awayGoals.equals(correctResult.awayGoals)) {
-            points++;
+        if(userResult.isValid() && correctResult.isValid()){
+            if (userResult.winner() == correctResult.winner()) {
+                points++;
+            }
+            if (userResult.homeGoals.equals(correctResult.homeGoals)) {
+                points++;
+            }
+            if (userResult.awayGoals.equals(correctResult.awayGoals)) {
+                points++;
+            }
         }
 
         if(!userResult.promoted.equals("") &&
