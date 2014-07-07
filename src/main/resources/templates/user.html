@@ -92,7 +92,7 @@
                                 <option th:each="team : ${teams}"
                                         th:value="${team}"
                                         th:text="${team}"
-                                        th:selected="${user.getWinner()}"> teams
+                                        th:selected="${team.equals(user.getWinner())    }"> teams
                                 </option>
                             </select></td>
                         </tr>
