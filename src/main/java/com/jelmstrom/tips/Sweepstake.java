@@ -2,6 +2,7 @@ package com.jelmstrom.tips;
 
 import com.jelmstrom.tips.group.Group;
 import com.jelmstrom.tips.group.GroupRepository;
+import com.jelmstrom.tips.group.NeoGroupRepository;
 import com.jelmstrom.tips.match.Match;
 import com.jelmstrom.tips.match.MatchRepository;
 import com.jelmstrom.tips.match.Result;
@@ -53,7 +54,7 @@ public class Sweepstake {
         matchRepository = new MatchRepository(context);
         userRepository = new UserRepository(context);
         tableRepository = new TableRepository(context);
-        groupRepository = new GroupRepository(context);
+        groupRepository = new NeoGroupRepository(context);
     }
 
     @RequestMapping("/matches")
@@ -125,7 +126,7 @@ public class Sweepstake {
     public List<TableEntry> currentStandingsForGroup(@PathVariable String groupName) {
 
         List<Result> adminResults = getMatches().stream().filter(match -> match.stage == GROUP).map(Match::getCorrectResult).filter(Objects::nonNull).collect(toList());
-        Group group = new GroupRepository(context).read(groupName);
+        Group group = groupRepository.read(groupName);
         return group.teams.stream().map(team -> TableEntry.recordForTeam(team, adminResults)).sorted().collect(toList());
     }
 
@@ -135,7 +136,7 @@ public class Sweepstake {
 
     public User saveUser(User user) {
         User updated = userRepository.store(user);
-        //new EmailNotification().sendMail(updated);
+        new EmailNotification().sendMail(updated);
         return updated;
     }
 

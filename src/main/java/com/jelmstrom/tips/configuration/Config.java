@@ -1,8 +1,12 @@
 package com.jelmstrom.tips.configuration;
 
+import com.jelmstrom.tips.group.Group;
+import com.jelmstrom.tips.group.NeoGroupRepository;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 public class Config {
@@ -22,6 +26,14 @@ public class Config {
         }
         startDate = tempDate;
         playoffStart = tempPlayoffStart;
+    }
+
+
+    public static void seed(){
+        NeoGroupRepository neoGroupRepository = new NeoGroupRepository("Champions League");
+        if(neoGroupRepository.allGroups().isEmpty()){
+            neoGroupRepository.store(new Group("A", Arrays.asList("Juventus","Malmö FF","Atletico Madrid", "Olympiakos")));
+        }
     }
 
 }

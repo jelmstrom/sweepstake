@@ -72,7 +72,15 @@
                                 <label>Token</label>
                             </td>
                             <td width="50%">
-                                <label th:text="${user.token}">Token</label>
+                                <label th:text="${user.token}" th:if="${activeUser.admin}">Token</label>
+                            </td>
+                        </tr>
+                        <tr th:if="${activeUser.admin}">
+                            <td width="50%">
+                                <label>Admin</label>
+                            </td>
+                            <td width="50%">
+                                <input type="checkbox" name="admin" value="admin" th:checked="${user.admin}" />
                             </td>
                         </tr>
                         <tr></tr>

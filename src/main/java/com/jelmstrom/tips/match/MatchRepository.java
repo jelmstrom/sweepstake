@@ -56,7 +56,7 @@ public class MatchRepository extends MongoRepository {
         }
     }
 
-    public BasicDBObject buildDbObject(Result result) {
+    private BasicDBObject buildDbObject(Result result) {
         if(result == null) {
             return null;
         }

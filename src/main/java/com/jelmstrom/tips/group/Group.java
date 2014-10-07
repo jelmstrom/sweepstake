@@ -5,6 +5,8 @@ import java.util.List;
 public class Group {
     public final String groupName;
     public final List<String> teams;
+    private Long groupId;
+
 
     public Group(String groupName, List<String> teams) {
         this.groupName = groupName;
@@ -35,5 +37,13 @@ public class Group {
 
     public String toString(){
         return groupName + " " + teams;
+    }
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
     }
 }

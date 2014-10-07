@@ -296,13 +296,15 @@ public class SweepstakeController {
     }
 
     private User saveUserDetails(HttpServletRequest request, Sweepstake sweepstake) {
-        System.out.println(String.format("updating user %s, %s %s",  request.getParameter("userId")
-                ,request.getParameter("displayName")
-                , request.getParameter("email")));
+        System.out.println(String.format("updating user %s, %s %s %s"
+                ,  request.getParameter("userId")
+                , request.getParameter("displayName")
+                , request.getParameter("email")
+                , request.getParameter("admin")));
         User user = new User(request.getParameter("userId")
                 , request.getParameter("displayName")
                 , request.getParameter("email")
-                , true
+                , null!=request.getParameter("admin")
                 , UUID.randomUUID().toString());
         user.setTopScorer(request.getParameter("topScorer"));
         user.setWinner(request.getParameter("winner"));

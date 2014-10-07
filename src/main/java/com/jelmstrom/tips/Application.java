@@ -1,5 +1,6 @@
 package com.jelmstrom.tips;
 
+import com.jelmstrom.tips.configuration.Config;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory;
@@ -22,6 +23,7 @@ public class Application {
 
     public static void main(String[] args) throws ParseException {
         SpringApplication.run(Application.class, args);
+        Config.seed();
     }
 
 

@@ -2,6 +2,8 @@ package com.jelmstrom.tips;
 
 import com.jelmstrom.tips.group.Group;
 import com.jelmstrom.tips.group.GroupRepository;
+import com.jelmstrom.tips.group.MongoGroupRepository;
+import com.jelmstrom.tips.group.NeoGroupRepository;
 import com.jelmstrom.tips.match.Match;
 import com.jelmstrom.tips.match.MatchRepository;
 import com.jelmstrom.tips.match.Result;
@@ -32,7 +34,7 @@ public class AcceptanceTest {
     public static final UserRepository USER_REPOSITORY = new UserRepository(TEST_REPO);
     public static final MatchRepository MATCH_REPOSITORY = new MatchRepository(TEST_REPO);
     private static final TableRepository TABLE_REPOSITORY = new TableRepository(TEST_REPO);
-    private static final GroupRepository GROUP_REPOSITORY = new GroupRepository(TEST_REPO);
+    private static final NeoGroupRepository GROUP_REPOSITORY = new NeoGroupRepository(TEST_REPO);
     private final String brazil = "Brazil";
     private final String germany = "Germany";
     private final String australia = "Australia";
@@ -108,7 +110,7 @@ public class AcceptanceTest {
     @After
     public void tearDown(){
        MATCH_REPOSITORY.matchCollection.drop();
-       GROUP_REPOSITORY.groupCollection.drop();
+       GROUP_REPOSITORY.dropAll();
        TABLE_REPOSITORY.tablePredictionCollection.drop();
        USER_REPOSITORY.userCollection.drop();
     }
@@ -118,7 +120,6 @@ public class AcceptanceTest {
     public void currentStandingsForGroupAShouldBeBrazilArgentinaAustraliaGermany(){
 
         List<TableEntry> table = sweepstake.currentStandingsForGroup(groupA.groupName);
-
         assertThat(table.get(0).team, is(brazil));
         assertThat(table.get(1).team, is(argentina));
         assertThat(table.get(2).team, is(australia));

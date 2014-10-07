@@ -1,7 +1,7 @@
 package com.jelmstrom.tips;
 
 import com.jelmstrom.tips.group.Group;
-import com.jelmstrom.tips.group.GroupRepository;
+import com.jelmstrom.tips.group.MongoGroupRepository;
 import com.jelmstrom.tips.match.Match;
 import com.jelmstrom.tips.match.MatchRepository;
 import com.jelmstrom.tips.match.Result;
@@ -26,7 +26,7 @@ public class IntegrationTest {
 
     private MatchRepository matchRepo = new MatchRepository("testRepo");
     private TableRepository tableRepo = new TableRepository("testRepo");
-    private GroupRepository groupRepo = new GroupRepository("testRepo");
+    private MongoGroupRepository groupRepo = new MongoGroupRepository("testRepo");
     private UserRepository userRepo = new UserRepository("userRepo");
 
     @After
