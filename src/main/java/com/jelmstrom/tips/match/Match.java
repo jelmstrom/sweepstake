@@ -21,7 +21,7 @@ public class Match implements Comparable<Match>{
     public final HashSet<Result> results;
     public final String id;
     private Result correctResult;
-
+    private Long nodeId;
 
 
     public enum Stage {
@@ -49,6 +49,15 @@ public class Match implements Comparable<Match>{
         this.id = id;
         this.stage = stage;
         results = new HashSet<>();
+    }
+
+
+    public Long getNodeId() {
+        return nodeId;
+    }
+
+    public void setNodeId(Long nodeId) {
+        this.nodeId = nodeId;
     }
 
     public void add(Result result){

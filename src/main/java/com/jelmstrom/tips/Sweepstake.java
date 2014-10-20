@@ -4,7 +4,7 @@ import com.jelmstrom.tips.group.Group;
 import com.jelmstrom.tips.group.GroupRepository;
 import com.jelmstrom.tips.group.NeoGroupRepository;
 import com.jelmstrom.tips.match.Match;
-import com.jelmstrom.tips.match.MatchRepository;
+import com.jelmstrom.tips.match.MongoMatchRepository;
 import com.jelmstrom.tips.match.Result;
 import com.jelmstrom.tips.table.TableEntry;
 import com.jelmstrom.tips.table.TablePrediction;
@@ -34,7 +34,7 @@ import static java.util.stream.Collectors.toMap;
 public class Sweepstake {
     private final Logger logger = LogManager.getLogger(Sweepstake.class);
     private final String context;
-    private final MatchRepository matchRepository;
+    private final MongoMatchRepository matchRepository;
     private final UserRepository userRepository;
     private final TableRepository tableRepository;
     private final GroupRepository groupRepository;
@@ -51,7 +51,7 @@ public class Sweepstake {
 
     public Sweepstake(String context) {
         this.context = context;
-        matchRepository = new MatchRepository(context);
+        matchRepository = new MongoMatchRepository(context);
         userRepository = new UserRepository(context);
         tableRepository = new TableRepository(context);
         groupRepository = new NeoGroupRepository(context);
@@ -127,6 +127,7 @@ public class Sweepstake {
 
         List<Result> adminResults = getMatches().stream().filter(match -> match.stage == GROUP).map(Match::getCorrectResult).filter(Objects::nonNull).collect(toList());
         Group group = groupRepository.read(groupName);
+        System.out.printf("Group %s :{%s}", groupName, group);
         return group.teams.stream().map(team -> TableEntry.recordForTeam(team, adminResults)).sorted().collect(toList());
     }
 

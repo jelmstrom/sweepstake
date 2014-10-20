@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.jelmstrom.tips.persistence.NeoRepository.GROUP_LABEL;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
@@ -27,7 +28,7 @@ public class NeoGroupRepositoryTest {
 
     @After
     public void after(){
-        neoGroupRepository.dropAll();
+        neoGroupRepository.dropAll(GROUP_LABEL);
     }
 
     @Test

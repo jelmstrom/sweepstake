@@ -1,10 +1,8 @@
 package com.jelmstrom.tips.group;
 
 import com.jelmstrom.tips.persistence.NeoRepository;
-import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.ResourceIterable;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
 
@@ -28,7 +26,7 @@ public class NeoGroupRepository extends NeoRepository implements GroupRepository
         try(Transaction tx = vmTips.beginTx()){
             Node node;
             if(null == group.getGroupId()){
-                node = vmTips.createNode(groupLabel);
+                node = vmTips.createNode(GROUP_LABEL);
             } else {
                 node = vmTips.getNodeById(group.getGroupId());
             }
@@ -42,7 +40,7 @@ public class NeoGroupRepository extends NeoRepository implements GroupRepository
     @Override
     public Group read(String groupId) {
         try(Transaction tx = vmTips.beginTx()){
-            ExecutionResult execute = engine.execute("MATCH (n:" + groupLabel.name() + "{Name : '"+groupId+"'}) return n");
+            ExecutionResult execute = engine.execute("MATCH (n:" + GROUP_LABEL.name() + "{Name : '"+groupId+"'}) return n");
             ResourceIterator<Node> nodes = execute.columnAs("n");
             List<Group> groups = new ArrayList<>();
             nodes.forEachRemaining(item -> groups.add(buildGroup(item)));
@@ -73,21 +71,12 @@ public class NeoGroupRepository extends NeoRepository implements GroupRepository
     @Override
     public List<Group> allGroups() {
         try(Transaction tx = vmTips.beginTx()){
-            ExecutionResult execute = engine.execute("MATCH (n:" + groupLabel.name() + ") return n");
+            ExecutionResult execute = engine.execute("MATCH (n:" + GROUP_LABEL.name() + ") return n");
             ResourceIterator<Node> nodes = execute.columnAs("n");
             List<Group> groups = new ArrayList<>();
             nodes.forEachRemaining(item -> groups.add(buildGroup(item)));
             tx.success();
             return groups;
-        }
-    }
-
-    public void dropAll() {
-        try(Transaction tx = vmTips.beginTx()){
-            ExecutionResult execute = engine.execute("MATCH (n:" + groupLabel.name() + ") return n");
-            ResourceIterator<Node> nodes = execute.columnAs("n");
-            nodes.forEachRemaining(Node::delete);
-            tx.success();
         }
     }
 }

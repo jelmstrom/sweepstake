@@ -19,9 +19,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static com.jelmstrom.tips.match.Match.Stage.*;
-import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 
 @SuppressWarnings("UnusedDeclaration")
 @Controller
@@ -56,7 +54,7 @@ public class SweepstakeController {
         uiModel.addAttribute("users", sweepstake.getUsers());
         List<String> teams = sweepstake.getAllTeams();
         uiModel.addAttribute("teams", teams);
-        uiModel.addAttribute("playoffTreeEditable", new Boolean(sessionUser.admin || new Date().before(Config.playoffStart)));
+        uiModel.addAttribute("playoffTreeEditable", (sessionUser.admin || new Date().before(Config.playoffStart)));
         return "playoff";
     }
     @RequestMapping(value = "/playoff",  method = RequestMethod.POST)
@@ -212,7 +210,7 @@ public class SweepstakeController {
     @RequestMapping(value = "/group/{groupLetter}", method = RequestMethod.GET)
     public String showGroup(Model uiModel, @PathVariable String groupLetter, HttpServletRequest request) {
 
-        List<TableEntry> tableEntries = sweepstake.currentStandingsForGroup("Group" + groupLetter);
+        List<TableEntry> tableEntries = sweepstake.currentStandingsForGroup(groupLetter);
         List<TablePrediction> predictions = sweepstake.getPredictions(sessionUserId(request));
         Optional<TablePrediction> maybe = predictions.stream().filter(entry -> entry.group.equals("Group" + groupLetter)).findFirst();
         List<Match> groupMatches = sweepstake.getMatches().stream().filter(match -> match.id.contains(groupLetter) && match.stage.equals(GROUP)).sorted().collect(toList());
@@ -360,7 +358,7 @@ public class SweepstakeController {
 
     private User sessionUser(HttpServletRequest request) {
         String currentSessionUser = sessionUserId(request);
-        System.out.println(String.format("Session user : %s", currentSessionUser));
+        System.out.printf("Session user : %s", currentSessionUser);
         return sweepstake.getUser(currentSessionUser);
     }
 }

@@ -31,7 +31,9 @@ public class Config {
 
     public static void seed(){
         NeoGroupRepository neoGroupRepository = new NeoGroupRepository("Champions League");
+        System.out.printf("Groups : %d", neoGroupRepository.allGroups().size());
         if(neoGroupRepository.allGroups().isEmpty()){
+            System.out.printf("Adding group");
             neoGroupRepository.store(new Group("A", Arrays.asList("Juventus","Malmö FF","Atletico Madrid", "Olympiakos")));
         }
     }

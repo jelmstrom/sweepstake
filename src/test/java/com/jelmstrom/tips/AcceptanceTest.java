@@ -1,12 +1,11 @@
 package com.jelmstrom.tips;
 
 import com.jelmstrom.tips.group.Group;
-import com.jelmstrom.tips.group.GroupRepository;
-import com.jelmstrom.tips.group.MongoGroupRepository;
 import com.jelmstrom.tips.group.NeoGroupRepository;
 import com.jelmstrom.tips.match.Match;
-import com.jelmstrom.tips.match.MatchRepository;
+import com.jelmstrom.tips.match.MongoMatchRepository;
 import com.jelmstrom.tips.match.Result;
+import com.jelmstrom.tips.persistence.NeoRepository;
 import com.jelmstrom.tips.table.TableEntry;
 import com.jelmstrom.tips.table.TablePrediction;
 import com.jelmstrom.tips.table.TableRepository;
@@ -32,7 +31,7 @@ public class AcceptanceTest {
     public static final String TEST_REPO = "testRepo";
     private String USER_ID;
     public static final UserRepository USER_REPOSITORY = new UserRepository(TEST_REPO);
-    public static final MatchRepository MATCH_REPOSITORY = new MatchRepository(TEST_REPO);
+    public static final MongoMatchRepository MATCH_REPOSITORY = new MongoMatchRepository(TEST_REPO);
     private static final TableRepository TABLE_REPOSITORY = new TableRepository(TEST_REPO);
     private static final NeoGroupRepository GROUP_REPOSITORY = new NeoGroupRepository(TEST_REPO);
     private final String brazil = "Brazil";
@@ -110,7 +109,7 @@ public class AcceptanceTest {
     @After
     public void tearDown(){
        MATCH_REPOSITORY.matchCollection.drop();
-       GROUP_REPOSITORY.dropAll();
+       GROUP_REPOSITORY.dropAll(NeoRepository.GROUP_LABEL);
        TABLE_REPOSITORY.tablePredictionCollection.drop();
        USER_REPOSITORY.userCollection.drop();
     }

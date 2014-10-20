@@ -46,4 +46,7 @@ public class Group {
     public void setGroupId(Long groupId) {
         this.groupId = groupId;
     }
+
+
+
 }

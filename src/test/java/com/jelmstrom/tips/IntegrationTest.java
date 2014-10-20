@@ -3,7 +3,7 @@ package com.jelmstrom.tips;
 import com.jelmstrom.tips.group.Group;
 import com.jelmstrom.tips.group.MongoGroupRepository;
 import com.jelmstrom.tips.match.Match;
-import com.jelmstrom.tips.match.MatchRepository;
+import com.jelmstrom.tips.match.MongoMatchRepository;
 import com.jelmstrom.tips.match.Result;
 import com.jelmstrom.tips.table.TablePrediction;
 import com.jelmstrom.tips.table.TableRepository;
@@ -24,7 +24,7 @@ import static org.junit.Assert.assertThat;
 public class IntegrationTest {
 
 
-    private MatchRepository matchRepo = new MatchRepository("testRepo");
+    private MongoMatchRepository matchRepo = new MongoMatchRepository("testRepo");
     private TableRepository tableRepo = new TableRepository("testRepo");
     private MongoGroupRepository groupRepo = new MongoGroupRepository("testRepo");
     private UserRepository userRepo = new UserRepository("userRepo");

@@ -2,9 +2,8 @@ package com.jelmstrom.tips.persistence;
 
 
 import org.neo4j.cypher.javacompat.ExecutionEngine;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.cypher.javacompat.ExecutionResult;
+import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 public class NeoRepository {
@@ -33,18 +32,32 @@ public class NeoRepository {
         } );
     }
 
-    public static enum RelationShips implements RelationshipType {
+    public static enum Relationships implements RelationshipType {
         MATCH_PREDICTION,
         USER_PREDICTION,
-        MATCH_IN;
+        MATCH_IN
     }
 
-    protected static Label groupLabel =  new Label() {
+    public void dropAll(Label label) {
+        try(Transaction tx = vmTips.beginTx()){
+            ExecutionResult execute = engine.execute("MATCH (n:" + label.name() + ") return n");
+            ResourceIterator<Node> nodes = execute.columnAs("n");
+            nodes.forEachRemaining(Node::delete);
+            tx.success();
+        }
+    }
+
+    public static final Label GROUP_LABEL =  new Label() {
         @Override
         public String name() {
             return "Group";
         }
     };
 
-
+    public static final Label MATCH_LABEL =  new Label() {
+        @Override
+        public String name() {
+            return "Match";
+        }
+    };
 }
