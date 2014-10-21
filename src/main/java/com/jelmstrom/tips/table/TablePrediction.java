@@ -14,7 +14,7 @@ public class TablePrediction {
     public final String group;
     public final List<String> tablePrediction;
     public final String userId;
-
+    private Long id;
 
 
     public TablePrediction(String group, String userId, List<String> tablePrediction) {
@@ -91,5 +91,13 @@ public class TablePrediction {
         result = 31 * result + (group != null ? group.hashCode() : 0);
         result = 31 * result + (tablePrediction != null ? tablePrediction.hashCode() : 0);
         return result;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

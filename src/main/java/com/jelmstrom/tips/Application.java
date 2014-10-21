@@ -21,10 +21,15 @@ import java.util.EnumSet;
 @ComponentScan
 public class Application {
 
-    public static void main(String[] args) throws ParseException {
+    public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
         System.out.println("=============> Seeding");
-        Config.seed();
+        try {
+            Config.seed();
+        } catch (ParseException e) {
+            System.out.printf("Failed to seed data : %s" , e.getMessage());
+            e.printStackTrace();
+        }
     }
 
 

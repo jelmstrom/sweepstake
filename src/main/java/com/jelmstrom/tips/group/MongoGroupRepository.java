@@ -6,6 +6,7 @@ import com.mongodb.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
 
@@ -14,6 +15,7 @@ public class MongoGroupRepository extends MongoRepository implements GroupReposi
     public final DBCollection groupCollection;
     public final String NAME = "name";
     public final String TEAMS = "teams";
+    public final String ID = "_id";
 
     public MongoGroupRepository(String context) {
         super(context);
@@ -22,13 +24,14 @@ public class MongoGroupRepository extends MongoRepository implements GroupReposi
 
     @Override
     public void store(Group group){
-            BasicDBObject dbGroup = new BasicDBObject(NAME, group.groupName)
+            BasicDBObject toStore = new BasicDBObject(NAME, group.groupName)
                     .append(TEAMS, group.teams);
-        if(read(group.groupName).teams.isEmpty()){
-            groupCollection.insert(dbGroup);
+        if(null == group.getGroupId()){
+            group.setGroupId(UUID.randomUUID().getMostSignificantBits());
+            toStore.append(ID, group.getGroupId());
+            groupCollection.insert(toStore);
         } else  {
-            groupCollection.update(new BasicDBObject(NAME, group.groupName)
-                    , dbGroup);
+            groupCollection.update(new BasicDBObject(ID, group.getGroupId()), toStore);
         }
     }
 
@@ -47,10 +50,17 @@ public class MongoGroupRepository extends MongoRepository implements GroupReposi
         return groups.toArray().stream().map(group -> buildGroup(group)).collect(toList());
     }
 
+    @Override
+    public void dropAll() {
+        groupCollection.drop();
+    }
+
     private Group buildGroup(DBObject dbGroup) {
 
         List<String> teams = new ArrayList<>();
         ((BasicDBList) dbGroup.get(TEAMS)).forEach(entry -> teams.add((String) entry));
-        return new Group(dbGroup.get(NAME).toString(), teams);
+        Group group = new Group(dbGroup.get(NAME).toString(), teams);
+        group.setGroupId(Long.parseLong(dbGroup.get(ID).toString()));
+        return group;
     }
 }

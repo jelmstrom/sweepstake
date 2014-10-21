@@ -1,14 +1,12 @@
 package com.jelmstrom.tips;
 
 import com.jelmstrom.tips.group.Group;
+import com.jelmstrom.tips.group.GroupRepository;
 import com.jelmstrom.tips.group.NeoGroupRepository;
-import com.jelmstrom.tips.match.Match;
-import com.jelmstrom.tips.match.MongoMatchRepository;
+import com.jelmstrom.tips.match.*;
 import com.jelmstrom.tips.match.Result;
-import com.jelmstrom.tips.persistence.NeoRepository;
-import com.jelmstrom.tips.table.TableEntry;
-import com.jelmstrom.tips.table.TablePrediction;
-import com.jelmstrom.tips.table.TableRepository;
+import com.jelmstrom.tips.table.*;
+import com.jelmstrom.tips.user.NeoUserRepository;
 import com.jelmstrom.tips.user.User;
 import com.jelmstrom.tips.user.UserRepository;
 import org.junit.After;
@@ -30,10 +28,10 @@ public class AcceptanceTest {
     public static final String USER_EMAIL = "Johan";
     public static final String TEST_REPO = "testRepo";
     private String USER_ID;
-    public static final UserRepository USER_REPOSITORY = new UserRepository(TEST_REPO);
-    public static final MongoMatchRepository MATCH_REPOSITORY = new MongoMatchRepository(TEST_REPO);
-    private static final TableRepository TABLE_REPOSITORY = new TableRepository(TEST_REPO);
-    private static final NeoGroupRepository GROUP_REPOSITORY = new NeoGroupRepository(TEST_REPO);
+    public static final UserRepository USER_REPOSITORY = new NeoUserRepository(TEST_REPO);
+    public static final MatchRepository MATCH_REPOSITORY = new NeoMatchRepository(TEST_REPO);
+    private static final TableRepository TABLE_REPOSITORY = new NeoTableRepository(TEST_REPO);
+    private static final GroupRepository GROUP_REPOSITORY = new NeoGroupRepository(TEST_REPO);
     private final String brazil = "Brazil";
     private final String germany = "Germany";
     private final String australia = "Australia";
@@ -50,9 +48,9 @@ public class AcceptanceTest {
     @Before
     public void setup(){
         GROUP_REPOSITORY.store(groupA);
-        adminUser = USER_REPOSITORY.store(new User("adminöö", ADMIN_EMAIL, true, ""));
-        user = USER_REPOSITORY.store(new User("useråö", USER_EMAIL, false, "3213ou1+297319u"));
-        playoffUser = USER_REPOSITORY.store(new User("playoff", "aaaaaaa", false, "1231243179287"));
+        adminUser = USER_REPOSITORY.store(new User("admin", ADMIN_EMAIL, true, ""));
+        user = USER_REPOSITORY.store(new User("user", USER_EMAIL, false, "3213ou1+297319u"));
+        playoffUser = USER_REPOSITORY.store(new User("playoff", "mail@null", false, "1231243179287"));
         String ADMIN_ID = adminUser.id;
 
         USER_ID = user.id;
@@ -108,10 +106,10 @@ public class AcceptanceTest {
 
     @After
     public void tearDown(){
-       MATCH_REPOSITORY.matchCollection.drop();
-       GROUP_REPOSITORY.dropAll(NeoRepository.GROUP_LABEL);
-       TABLE_REPOSITORY.tablePredictionCollection.drop();
-       USER_REPOSITORY.userCollection.drop();
+       MATCH_REPOSITORY.dropAll();
+       GROUP_REPOSITORY.dropAll();
+       TABLE_REPOSITORY.dropAll();
+       USER_REPOSITORY.dropAll();
     }
 
 

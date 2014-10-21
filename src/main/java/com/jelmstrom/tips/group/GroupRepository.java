@@ -8,4 +8,6 @@ public interface GroupRepository {
     Group read(String groupName);
 
     List<Group> allGroups();
+
+    void dropAll();
 }

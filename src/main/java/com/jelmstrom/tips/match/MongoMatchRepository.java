@@ -8,7 +8,6 @@ import com.mongodb.DBObject;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import static com.jelmstrom.tips.match.Match.Stage;
 import static java.util.stream.Collectors.toList;
@@ -81,6 +80,8 @@ public class MongoMatchRepository extends MongoRepository implements MatchReposi
         return matchCollection.find().toArray().parallelStream().map(this::buildMatch).collect(toList());
     }
 
+
+
     private Match buildMatch(DBObject dbMatch) {
         Stage stage = Stage.GROUP;
         String dbStage = (String) dbMatch.get(STAGE);
@@ -125,5 +126,10 @@ public class MongoMatchRepository extends MongoRepository implements MatchReposi
     @Override
     public void store(List<Match> matches) {
         matches.stream().forEach(this::store);
+    }
+
+    @Override
+    public void dropAll() {
+        matchCollection.drop();
     }
 }

@@ -2,6 +2,8 @@ package com.jelmstrom.tips.configuration;
 
 import com.jelmstrom.tips.group.Group;
 import com.jelmstrom.tips.group.NeoGroupRepository;
+import com.jelmstrom.tips.match.Match;
+import com.jelmstrom.tips.match.NeoMatchRepository;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -29,12 +31,18 @@ public class Config {
     }
 
 
-    public static void seed(){
+    public static void seed() throws ParseException {
         NeoGroupRepository neoGroupRepository = new NeoGroupRepository("Champions League");
-        System.out.printf("Groups : %d", neoGroupRepository.allGroups().size());
+        NeoMatchRepository matches = new NeoMatchRepository("Champions League");
+        System.out.printf("Groups : %d\n", neoGroupRepository.allGroups().size());
         if(neoGroupRepository.allGroups().isEmpty()){
-            System.out.printf("Adding group");
+            System.out.println("Adding group");
             neoGroupRepository.store(new Group("A", Arrays.asList("Juventus","Malmö FF","Atletico Madrid", "Olympiakos")));
+        }
+
+        if(matches.read().isEmpty()){
+            System.out.println("Adding matches");
+            matches.store(new Match("Juventus", "Malmö FF", new SimpleDateFormat("yyyy-MM-dd HH:mm").parse("2014-09-16 20:45"), "A1", Match.Stage.GROUP));
         }
     }
 

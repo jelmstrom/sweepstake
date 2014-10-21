@@ -1,8 +1,5 @@
-package com.jelmstrom.tips;
+package com.jelmstrom.tips.match;
 
-
-import com.jelmstrom.tips.match.Match;
-import com.jelmstrom.tips.match.NeoMatchRepository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,7 +8,6 @@ import java.util.Date;
 import java.util.List;
 
 import static com.jelmstrom.tips.match.Match.Stage.GROUP;
-import static com.jelmstrom.tips.persistence.NeoRepository.MATCH_LABEL;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
@@ -29,7 +25,7 @@ public class NeoMatchRepositoryTest {
 
     @After
     public void after(){
-        neoMatchRepository.dropAll(MATCH_LABEL);
+        neoMatchRepository.dropAll();
     }
 
     @Test

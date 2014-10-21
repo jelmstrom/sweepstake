@@ -1,8 +1,5 @@
-package com.jelmstrom.tips;
+package com.jelmstrom.tips.group;
 
-
-import com.jelmstrom.tips.group.Group;
-import com.jelmstrom.tips.group.NeoGroupRepository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,14 +7,13 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.jelmstrom.tips.persistence.NeoRepository.GROUP_LABEL;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 
-public class NeoGroupRepositoryTest {
+public class MongoGroupRepositoryTest {
 
-    private NeoGroupRepository neoGroupRepository =  new NeoGroupRepository("test");
+    private GroupRepository neoGroupRepository =  new MongoGroupRepository("test");
     private Group group;
 
     @Before
@@ -28,7 +24,7 @@ public class NeoGroupRepositoryTest {
 
     @After
     public void after(){
-        neoGroupRepository.dropAll(GROUP_LABEL);
+        neoGroupRepository.dropAll();
     }
 
     @Test

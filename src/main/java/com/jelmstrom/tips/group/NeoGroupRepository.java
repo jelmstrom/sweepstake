@@ -79,4 +79,9 @@ public class NeoGroupRepository extends NeoRepository implements GroupRepository
             return groups;
         }
     }
+
+    @Override
+    public void dropAll() {
+        super.dropAll(GROUP_LABEL);
+    }
 }

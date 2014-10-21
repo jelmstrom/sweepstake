@@ -10,6 +10,7 @@ public class User {
     public final String id;
     private String topScorer;
     private String winner;
+    private Long nodeId;
 
     public User(String displayName, String email, boolean admin, String token) {
         this.displayName = displayName;

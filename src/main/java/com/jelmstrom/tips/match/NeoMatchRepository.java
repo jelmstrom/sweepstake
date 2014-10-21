@@ -2,17 +2,15 @@ package com.jelmstrom.tips.match;
 
 import com.jelmstrom.tips.persistence.NeoRepository;
 import org.neo4j.cypher.javacompat.ExecutionResult;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.ResourceIterator;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.*;
+import org.neo4j.graphdb.traversal.Evaluators;
+import org.neo4j.graphdb.traversal.TraversalDescription;
+import org.neo4j.graphdb.traversal.Traverser;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
-/**
- * Created by jelmstrom on 20/10/14.
- */
+import static org.neo4j.graphdb.traversal.Evaluators.*;
+
 public class NeoMatchRepository extends NeoRepository implements MatchRepository{
 
     public NeoMatchRepository(String context) {
@@ -23,32 +21,59 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
     @Override
     public void store(Match match) {
         try(Transaction tx = vmTips.beginTx()){
-            Node node;
+            Node matchNode;
             if(match.getNodeId() == null){
-                node = vmTips.createNode(MATCH_LABEL)
-                ;
+                matchNode = vmTips.createNode(MATCH_LABEL);
+                match.setNodeId(matchNode.getId());
             } else {
-                node = vmTips.getNodeById(match.getNodeId());
+                matchNode = vmTips.getNodeById(match.getNodeId());
             }
 
-            node.setProperty("awayTeam", match.awayTeam);
-            node.setProperty("homeTeam", match.homeTeam);
-            node.setProperty("matchId", match.id);
-            node.setProperty("matchStart", match.matchStart.getTime());
-            node.setProperty("stage", match.stage.toString());
-            match.setNodeId(node.getId());
+            matchNode.setProperty("awayTeam", match.awayTeam);
+            matchNode.setProperty("homeTeam", match.homeTeam);
+            matchNode.setProperty("matchId", match.id); //todo: relationship( ->Group)
+            matchNode.setProperty("matchStart", match.matchStart.getTime());
+            matchNode.setProperty("stage", match.stage.toString());
+            if(match.hasResult()){
+                matchNode.setProperty("homeGoals", match.getCorrectResult().homeGoals);
+                matchNode.setProperty("awayGoals", match.getCorrectResult().awayGoals);
+                matchNode.setProperty("adminUser", match.getCorrectResult().userId);
+                matchNode.setProperty("promoted", match.getCorrectResult().promoted);
+            }
+            storeMatches(match.results, matchNode);
             tx.success();
+        }
+    }
+
+    private void storeMatches(HashSet<Result> results, Node parent) {
+        for(Result result : results){
+            Node resultNode;
+            if(null == result.getId()){
+                resultNode = vmTips.createNode(RESULT_LABEL);
+                parent.createRelationshipTo(resultNode, Relationships.MATCH_PREDICTION);
+            } else {
+                resultNode = vmTips.getNodeById(result.getId());
+            }
+            result.setId(resultNode.getId());
+            resultNode.setProperty("awayGoals", result.awayGoals.toString());
+            resultNode.setProperty("homeGoals", result.homeGoals.toString());
+            resultNode.setProperty("promoted", result.promoted);
+            resultNode.setProperty("userId", result.userId); //todo: relationship (-> User)
         }
     }
 
     @Override
     public Match read(String matchId) {
         try(Transaction tx = vmTips.beginTx()){
-            ExecutionResult execute = engine.execute("MATCH (n:" + MATCH_LABEL.name() + "{matchId : '"+matchId+"'}) return n");
+            ExecutionResult execute = engine.execute(
+                    String.format("MATCH (n:%s{matchId : '%s'}) return n",
+                            MATCH_LABEL.name()
+                            , matchId));
             ResourceIterator<Node> nodes = execute.columnAs("n");
             List<Match> matches = new ArrayList<>();
             nodes.forEachRemaining(item -> matches.add(buildMatch(item)));
             tx.success();
+
             if(matches.isEmpty()){
                 return new Match("", "", null, matchId);
             } else if (matches.size() == 1){
@@ -59,17 +84,51 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
         }
     }
 
-    private Match buildMatch(Node item) {
+    private Match buildMatch(Node matchNode) {
         Match match = new Match(
-                item.getProperty("homeTeam").toString(),
-                item.getProperty("awayTeam").toString(),
-                new Date(Long.parseLong(item.getProperty("matchStart").toString())),
-                item.getProperty("matchId").toString(),
-                Match.Stage.valueOf(item.getProperty("stage").toString())
+                matchNode.getProperty("homeTeam").toString(),
+                matchNode.getProperty("awayTeam").toString(),
+                new Date(Long.parseLong(matchNode.getProperty("matchStart").toString())),
+                matchNode.getProperty("matchId").toString(), //todo: relationship
+                Match.Stage.valueOf(matchNode.getProperty("stage").toString())
 
         );
-        match.setNodeId(item.getId());
+
+        if(matchNode.hasProperty("homeGoals")){
+            Result correct = new Result(match
+                        , Integer.parseInt(matchNode.getProperty("homeGoals").toString())
+                        , Integer.parseInt(matchNode.getProperty("awayGoals").toString())
+                        , matchNode.getProperty("adminUser").toString() //todo : relationship.
+                        , (String)matchNode.getProperty("promoted") //  nullable
+            );
+
+            match.setCorrectResult(correct);
+        }
+
+        Collection<Result> results = new HashSet<>();
+        TraversalDescription td = vmTips.traversalDescription().breadthFirst()
+                .relationships(Relationships.MATCH_PREDICTION, Direction.OUTGOING)
+                .evaluator(includeWhereLastRelationshipTypeIs(Relationships.MATCH_PREDICTION));
+        Traverser traverse = td.traverse(matchNode);
+        for(Path path: traverse){
+            Node resultNode = path.endNode();
+            Result result = buildResult(resultNode, match);
+            results.add(result);
+        }
+
+        match.results.addAll(results);
+        match.setNodeId(matchNode.getId());
         return match;
+    }
+
+    private Result buildResult(Node resultNode, Match match) {
+        Result result =  new Result(match
+                    , Integer.parseInt(resultNode.getProperty("homeGoals").toString())
+                    , Integer.parseInt(resultNode.getProperty("awayGoals").toString())
+                    , resultNode.getProperty("userId").toString()
+                    , (String)resultNode.getProperty("promoted"));
+        result.setId(resultNode.getId());
+        return result;
     }
 
     @Override
@@ -89,7 +148,11 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
         for(Match match : matches){
             store(match);
         }
+    }
 
+    @Override
+    public void dropAll() {
+        super.dropAll(RESULT_LABEL);
+        super.dropAll(MATCH_LABEL);
     }
 }
-

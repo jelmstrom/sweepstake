@@ -5,11 +5,11 @@ import com.jelmstrom.tips.group.MongoGroupRepository;
 import com.jelmstrom.tips.match.Match;
 import com.jelmstrom.tips.match.MongoMatchRepository;
 import com.jelmstrom.tips.match.Result;
+import com.jelmstrom.tips.table.MongoTableRepository;
 import com.jelmstrom.tips.table.TablePrediction;
-import com.jelmstrom.tips.table.TableRepository;
 import com.jelmstrom.tips.user.EmailNotification;
 import com.jelmstrom.tips.user.User;
-import com.jelmstrom.tips.user.UserRepository;
+import com.jelmstrom.tips.user.MongoUserRepository;
 import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -25,9 +25,9 @@ public class IntegrationTest {
 
 
     private MongoMatchRepository matchRepo = new MongoMatchRepository("testRepo");
-    private TableRepository tableRepo = new TableRepository("testRepo");
+    private MongoTableRepository tableRepo = new MongoTableRepository("testRepo");
     private MongoGroupRepository groupRepo = new MongoGroupRepository("testRepo");
-    private UserRepository userRepo = new UserRepository("userRepo");
+    private MongoUserRepository userRepo = new MongoUserRepository("userRepo");
 
     @After
     public void tearDown(){

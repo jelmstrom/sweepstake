@@ -6,19 +6,16 @@ import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
-public class NeoRepository {
+public abstract class NeoRepository {
 
     protected static final GraphDatabaseService vmTips;
-
     protected static ExecutionEngine engine;
 
     static {
-        vmTips = new GraphDatabaseFactory().newEmbeddedDatabase("VmTips");
+        vmTips = new GraphDatabaseFactory().newEmbeddedDatabase("VmTipsDb");
         engine = new ExecutionEngine( vmTips );
         registerShutdownHook(vmTips);
     }
-
-
 
     private static void registerShutdownHook( final GraphDatabaseService graphDb )
     {
@@ -32,32 +29,33 @@ public class NeoRepository {
         } );
     }
 
+    public abstract void dropAll();
+
+
     public static enum Relationships implements RelationshipType {
         MATCH_PREDICTION,
         USER_PREDICTION,
         MATCH_IN
     }
 
-    public void dropAll(Label label) {
+    protected void dropAll(Label label) {
         try(Transaction tx = vmTips.beginTx()){
             ExecutionResult execute = engine.execute("MATCH (n:" + label.name() + ") return n");
             ResourceIterator<Node> nodes = execute.columnAs("n");
-            nodes.forEachRemaining(Node::delete);
+            nodes.forEachRemaining(this::deleteNode);
             tx.success();
         }
     }
 
-    public static final Label GROUP_LABEL =  new Label() {
-        @Override
-        public String name() {
-            return "Group";
-        }
-    };
+    private void deleteNode(Node n) {
+        n.getRelationships().forEach(Relationship::delete);
+        n.delete();
 
-    public static final Label MATCH_LABEL =  new Label() {
-        @Override
-        public String name() {
-            return "Match";
-        }
-    };
+    }
+
+    protected static final Label GROUP_LABEL = () -> "Group";
+    protected static final Label MATCH_LABEL = () -> "Match";
+    protected static final Label TABLE_PREDICTION = () -> "TablePrediction";
+    protected static final Label RESULT_LABEL = () -> "Result";
+    protected static final Label USER_LABEL = () -> "User";
 }

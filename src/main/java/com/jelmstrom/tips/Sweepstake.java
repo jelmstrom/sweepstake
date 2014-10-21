@@ -4,14 +4,14 @@ import com.jelmstrom.tips.group.Group;
 import com.jelmstrom.tips.group.GroupRepository;
 import com.jelmstrom.tips.group.NeoGroupRepository;
 import com.jelmstrom.tips.match.Match;
-import com.jelmstrom.tips.match.MongoMatchRepository;
+import com.jelmstrom.tips.match.MatchRepository;
+import com.jelmstrom.tips.match.NeoMatchRepository;
 import com.jelmstrom.tips.match.Result;
+import com.jelmstrom.tips.table.NeoTableRepository;
 import com.jelmstrom.tips.table.TableEntry;
 import com.jelmstrom.tips.table.TablePrediction;
 import com.jelmstrom.tips.table.TableRepository;
-import com.jelmstrom.tips.user.EmailNotification;
-import com.jelmstrom.tips.user.User;
-import com.jelmstrom.tips.user.UserRepository;
+import com.jelmstrom.tips.user.*;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -34,7 +34,7 @@ import static java.util.stream.Collectors.toMap;
 public class Sweepstake {
     private final Logger logger = LogManager.getLogger(Sweepstake.class);
     private final String context;
-    private final MongoMatchRepository matchRepository;
+    private final MatchRepository matchRepository;
     private final UserRepository userRepository;
     private final TableRepository tableRepository;
     private final GroupRepository groupRepository;
@@ -51,9 +51,9 @@ public class Sweepstake {
 
     public Sweepstake(String context) {
         this.context = context;
-        matchRepository = new MongoMatchRepository(context);
-        userRepository = new UserRepository(context);
-        tableRepository = new TableRepository(context);
+        matchRepository = new NeoMatchRepository(context);
+        userRepository = new NeoUserRepository(context);
+        tableRepository = new NeoTableRepository(context);
         groupRepository = new NeoGroupRepository(context);
     }
 
@@ -84,6 +84,7 @@ public class Sweepstake {
         List<Result> adminResults = matches.stream().filter(match -> match.stage == GROUP).map(Match::getCorrectResult).filter(Objects::nonNull).collect(toList());
 
         Map<String, Integer> tables = tablePredictions.stream()
+                .filter(prediction -> !StringUtils.isEmpty(prediction.userId))
                 .collect(toMap(pred -> pred.userId, pred -> pred.score(adminResults), Math::addExact));
 
         List<User> users = userRepository.read();

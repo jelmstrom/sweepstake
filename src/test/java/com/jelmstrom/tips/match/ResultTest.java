@@ -1,4 +1,4 @@
-package com.jelmstrom.tips;
+package com.jelmstrom.tips.match;
 
 
 import com.jelmstrom.tips.match.Match;

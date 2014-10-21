@@ -10,6 +10,7 @@ public class Result {
     public final Integer awayGoals;
     public final String userId;
     public final String promoted;
+    private Long id;
 
     public Result(Match match, Integer homeGoals, Integer awayGoals, String userId) {
         this.match = match;
@@ -106,5 +107,13 @@ public class Result {
                 && this.awayGoals != null
                 && !StringUtils.isEmpty(this.userId)
                 && !StringUtils.isEmpty(this.match.id);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }
