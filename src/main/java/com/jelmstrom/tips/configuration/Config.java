@@ -37,12 +37,23 @@ public class Config {
         System.out.printf("Groups : %d\n", neoGroupRepository.allGroups().size());
         if(neoGroupRepository.allGroups().isEmpty()){
             System.out.println("Adding group");
-            neoGroupRepository.store(new Group("A", Arrays.asList("Juventus","Malmö FF","Atletico Madrid", "Olympiakos")));
-        }
+            Group group = new Group("A", Arrays.asList("Juventus", "Malmö FF", "Atletico Madrid", "Olympiakos"));
+            neoGroupRepository.store(group);
 
-        if(matches.read().isEmpty()){
-            System.out.println("Adding matches");
-            matches.store(new Match("Juventus", "Malmö FF", new SimpleDateFormat("yyyy-MM-dd HH:mm").parse("2014-09-16 20:45"), "A1", Match.Stage.GROUP));
+            matches.store(new Match("Juventus", "Malmö FF", new Date(), Match.Stage.GROUP, group.getGroupId()));
+            matches.store(new Match("Juventus", "Atletico Madrid", new Date(), Match.Stage.GROUP, group.getGroupId()));
+            matches.store(new Match("Juventus", "Olympiakos", new Date(), Match.Stage.GROUP, group.getGroupId()));
+            matches.store(new Match("Malmö FF", "Juventus", new Date(), Match.Stage.GROUP, group.getGroupId()));
+            matches.store(new Match("Atletico Madrid","Juventus", new Date(), Match.Stage.GROUP, group.getGroupId()));
+            matches.store(new Match("Olympiakos", "Juventus",new Date(), Match.Stage.GROUP, group.getGroupId()));
+
+            matches.store(new Match("Atletico Madrid", "Malmö FF", new Date(), Match.Stage.GROUP, group.getGroupId()));
+            matches.store(new Match("Olympiakos", "Malmö FF", new Date(), Match.Stage.GROUP, group.getGroupId()));
+            matches.store(new Match("Malmö FF", "Atletico Madrid", new Date(), Match.Stage.GROUP, group.getGroupId()));
+            matches.store(new Match("Malmö FF", "Olympiakos", new Date(), Match.Stage.GROUP, group.getGroupId()));
+
+            matches.store(new Match("Atletico Madrid", "Olympiakos", new Date(), Match.Stage.GROUP, group.getGroupId()));
+            matches.store(new Match("Olympiakos", "Atletico Madrid",  new Date(), Match.Stage.GROUP, group.getGroupId()));
         }
     }
 

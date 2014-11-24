@@ -19,9 +19,9 @@ public class Match implements Comparable<Match>{
     public final Stage stage;
     @JsonManagedReference
     public final HashSet<Result> results;
-    public final String id;
     private Result correctResult;
-    private Long nodeId;
+    private Long matchId;
+    public final Long groupId;
 
 
     public enum Stage {
@@ -33,31 +33,32 @@ public class Match implements Comparable<Match>{
     }
 
 
-    public Match(String homeTeam, String awayTeam, Date matchStart, String id) {
+    public Match(String homeTeam, String awayTeam, Date matchStart, Long groupId) {
         this.homeTeam = homeTeam;
         this.awayTeam = awayTeam;
         this.matchStart = matchStart;
-        this.id = id;
         this.stage = GROUP;
         results = new HashSet<>();
+        this.groupId = groupId;
     }
 
-    public Match(String homeTeam, String awayTeam, Date matchStart, String id, Stage stage) {
+    public Match(String homeTeam, String awayTeam, Date matchStart, Stage stage, Long groupId) {
         this.homeTeam = homeTeam;
         this.awayTeam = awayTeam;
         this.matchStart = matchStart;
-        this.id = id;
         this.stage = stage;
         results = new HashSet<>();
+        this.groupId = groupId;
+
     }
 
 
-    public Long getNodeId() {
-        return nodeId;
+    public Long getMatchId() {
+        return matchId;
     }
 
-    public void setNodeId(Long nodeId) {
-        this.nodeId = nodeId;
+    public void setMatchId(Long matchId) {
+        this.matchId = matchId;
     }
 
     public void add(Result result){
@@ -82,9 +83,9 @@ public class Match implements Comparable<Match>{
                     && this.homeTeam.equals(that.homeTeam)
                     && this.matchStart.equals(that.matchStart)
                     && this.results.equals(that.results)
-                    && this.id.equals(that.id)
                     && this.stage.equals(that.stage)
-                    && ObjectUtils.nullSafeEquals(this.correctResult, that.correctResult);
+                    && ObjectUtils.nullSafeEquals(this.correctResult, that.correctResult)
+                    && ObjectUtils.nullSafeEquals(this.matchId, that.matchId);
         }
         return false;
     }
@@ -159,14 +160,17 @@ public class Match implements Comparable<Match>{
                 ", awayTeam='" + awayTeam + '\'' +
                 ", matchStart=" + matchStart +
                 ", stage=" + stage +
-                ", id='" + id + '\'' +
                 ", correctResult=" + (correctResult==null?"null":(correctResult.homeGoals +":" +correctResult.awayGoals))+
                 '}';
     }
 
     @SuppressWarnings("UnusedDeclaration")
     public boolean isValid() {
-        return !(homeTeam.equals("") || awayTeam.equals("") || startDate == null || stage == null || id.equals("")) ;
+        return !(homeTeam.equals("") || awayTeam.equals("") || startDate == null || stage == null || groupId==null || groupId.equals(-1L) ) ;
     }
 
+    @Override
+    public int hashCode() {
+        return matchId != null ? matchId.hashCode() : 0;
+    }
 }

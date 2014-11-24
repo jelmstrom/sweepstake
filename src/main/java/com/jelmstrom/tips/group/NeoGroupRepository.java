@@ -22,7 +22,7 @@ public class NeoGroupRepository extends NeoRepository implements GroupRepository
     }
 
     @Override
-    public void store(Group group) {
+    public Group store(Group group) {
         try(Transaction tx = vmTips.beginTx()){
             Node node;
             if(null == group.getGroupId()){
@@ -35,23 +35,13 @@ public class NeoGroupRepository extends NeoRepository implements GroupRepository
             group.setGroupId(node.getId());
             tx.success();
         }
+        return group;
     }
 
     @Override
-    public Group read(String groupId) {
+    public Group read(Long groupId) {
         try(Transaction tx = vmTips.beginTx()){
-            ExecutionResult execute = engine.execute("MATCH (n:" + GROUP_LABEL.name() + "{Name : '"+groupId+"'}) return n");
-            ResourceIterator<Node> nodes = execute.columnAs("n");
-            List<Group> groups = new ArrayList<>();
-            nodes.forEachRemaining(item -> groups.add(buildGroup(item)));
-            tx.success();
-            if(groups.isEmpty()){
-                return new Group(groupId, Collections.emptyList());
-            } else if (groups.size() == 1){
-                return groups.get(0);
-            } else {
-                throw new IllegalStateException("Duplicate group names with name " + groupId);
-            }
+            return buildGroup(vmTips.getNodeById(groupId));
         }
     }
 

@@ -2,10 +2,8 @@ package com.jelmstrom.tips;
 
 import com.jelmstrom.tips.group.Group;
 import com.jelmstrom.tips.group.GroupRepository;
-import com.jelmstrom.tips.group.MongoGroupRepository;
 import com.jelmstrom.tips.group.NeoGroupRepository;
 import com.jelmstrom.tips.match.*;
-import com.jelmstrom.tips.table.MongoTablePredictionRepository;
 import com.jelmstrom.tips.table.NeoTablePredictionRepository;
 import com.jelmstrom.tips.table.TablePrediction;
 import com.jelmstrom.tips.table.TablePredictionRepository;
@@ -43,11 +41,13 @@ public class IntegrationTest {
         User user2 = new User("test", "test", false, "test");
         user = userRepo.store(user);
         user2 = userRepo.store(user2);
-        Match match = new Match("TeamA", "TeamB", new Date(), UUID.randomUUID().toString());
+        Group group = groupRepo.store(new Group("a", Collections.emptyList()));
+        Match match = new Match("TeamA", "TeamB", new Date(), group.getGroupId());
+        match = matchRepo.store(match);
         new Result(match, 2, 1, user.id);
         new Result(match, 2, 2, user2.id);
         matchRepo.store(match);
-        Match persisted = matchRepo.read(match.id);
+        Match persisted = matchRepo.read(match.getMatchId());
         assertThat(persisted.equals(match), is(true));
     }
 
@@ -56,10 +56,12 @@ public class IntegrationTest {
     public void getAllMatchesShouldReturnListOfMatchesGreaterThanOne(){
         User user = new User("_display_", "_mail_", false, "_token" );
         user = userRepo.store(user);
-        Match match = new Match("TeamA", "TeamB", new Date(), UUID.randomUUID().toString());
+        Group group = groupRepo.store(new Group("a", Collections.emptyList()));
+        Match match = new Match("TeamA", "TeamB", new Date(), group.getGroupId());
+        match = matchRepo.store(match);
         new Result(match, 2, 2, user.id);
         new Result(match, 2, 2, user.id);
-        Match match2 = new Match("TeamA", "TeamB", new Date(), UUID.randomUUID().toString());
+        Match match2 = new Match("TeamA", "TeamB", new Date(), group.getGroupId());
         new Result(match, 2, 1, user.id);
         new Result(match, 2, 2, user.id);
         matchRepo.store(match);
@@ -75,15 +77,17 @@ public class IntegrationTest {
         User user2 = new User("test", "test", false, "test");
         user = userRepo.store(user);
         user2 = userRepo.store(user2);
-        Match match = new Match("TeamA", "TeamB", new Date(), UUID.randomUUID().toString());
+        Group group = groupRepo.store(new Group("a", Collections.emptyList()));
+        Match match = new Match("TeamA", "TeamB", new Date(), group.getGroupId());
+        match = matchRepo.store(match);
         new Result(match, 2, 1, user.id);
         matchRepo.store(match);
 
-        Match versionOne = matchRepo.read(match.id);
+        Match versionOne = matchRepo.read(match.getMatchId());
         new Result(match, 2, 2, user2.id);
         matchRepo.store(match);
 
-        Match versionTwo = matchRepo.read(match.id);
+        Match versionTwo = matchRepo.read(match.getMatchId());
 
         assertThat(versionTwo.equals(match), is(true));
         assertThat(versionTwo.equals(versionOne), is(false));
@@ -94,7 +98,9 @@ public class IntegrationTest {
 
         User user = new User("test", "test", false, "test");
         user = userRepo.store(user);
-        TablePrediction prediction = new TablePrediction("grp",user.id, Arrays.asList("teamB", "teamA", "teamC", "teamD"));
+        List<String> teams = Arrays.asList("teamB", "teamA", "teamC", "teamD");
+        Group group = groupRepo.store(new Group("a", teams));
+        TablePrediction prediction = new TablePrediction( group.getGroupId(),user.id, teams);
         tableRepo.store(prediction);
         TablePrediction stored = tableRepo.readPrediction(prediction.userId, prediction.group);
         assertThat(stored, equalTo(prediction));
@@ -106,7 +112,7 @@ public class IntegrationTest {
     public void groupRepositoryShouldStoreGroup(){
         Group group = new Group("A", Arrays.asList("a", "b","c", "d"));
         groupRepo.store(group);
-        assertThat(groupRepo.read("A"), is(equalTo(group)));
+        assertThat(groupRepo.read(group.getGroupId()), is(equalTo(group)));
     }
 
     @Test

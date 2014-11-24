@@ -4,6 +4,7 @@ import com.jelmstrom.tips.configuration.Config;
 import com.jelmstrom.tips.match.Result;
 import com.jelmstrom.tips.user.User;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -11,13 +12,13 @@ import static java.util.stream.Collectors.toList;
 
 public class TablePrediction {
 
-    public final String group;
+    public final Long group;
     public final List<String> tablePrediction;
     public final Long userId;
     private Long id;
 
 
-    public TablePrediction(String group, Long userId, List<String> tablePrediction) {
+    public TablePrediction(Long group, Long userId, List<String> tablePrediction) {
         this.group = group;
         this.tablePrediction = tablePrediction;
         this.userId = userId;
@@ -99,5 +100,9 @@ public class TablePrediction {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public static TablePrediction emptyPrediction() {
+        return new TablePrediction(-1L, null, Arrays.asList("", "", "", ""));
     }
 }

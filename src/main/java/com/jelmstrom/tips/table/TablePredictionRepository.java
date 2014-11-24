@@ -10,7 +10,7 @@ public interface TablePredictionRepository {
 
     TablePrediction readPrediction(TablePrediction user);
 
-    TablePrediction readPrediction(Long userId, String group);
+    TablePrediction readPrediction(Long userId, Long group);
 
     List<TablePrediction> read();
 

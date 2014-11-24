@@ -3,8 +3,8 @@ package com.jelmstrom.tips.match;
 import java.util.List;
 
 public interface MatchRepository {
-    void store(Match match);
-    Match read(String matchId);
+    Match store(Match match);
+    Match read(Long matchId);
     List<Match> read();
     void store(List<Match> matches);
     void dropAll();

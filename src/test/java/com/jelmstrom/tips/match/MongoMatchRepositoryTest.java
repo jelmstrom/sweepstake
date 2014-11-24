@@ -1,10 +1,14 @@
 package com.jelmstrom.tips.match;
 
 
+import com.jelmstrom.tips.group.Group;
+import com.jelmstrom.tips.group.GroupRepository;
+import com.jelmstrom.tips.group.NeoGroupRepository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -16,23 +20,26 @@ import static org.junit.Assert.assertThat;
 public class MongoMatchRepositoryTest {
 
     private MatchRepository matchRepository = new MongoMatchRepository("test");
+    private GroupRepository groupRepository = new NeoGroupRepository("");
     private Match match;
 
     @Before
     public void before(){
-        match = new Match("home", "away", new Date(), "a1", GROUP);
-        matchRepository.store(match);
+        Group group = groupRepository.store(new Group("A", Collections.emptyList()));
+        match = new Match("home", "away", new Date(), GROUP, group.getGroupId());
+        match = matchRepository.store(match);
     }
 
     @After
     public void after(){
         matchRepository.dropAll();
+        groupRepository.dropAll();
     }
 
     @Test
     public void createGroupShouldStoreGroup(){
-        Match persisted = matchRepository.read(match.id);
-        assertThat(match.getNodeId(), is(equalTo(persisted.getNodeId())));
+        Match persisted = matchRepository.read(match.getMatchId());
+        assertThat(match.getMatchId(), is(equalTo(persisted.getMatchId())));
         assertThat(match, is(equalTo(persisted)));
     }
 
@@ -44,12 +51,16 @@ public class MongoMatchRepositoryTest {
 
     @Test
     public void updateNodeShouldUpdateExistingNode(){
-        Match m2 = new Match("home2", "away2", new Date(), "a1", GROUP);
-        m2.setNodeId(match.getNodeId());
+        Group group = groupRepository.store(new Group("A", Collections.emptyList()));
+
+        Match m2 = new Match("home2", "away2", new Date(), GROUP, group.getGroupId());
+        m2.setMatchId(match.getMatchId());
+
         matchRepository.store(m2);
+
         List<Match> matches = matchRepository.read();
         assertThat(matches.size(), is(1));
-        assertThat(matches.get(0).getNodeId(), is(equalTo(match.getNodeId())));
+        assertThat(matches.get(0).getMatchId(), is(equalTo(match.getMatchId())));
     }
 
 }

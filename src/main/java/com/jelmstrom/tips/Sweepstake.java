@@ -15,8 +15,6 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
@@ -118,13 +116,11 @@ public class Sweepstake {
     }
 
 
-
-    @RequestMapping(value = "/table/{groupName}")
-    public List<TableEntry> currentStandingsForGroup(@PathVariable String groupName) {
+    public List<TableEntry> currentStandingsForGroup(Long groupId) {
 
         List<Result> adminResults = getMatches().stream().filter(match -> match.stage == GROUP).map(Match::getCorrectResult).filter(Objects::nonNull).collect(toList());
-        Group group = groupRepository.read(groupName);
-        System.out.printf("Group %s :{%s}", groupName, group);
+        Group group = groupRepository.read(groupId);
+        System.out.printf("Group %s :{%s}", groupId, group);
         return group.teams.stream().map(team -> TableEntry.recordForTeam(team, adminResults)).sorted().collect(toList());
     }
 
@@ -146,14 +142,14 @@ public class Sweepstake {
         return userRepository.findByToken(token);
     }
 
-    public void saveResults(List<Match> resultList, User user) {
-        matchRepository.store(resultList);
+    public void saveMatches(List<Match> matches, User user) {
+        matchRepository.store(matches);
 
     }
 
-    private Match findMatch(List<Match> matches, String id) {
+    private Match findMatch(List<Match> matches, Long id) {
         System.out.println(String.format("Finding match for %s", id));
-        return matches.stream().filter(match -> match.id.equals(id)).findFirst().get();
+        return matches.stream().filter(match -> match.getMatchId().equals(id)).findFirst().get();
     }
 
     public void saveUserPrediction(TablePrediction tablePrediction) {
@@ -164,11 +160,15 @@ public class Sweepstake {
         userRepository.remove(userId);
     }
 
-    public Match getMatch(String matchId) {
+    public Match getMatch(Long matchId) {
         return matchRepository.read(matchId);
     }
 
     public List<String> getAllTeams() {
         return groupRepository.allGroups().stream().flatMap(group -> group.teams.stream()).sorted().collect(toList());
+    }
+
+    public List<Group> groups() {
+        return groupRepository.allGroups();
     }
 }

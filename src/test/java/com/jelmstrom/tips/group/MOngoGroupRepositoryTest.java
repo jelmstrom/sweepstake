@@ -29,7 +29,7 @@ public class MongoGroupRepositoryTest {
 
     @Test
     public void createGroupShouldStoreGroup(){
-        Group persisted = neoGroupRepository.read(group.groupName);
+        Group persisted = neoGroupRepository.read(group.getGroupId());
         assertThat(group.getGroupId(), is(equalTo(persisted.getGroupId())));
         assertThat(group, is(equalTo(persisted)));
     }

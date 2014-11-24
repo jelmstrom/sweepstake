@@ -23,7 +23,7 @@ public class MongoGroupRepository extends MongoRepository implements GroupReposi
     }
 
     @Override
-    public void store(Group group){
+    public Group store(Group group){
             BasicDBObject toStore = new BasicDBObject(NAME, group.groupName)
                     .append(TEAMS, group.teams);
         if(null == group.getGroupId()){
@@ -33,15 +33,16 @@ public class MongoGroupRepository extends MongoRepository implements GroupReposi
         } else  {
             groupCollection.update(new BasicDBObject(ID, group.getGroupId()), toStore);
         }
+        return group;
     }
 
     @Override
-    public Group read(String groupName) {
-        DBObject teams = groupCollection.findOne(new BasicDBObject(NAME, groupName));
+    public Group read(Long groupName) {
+        DBObject teams = groupCollection.findOne(new BasicDBObject(ID, groupName));
         if(teams != null && null != teams.get(NAME)){
             return buildGroup(teams);
         }
-        return new Group(groupName, Collections.emptyList());
+        return new Group(groupName.toString(), Collections.emptyList());
     }
 
     @Override

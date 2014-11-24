@@ -7,7 +7,10 @@ import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Traverser;
 
 import java.util.*;
+import java.util.stream.StreamSupport;
 
+import static com.jelmstrom.tips.persistence.NeoRepository.Relationships.*;
+import static org.neo4j.graphdb.Direction.*;
 import static org.neo4j.graphdb.traversal.Evaluators.*;
 
 public class NeoMatchRepository extends NeoRepository implements MatchRepository{
@@ -18,69 +21,101 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
     }
 
     @Override
-    public void store(Match match) {
+    public Match store(Match match) {
         try(Transaction tx = vmTips.beginTx()){
             Node matchNode;
-            if(match.getNodeId() == null){
+            if(match.getMatchId() == null){
                 matchNode = vmTips.createNode(MATCH_LABEL);
-                match.setNodeId(matchNode.getId());
+                match.setMatchId(matchNode.getId());
             } else {
-                matchNode = vmTips.getNodeById(match.getNodeId());
+                matchNode = vmTips.getNodeById(match.getMatchId());
             }
 
             matchNode.setProperty("awayTeam", match.awayTeam);
             matchNode.setProperty("homeTeam", match.homeTeam);
-            matchNode.setProperty("matchId", match.id); //todo: relationship( ->Group)
             matchNode.setProperty("matchStart", match.matchStart.getTime());
             matchNode.setProperty("stage", match.stage.toString());
+            matchNode.setProperty("groupId", match.groupId);
             if(match.hasResult()){
                 matchNode.setProperty("homeGoals", match.getCorrectResult().homeGoals);
                 matchNode.setProperty("awayGoals", match.getCorrectResult().awayGoals);
                 matchNode.setProperty("adminUser", match.getCorrectResult().userId);
                 matchNode.setProperty("promoted", match.getCorrectResult().promoted);
             }
-            storeMatches(match.results, matchNode);
+            storeResults(match.results, matchNode);
             tx.success();
         }
+        return match;
     }
 
-    private void storeMatches(HashSet<Result> results, Node parent) {
+    private void storeResults(HashSet<Result> results, Node parent) {
         for(Result result : results){
             Node resultNode;
-            if(null == result.getId()){
-                resultNode = vmTips.createNode(RESULT_LABEL);
-                parent.createRelationshipTo(resultNode, Relationships.MATCH_PREDICTION);
-            } else {
-                resultNode = vmTips.getNodeById(result.getId());
-            }
+            resultNode = getResultNode(parent, result);
             result.setId(resultNode.getId());
             resultNode.setProperty("awayGoals", result.awayGoals.toString());
             resultNode.setProperty("homeGoals", result.homeGoals.toString());
             resultNode.setProperty("promoted", result.promoted);
             resultNode.setProperty("userId", result.userId);
-            vmTips.getNodeById(result.userId).createRelationshipTo(resultNode, Relationships.USER_PREDICTION);
+            vmTips.getNodeById(result.userId).createRelationshipTo(resultNode, USER_PREDICTION);
+        }
+    }
+
+    private Node getResultNode(Node parent, Result result) {
+        if(null != result.getId()){
+            return vmTips.getNodeById(result.getId());
+        } else {
+
+            Optional<Relationship> relationship = StreamSupport.stream(
+                    parent.getRelationships(OUTGOING, MATCH_PREDICTION).spliterator(), false)
+                    .filter(rel -> checkRelationshipProperty(result.userId, rel))
+                    .findFirst();
+
+            Node resultNode;
+            if(relationship.isPresent()){
+                resultNode = relationship.get().getEndNode();
+            } else {
+                resultNode = vmTips.createNode(RESULT_LABEL);
+                Relationship relationshipTo = parent.createRelationshipTo(resultNode, MATCH_PREDICTION);
+                relationshipTo.setProperty("userId", result.userId);
+            }
+
+            return resultNode;
+        }
+    }
+
+    private boolean checkRelationshipProperty(Long userId, Relationship endNode) {
+        return userId.equals(endNode.getProperty("userId"));
+    }
+
+    private void removeIfUpdate(Relationship item, Result result) {
+        Long userId = (Long) item.getEndNode().getProperty("userId");
+        if(result.userId.equals(userId));
+        item.getEndNode().delete();
+    }
+
+
+    private Long checkForUpdate(Result result) {
+        List<Long> results = new ArrayList<>();
+        String query = String.format("MATCH (n:%s {userId:%s , matchId:%s }) return n:id"
+                , RESULT_LABEL.name()
+                , result.userId
+                , result.match.getMatchId());
+        ResourceIterator<Long> nodes = engine.execute(query).columnAs("n");
+        nodes.forEachRemaining(results::add);
+        if(results.isEmpty()){
+            return -1L;
+        } else {
+            return results.get(0);
         }
     }
 
     @Override
-    public Match read(String matchId) {
+    public Match read(Long matchId) {
         try(Transaction tx = vmTips.beginTx()){
-            ExecutionResult execute = engine.execute(
-                    String.format("MATCH (n:%s{matchId : '%s'}) return n",
-                            MATCH_LABEL.name()
-                            , matchId));
-            ResourceIterator<Node> nodes = execute.columnAs("n");
-            List<Match> matches = new ArrayList<>();
-            nodes.forEachRemaining(item -> matches.add(buildMatch(item)));
+            Match match = buildMatch(vmTips.getNodeById(matchId));
             tx.success();
-
-            if(matches.isEmpty()){
-                return new Match("", "", null, matchId);
-            } else if (matches.size() == 1){
-                return matches.get(0);
-            } else {
-                throw new IllegalStateException("Duplicate matches with ID " + matchId);
-            }
+            return match;
         }
     }
 
@@ -89,10 +124,11 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
                 matchNode.getProperty("homeTeam").toString(),
                 matchNode.getProperty("awayTeam").toString(),
                 new Date(Long.parseLong(matchNode.getProperty("matchStart").toString())),
-                matchNode.getProperty("matchId").toString(),
-                Match.Stage.valueOf(matchNode.getProperty("stage").toString())
+                Match.Stage.valueOf(matchNode.getProperty("stage").toString()),
+                Long.parseLong(matchNode.getProperty("groupId").toString()));
 
-        );
+        match.setMatchId(matchNode.getId());
+
 
         if(matchNode.hasProperty("homeGoals")){
             Result correct = new Result(match
@@ -106,10 +142,12 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
         }
 
         Collection<Result> results = new HashSet<>();
+
         TraversalDescription td = vmTips.traversalDescription().breadthFirst()
-                .relationships(Relationships.MATCH_PREDICTION, Direction.OUTGOING)
-                .evaluator(includeWhereLastRelationshipTypeIs(Relationships.MATCH_PREDICTION));
+                .relationships(MATCH_PREDICTION, OUTGOING)
+                .evaluator(includeWhereLastRelationshipTypeIs(MATCH_PREDICTION));
         Traverser traverse = td.traverse(matchNode);
+
         for(Path path: traverse){
             Node resultNode = path.endNode();
             Result result = buildResult(resultNode, match);
@@ -117,7 +155,6 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
         }
 
         match.results.addAll(results);
-        match.setNodeId(matchNode.getId());
         return match;
     }
 
@@ -162,12 +199,12 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
     public List<Result> userPredictions(long userId) {
         List<Result> results  = new ArrayList<>();
         try(Transaction tx = vmTips.beginTx()){
-            TraversalDescription td = vmTips.traversalDescription().breadthFirst().relationships(Relationships.USER_PREDICTION, Direction.OUTGOING)
-                    .evaluator(includeWhereLastRelationshipTypeIs(Relationships.USER_PREDICTION));
+            TraversalDescription td = vmTips.traversalDescription().breadthFirst().relationships(USER_PREDICTION, OUTGOING)
+                    .evaluator(includeWhereLastRelationshipTypeIs(USER_PREDICTION));
             Traverser paths = td.traverse(vmTips.getNodeById(userId));
             for(Path path : paths){
                 Node resultNode = path.endNode();
-                Node matchNode = resultNode.getRelationships(Relationships.MATCH_PREDICTION, Direction.INCOMING).iterator().next().getStartNode();
+                Node matchNode = resultNode.getRelationships(MATCH_PREDICTION, INCOMING).iterator().next().getStartNode();
                 matchNode.getPropertyKeys().forEach(key -> System.out.println(key  + " = " + matchNode.getProperty(key)));
                 results.add(buildResult(resultNode, buildMatch(matchNode)));
             }

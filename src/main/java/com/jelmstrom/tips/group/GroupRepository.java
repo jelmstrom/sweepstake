@@ -3,11 +3,13 @@ package com.jelmstrom.tips.group;
 import java.util.List;
 
 public interface GroupRepository {
-    void store(Group group);
+    Group store(Group group);
 
-    Group read(String groupName);
+    Group read(Long groupId);
 
     List<Group> allGroups();
 
     void dropAll();
+
+
 }

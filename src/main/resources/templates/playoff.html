@@ -12,14 +12,11 @@
     <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
             <li><a href="/">Leaderboard</a></li>
-            <li><a href="/group/A">GroupA</a></li>
-            <li><a href="/group/B">GroupB</a></li>
-            <li><a href="/group/C">GroupC</a></li>
-            <li><a href="/group/D">GroupD</a></li>
-            <li><a href="/group/E">GroupE</a></li>
-            <li><a href="/group/F">GroupF</a></li>
-            <li><a href="/group/G">GroupG</a></li>
-            <li><a href="/group/H">GroupH</a></li>
+            <th:block th:each="group : ${groups}">
+                <li>
+                    <a href="index" th:href="@{'/group/' + ${group.getGroupId()}}" th:text="${'Group'+ group.groupName}">grp</a>
+                </li>
+            </th:block>
             <li><a href="/playoff">Playoff</a></li>
             <li><a href="user"
                    th:href="@{'/user/'+ ${activeUser.displayName}}"

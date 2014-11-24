@@ -32,7 +32,7 @@ public class Result {
 
 
     public static Result emptyResult() {
-        return new Result(new Match("", "", null, ""), null, null, -1L);
+        return new Result(new Match("", "", null, -1L), null, null, -1L);
     }
 
     public int goalsAgainst(String team) {
@@ -78,13 +78,13 @@ public class Result {
         if (other instanceof Result) {
             Result that = (Result) other;
             return this.userId.equals(that.userId)
-                    && this.match.id.equals(that.match.id);
+                    && this.match.getMatchId().equals(that.match.getMatchId());
         }
         return false;
     }
 
     public int hashCode() {
-        return 31 * (userId.hashCode() * match.id.hashCode());
+        return (int) ((31 * userId) * match.hashCode());
     }
 
     public int score() {
@@ -94,7 +94,7 @@ public class Result {
     @Override
     public String toString() {
         return "Result{" +
-                "match=" + match.id +
+                "match=" + match.getMatchId() +
                 ", homeGoals=" + homeGoals +
                 ", awayGoals=" + awayGoals +
                 ", userId='" + userId + '\'' +
@@ -106,7 +106,7 @@ public class Result {
         return this.homeGoals != null
                 && this.awayGoals != null
                 && !StringUtils.isEmpty(this.userId)
-                && !StringUtils.isEmpty(this.match.id);
+                && this.match.getMatchId() != null && match.getMatchId() > 0;
     }
 
     public Long getId() {

@@ -22,6 +22,7 @@ public class NeoTablePredictionRepository extends NeoRepository implements Table
             Node node;
             if(null == prediction.getId()){
                 node = vmTips.createNode(TABLE_PREDICTION);
+                node.createRelationshipTo(vmTips.getNodeById(prediction.group), Relationships.GROUP);
             } else  {
                 node = vmTips.getNodeById(prediction.getId());
             }
@@ -54,7 +55,7 @@ public class NeoTablePredictionRepository extends NeoRepository implements Table
 
     private TablePrediction buildTablePrediction(Node nodeById) {
         String table = nodeById.getProperty("groupPrediction").toString();
-        String group = nodeById.getProperty("group").toString();
+        Long group = Long.parseLong(nodeById.getProperty("group").toString());
         Long userId = Long.parseLong(nodeById.getProperty("userId").toString());
         TablePrediction prediction =  new TablePrediction(group, userId, Arrays.asList(table.split(":")));
         prediction.setId(nodeById.getId());
@@ -63,10 +64,10 @@ public class NeoTablePredictionRepository extends NeoRepository implements Table
     }
 
     @Override
-    public TablePrediction readPrediction(Long userId, String group) {
+    public TablePrediction readPrediction(Long userId, Long group) {
         try(Transaction tx = vmTips.beginTx()){
             List<TablePrediction> predictions = new ArrayList<>();
-            ResourceIterator<Node> nodes = engine.execute(String.format("MATCH (n:%s {userId : %s, group : '%s'}) return n"
+            ResourceIterator<Node> nodes = engine.execute(String.format("MATCH (n:%s {userId : %s, group : %s}) return n"
                     , TABLE_PREDICTION.name()
                     , userId
                     , group)).columnAs("n");

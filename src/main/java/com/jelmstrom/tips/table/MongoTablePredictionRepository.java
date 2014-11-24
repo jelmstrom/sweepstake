@@ -45,7 +45,7 @@ public class MongoTablePredictionRepository extends MongoRepository implements T
     }
 
     @Override
-    public TablePrediction readPrediction(Long userId, String group) {
+    public TablePrediction readPrediction(Long userId, Long group) {
         return readPrediction(new TablePrediction(group, userId, null));
     }
 
@@ -54,7 +54,7 @@ public class MongoTablePredictionRepository extends MongoRepository implements T
         List<String> predictions = new ArrayList<>();
         ((BasicDBList) dbMatch.get("prediction")).forEach(entry -> predictions.add((String) entry));
         return new TablePrediction(
-                dbMatch.get("group").toString()
+                Long.parseLong(dbMatch.get("group").toString())
                                 , (Long)dbMatch.get("userId")
                                 , predictions);
     }
