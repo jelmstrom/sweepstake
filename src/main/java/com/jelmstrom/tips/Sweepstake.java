@@ -149,7 +149,7 @@ public class Sweepstake {
 
     private Match findMatch(List<Match> matches, Long id) {
         System.out.println(String.format("Finding match for %s", id));
-        return matches.stream().filter(match -> match.getMatchId().equals(id)).findFirst().get();
+        return matches.stream().filter(match -> match.getId().equals(id)).findFirst().get();
     }
 
     public void saveUserPrediction(TablePrediction tablePrediction) {

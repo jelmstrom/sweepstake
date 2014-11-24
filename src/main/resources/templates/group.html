@@ -72,29 +72,17 @@
                         <th> Group prediction</th>
                     </tr>
                     </thead>
-                    <tr>
-                        <td width="5%">1</td>
 
+                    <tr th:each="pred, iterStat : ${prediction.tablePrediction}">
+                        <td width="5%"><label th:text="${iterStat.count}">label</label></td>
                         <td width="95%">
-                            <input type="text" id="prediction1" name="prediction1" th:value="${prediction.tablePrediction.get(0)}"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td width="5%"> 2</td>
-                        <td width="95%">
-                            <input type="text" id="prediction2" name="prediction2" th:value="${prediction.tablePrediction.get(1)}"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td width="5%">3</td>
-                        <td width="95%">
-                            <input type="text" id="prediction3" name="prediction3" th:value="${prediction.tablePrediction.get(2)}"/>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td width="5%">4</td>
-                        <td width="95%">
-                            <input type="text" id="prediction4" name="prediction4" th:value="${prediction.tablePrediction.get(3)}"/>
+                            <select th:name="${'prediction'+iterStat.count}" th:disabled="not ${prediction.editable(activeUser)}">
+                                <option value="--">--</option>
+                                <option th:each="team : ${currentStandings}"
+                                        th:text="${team.team}"
+                                        th:selected="${team.team.equals(pred)}"
+                                        >teams</option>
+                            </select>
                         </td>
                     </tr>
                     <tr>

@@ -47,7 +47,7 @@ public class IntegrationTest {
         new Result(match, 2, 1, user.id);
         new Result(match, 2, 2, user2.id);
         matchRepo.store(match);
-        Match persisted = matchRepo.read(match.getMatchId());
+        Match persisted = matchRepo.read(match.getId());
         assertThat(persisted.equals(match), is(true));
     }
 
@@ -83,11 +83,11 @@ public class IntegrationTest {
         new Result(match, 2, 1, user.id);
         matchRepo.store(match);
 
-        Match versionOne = matchRepo.read(match.getMatchId());
+        Match versionOne = matchRepo.read(match.getId());
         new Result(match, 2, 2, user2.id);
         matchRepo.store(match);
 
-        Match versionTwo = matchRepo.read(match.getMatchId());
+        Match versionTwo = matchRepo.read(match.getId());
 
         assertThat(versionTwo.equals(match), is(true));
         assertThat(versionTwo.equals(versionOne), is(false));

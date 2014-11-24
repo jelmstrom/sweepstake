@@ -8,7 +8,10 @@ import org.neo4j.graphdb.traversal.Traverser;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.StreamSupport;
 
+import static com.jelmstrom.tips.persistence.NeoRepository.Relationships.*;
 import static java.util.stream.Collectors.joining;
 
 public class NeoTablePredictionRepository extends NeoRepository implements TablePredictionRepository {
@@ -21,8 +24,17 @@ public class NeoTablePredictionRepository extends NeoRepository implements Table
         try(Transaction tx = vmTips.beginTx()) {
             Node node;
             if(null == prediction.getId()){
-                node = vmTips.createNode(TABLE_PREDICTION);
-                node.createRelationshipTo(vmTips.getNodeById(prediction.group), Relationships.GROUP);
+                Node group = vmTips.getNodeById(prediction.group);
+                Optional<Relationship> existing = StreamSupport.stream(group.getRelationships(Direction.INCOMING, GROUP).spliterator(), false)
+                        .filter(rel -> prediction.userId.equals((long) rel.getProperty("userId")))
+                        .findFirst();
+                if(existing.isPresent()){
+                    node = existing.get().getEndNode();
+                } else {
+                    node = vmTips.createNode(TABLE_PREDICTION);
+                    Relationship relationshipTo = node.createRelationshipTo(group, GROUP);
+                    relationshipTo.setProperty("userId", prediction.userId);
+                }
             } else  {
                 node = vmTips.getNodeById(prediction.getId());
             }

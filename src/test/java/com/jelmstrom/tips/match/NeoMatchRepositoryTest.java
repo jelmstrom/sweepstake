@@ -39,8 +39,8 @@ public class NeoMatchRepositoryTest {
 
     @Test
     public void createGroupShouldStoreGroup(){
-        Match persisted = neoMatchRepository.read(match.getMatchId());
-        assertThat(match.getMatchId(), is(equalTo(persisted.getMatchId())));
+        Match persisted = neoMatchRepository.read(match.getId());
+        assertThat(match.getId(), is(equalTo(persisted.getId())));
         assertThat(match, is(equalTo(persisted)));
     }
 
@@ -54,11 +54,11 @@ public class NeoMatchRepositoryTest {
     public void updateNodeShouldUpdateExistingNode(){
         Group group = groupRepository.store(new Group("A", Collections.emptyList()));
         Match m2 = new Match("home2", "away2", new Date(), GROUP, group.getGroupId());
-        m2.setMatchId(match.getMatchId());
+        m2.setId(match.getId());
         neoMatchRepository.store(m2);
         List<Match> matches = neoMatchRepository.read();
         assertThat(matches.size(), is(1));
-        assertThat(matches.get(0).getMatchId(), is(equalTo(match.getMatchId())));
+        assertThat(matches.get(0).getId(), is(equalTo(match.getId())));
     }
 
     @Test

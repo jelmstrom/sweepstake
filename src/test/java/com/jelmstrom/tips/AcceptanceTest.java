@@ -245,7 +245,7 @@ public class AcceptanceTest {
 
         sweepstake.saveMatches(results, user);
 
-        Match fromDb = MATCH_REPOSITORY.read(matchA1.getMatchId());
+        Match fromDb = MATCH_REPOSITORY.read(matchA1.getId());
         assertThat(fromDb.results.size(), is(originalCount));
         assertThat(fromDb.resultFor(user.id).awayGoals, is(2));
     }

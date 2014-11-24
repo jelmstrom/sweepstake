@@ -78,7 +78,7 @@ public class Result {
         if (other instanceof Result) {
             Result that = (Result) other;
             return this.userId.equals(that.userId)
-                    && this.match.getMatchId().equals(that.match.getMatchId());
+                    && this.match.getId().equals(that.match.getId());
         }
         return false;
     }
@@ -94,7 +94,7 @@ public class Result {
     @Override
     public String toString() {
         return "Result{" +
-                "match=" + match.getMatchId() +
+                "match=" + match.getId() +
                 ", homeGoals=" + homeGoals +
                 ", awayGoals=" + awayGoals +
                 ", userId='" + userId + '\'' +
@@ -106,7 +106,7 @@ public class Result {
         return this.homeGoals != null
                 && this.awayGoals != null
                 && !StringUtils.isEmpty(this.userId)
-                && this.match.getMatchId() != null && match.getMatchId() > 0;
+                && this.match.getId() != null && match.getId() > 0;
     }
 
     public Long getId() {

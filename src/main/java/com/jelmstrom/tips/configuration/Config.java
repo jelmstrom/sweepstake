@@ -4,6 +4,9 @@ import com.jelmstrom.tips.group.Group;
 import com.jelmstrom.tips.group.NeoGroupRepository;
 import com.jelmstrom.tips.match.Match;
 import com.jelmstrom.tips.match.NeoMatchRepository;
+import com.jelmstrom.tips.user.NeoUserRepository;
+import com.jelmstrom.tips.user.User;
+import com.jelmstrom.tips.user.UserRepository;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -21,8 +24,8 @@ public class Config {
         Date tempDate  = null;
         Date tempPlayoffStart = null;
         try {
-            tempDate = dateFormat.parse("12 06 2014 17:00");
-            tempPlayoffStart = dateFormat.parse("28 06 2014 18:00");
+            tempDate = dateFormat.parse("12 06 2015 17:00");
+            tempPlayoffStart = dateFormat.parse("28 06 2015 18:00");
         } catch (ParseException pex){
             System.out.println("failed to parse start date");
         }
@@ -30,11 +33,18 @@ public class Config {
         playoffStart = tempPlayoffStart;
     }
 
+    private static NeoUserRepository neoUserRepository;
+
 
     public static void seed() throws ParseException {
         NeoGroupRepository neoGroupRepository = new NeoGroupRepository("Champions League");
         NeoMatchRepository matches = new NeoMatchRepository("Champions League");
         System.out.printf("Groups : %d\n", neoGroupRepository.allGroups().size());
+        neoUserRepository = new NeoUserRepository("");
+        if(!neoUserRepository.findAdminUser().isValid()){
+            neoUserRepository.store(new User("admin", "admin", true, "admin"));
+        }
+
         if(neoGroupRepository.allGroups().isEmpty()){
             System.out.println("Adding group");
             Group group = new Group("A", Arrays.asList("Juventus", "Malmö FF", "Atletico Madrid", "Olympiakos"));

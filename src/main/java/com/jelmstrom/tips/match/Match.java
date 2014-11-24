@@ -13,6 +13,8 @@ import static com.jelmstrom.tips.configuration.Config.startDate;
 import static com.jelmstrom.tips.match.Match.Stage.GROUP;
 
 public class Match implements Comparable<Match>{
+    private Long id;
+
     public final String homeTeam;
     public final String awayTeam;
     public final Date matchStart;
@@ -20,7 +22,6 @@ public class Match implements Comparable<Match>{
     @JsonManagedReference
     public final HashSet<Result> results;
     private Result correctResult;
-    private Long matchId;
     public final Long groupId;
 
 
@@ -53,17 +54,19 @@ public class Match implements Comparable<Match>{
     }
 
 
-    public Long getMatchId() {
-        return matchId;
+    public Long getId() {
+        return id;
     }
 
-    public void setMatchId(Long matchId) {
-        this.matchId = matchId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public void add(Result result){
-        results.remove(result);
-        results.add(result);
+        if(result.isValid()){
+            results.remove(result);
+            results.add(result);
+        }
     }
 
     public Result resultFor(Long userId) {
@@ -85,7 +88,7 @@ public class Match implements Comparable<Match>{
                     && this.results.equals(that.results)
                     && this.stage.equals(that.stage)
                     && ObjectUtils.nullSafeEquals(this.correctResult, that.correctResult)
-                    && ObjectUtils.nullSafeEquals(this.matchId, that.matchId);
+                    && ObjectUtils.nullSafeEquals(this.id, that.id);
         }
         return false;
     }
@@ -121,7 +124,9 @@ public class Match implements Comparable<Match>{
     }
 
     public void setCorrectResult(Result correctResult) {
-        this.correctResult = correctResult;
+        if(correctResult.isValid()){
+            this.correctResult = correctResult;
+        }
     }
 
     public Result getCorrectResult() {
@@ -171,6 +176,6 @@ public class Match implements Comparable<Match>{
 
     @Override
     public int hashCode() {
-        return matchId != null ? matchId.hashCode() : 0;
+        return id != null ? id.hashCode() : 0;
     }
 }

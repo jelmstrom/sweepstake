@@ -42,17 +42,17 @@ public class MongoMatchRepository extends MongoRepository implements MatchReposi
                         .collect(toList());
 
 
-        Match persisted = read(match.getMatchId());
-        if (persisted.getMatchId().equals(match.getMatchId())) {
+        Match persisted = read(match.getId());
+        if (persisted.getId().equals(match.getId())) {
             DBObject entry = new BasicDBObject(HOME_TEAM, match.homeTeam)
                     .append(AWAY_TEAM, match.awayTeam)
                     .append(MATCH_START, match.matchStart.getTime())
                     .append(RESULTS, results)
                     .append(STAGE, match.stage.toString())
                     .append(GROUP_ID, match.groupId)
-                    .append(MATCH_ID, match.getMatchId())
+                    .append(MATCH_ID, match.getId())
                     .append(CORRECT_RESULT, buildDbObject(match.getCorrectResult()));
-            matchCollection.update(new BasicDBObject(MATCH_ID, match.getMatchId()), entry);
+            matchCollection.update(new BasicDBObject(MATCH_ID, match.getId()), entry);
         } else {
             long nodeId = UUID.randomUUID().hashCode();
             DBObject entry = new BasicDBObject(HOME_TEAM, match.homeTeam)
@@ -64,7 +64,7 @@ public class MongoMatchRepository extends MongoRepository implements MatchReposi
                     .append(MATCH_ID, nodeId)
                     .append(CORRECT_RESULT, buildDbObject(match.getCorrectResult()));
             matchCollection.insert(entry);
-            match.setMatchId(nodeId);
+            match.setId(nodeId);
         }
         return match;
     }
@@ -86,7 +86,7 @@ public class MongoMatchRepository extends MongoRepository implements MatchReposi
             return buildMatch(dbMatch);
         }
         Match m =  new Match("", "", new Date(), -1L);
-        m.setMatchId(-1L);
+        m.setId(-1L);
         return m;
     }
 
@@ -109,7 +109,7 @@ public class MongoMatchRepository extends MongoRepository implements MatchReposi
                 ,
                 stage,
                 Long.parseLong(dbMatch.get(GROUP_ID).toString()));
-        match.setMatchId((long) dbMatch.get(MATCH_ID));
+        match.setId((long) dbMatch.get(MATCH_ID));
         BasicDBList dbResults = (BasicDBList) dbMatch.get(RESULTS);
         BasicDBObject[] dbObjects = new BasicDBObject[dbResults.size()];
         dbResults.toArray(dbObjects);
@@ -122,7 +122,7 @@ public class MongoMatchRepository extends MongoRepository implements MatchReposi
 
     private Result newResult(Match match, BasicDBObject dbResult) {
         if(dbResult == null){
-            return null;
+            return Result.emptyResult();
         }
 
         Integer homeGoals = dbResult.get(HOME_GOALS)==null?

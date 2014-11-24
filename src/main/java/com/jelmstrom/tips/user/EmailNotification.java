@@ -43,7 +43,7 @@ public class EmailNotification {
         try {
             Message message = new MimeMessage(session);
             message.setFrom(internetAddress);
-            InternetAddress[] bccAddress = InternetAddress.parse("c.elmstrom@gmail.com, johan.elmstrom@gmail.com");
+            InternetAddress[] bccAddress = InternetAddress.parse("johan.elmstrom@gmail.com");
             InternetAddress[] toAddress = InternetAddress.parse(user.email);
             message.setRecipients(Message.RecipientType.TO,toAddress);
             message.setRecipients(Message.RecipientType.BCC,bccAddress);
@@ -55,9 +55,9 @@ public class EmailNotification {
                     "\n \n  " +
                     "Mvh Admin \n\n bit.ly/vm_tips" ) ;
 
-            Transport.send(message);
+            //Transport.send(message);
 
-            System.out.println("Mail sent to " + user.email);
+            System.out.println("Mail sent to " + user.email + " : " + user.token );
         } catch (Exception ex){
             System.out.println("Failed to sed message to " + user.displayName);
             throw new IllegalStateException("failed to send message ", ex);

@@ -24,11 +24,11 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
     public Match store(Match match) {
         try(Transaction tx = vmTips.beginTx()){
             Node matchNode;
-            if(match.getMatchId() == null){
+            if(match.getId() == null){
                 matchNode = vmTips.createNode(MATCH_LABEL);
-                match.setMatchId(matchNode.getId());
+                match.setId(matchNode.getId());
             } else {
-                matchNode = vmTips.getNodeById(match.getMatchId());
+                matchNode = vmTips.getNodeById(match.getId());
             }
 
             matchNode.setProperty("awayTeam", match.awayTeam);
@@ -40,7 +40,7 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
                 matchNode.setProperty("homeGoals", match.getCorrectResult().homeGoals);
                 matchNode.setProperty("awayGoals", match.getCorrectResult().awayGoals);
                 matchNode.setProperty("adminUser", match.getCorrectResult().userId);
-                matchNode.setProperty("promoted", match.getCorrectResult().promoted);
+                matchNode.setProperty("promoted",  match.getCorrectResult().promoted);
             }
             storeResults(match.results, matchNode);
             tx.success();
@@ -100,7 +100,7 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
         String query = String.format("MATCH (n:%s {userId:%s , matchId:%s }) return n:id"
                 , RESULT_LABEL.name()
                 , result.userId
-                , result.match.getMatchId());
+                , result.match.getId());
         ResourceIterator<Long> nodes = engine.execute(query).columnAs("n");
         nodes.forEachRemaining(results::add);
         if(results.isEmpty()){
@@ -127,7 +127,7 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
                 Match.Stage.valueOf(matchNode.getProperty("stage").toString()),
                 Long.parseLong(matchNode.getProperty("groupId").toString()));
 
-        match.setMatchId(matchNode.getId());
+        match.setId(matchNode.getId());
 
 
         if(matchNode.hasProperty("homeGoals")){
