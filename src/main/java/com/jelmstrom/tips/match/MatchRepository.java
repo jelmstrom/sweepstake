@@ -8,5 +8,6 @@ public interface MatchRepository {
     List<Match> read();
     void store(List<Match> matches);
     void dropAll();
+    List<Result> userPredictions(long userId);
 
 }

@@ -65,7 +65,7 @@ public class Match implements Comparable<Match>{
         results.add(result);
     }
 
-    public Result resultFor(String userId) {
+    public Result resultFor(Long userId) {
         Optional<Result> option = results.stream().filter(result -> result.userId.equals(userId)).findFirst();
         if(option.isPresent()){
             return option.get();
@@ -89,7 +89,7 @@ public class Match implements Comparable<Match>{
         return false;
     }
 
-    public int scoreFor(String user) {
+    public int scoreFor(Long user) {
         return userScore(resultFor(user));
     }
 

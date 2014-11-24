@@ -3,7 +3,6 @@ package com.jelmstrom.tips.match;
 import com.jelmstrom.tips.persistence.NeoRepository;
 import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.*;
-import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Traverser;
 
@@ -58,7 +57,8 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
             resultNode.setProperty("awayGoals", result.awayGoals.toString());
             resultNode.setProperty("homeGoals", result.homeGoals.toString());
             resultNode.setProperty("promoted", result.promoted);
-            resultNode.setProperty("userId", result.userId); //todo: relationship (-> User)
+            resultNode.setProperty("userId", result.userId);
+            vmTips.getNodeById(result.userId).createRelationshipTo(resultNode, Relationships.USER_PREDICTION);
         }
     }
 
@@ -89,7 +89,7 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
                 matchNode.getProperty("homeTeam").toString(),
                 matchNode.getProperty("awayTeam").toString(),
                 new Date(Long.parseLong(matchNode.getProperty("matchStart").toString())),
-                matchNode.getProperty("matchId").toString(), //todo: relationship
+                matchNode.getProperty("matchId").toString(),
                 Match.Stage.valueOf(matchNode.getProperty("stage").toString())
 
         );
@@ -98,7 +98,7 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
             Result correct = new Result(match
                         , Integer.parseInt(matchNode.getProperty("homeGoals").toString())
                         , Integer.parseInt(matchNode.getProperty("awayGoals").toString())
-                        , matchNode.getProperty("adminUser").toString() //todo : relationship.
+                        , Long.parseLong(matchNode.getProperty("adminUser").toString())
                         , (String)matchNode.getProperty("promoted") //  nullable
             );
 
@@ -125,7 +125,7 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
         Result result =  new Result(match
                     , Integer.parseInt(resultNode.getProperty("homeGoals").toString())
                     , Integer.parseInt(resultNode.getProperty("awayGoals").toString())
-                    , resultNode.getProperty("userId").toString()
+                    , Long.parseLong(resultNode.getProperty("userId").toString())
                     , (String)resultNode.getProperty("promoted"));
         result.setId(resultNode.getId());
         return result;
@@ -143,6 +143,8 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
         return matches;
     }
 
+
+
     @Override
     public void store(List<Match> matches) {
         for(Match match : matches){
@@ -154,5 +156,22 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
     public void dropAll() {
         super.dropAll(RESULT_LABEL);
         super.dropAll(MATCH_LABEL);
+    }
+
+    @Override
+    public List<Result> userPredictions(long userId) {
+        List<Result> results  = new ArrayList<>();
+        try(Transaction tx = vmTips.beginTx()){
+            TraversalDescription td = vmTips.traversalDescription().breadthFirst().relationships(Relationships.USER_PREDICTION, Direction.OUTGOING)
+                    .evaluator(includeWhereLastRelationshipTypeIs(Relationships.USER_PREDICTION));
+            Traverser paths = td.traverse(vmTips.getNodeById(userId));
+            for(Path path : paths){
+                Node resultNode = path.endNode();
+                Node matchNode = resultNode.getRelationships(Relationships.MATCH_PREDICTION, Direction.INCOMING).iterator().next().getStartNode();
+                matchNode.getPropertyKeys().forEach(key -> System.out.println(key  + " = " + matchNode.getProperty(key)));
+                results.add(buildResult(resultNode, buildMatch(matchNode)));
+            }
+            return results;
+        }
     }
 }

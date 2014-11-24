@@ -119,7 +119,7 @@ public class MongoMatchRepository extends MongoRepository implements MatchReposi
         return new Result(match
                 , homeGoals
                 , awayGoals
-                , dbResult.getString(USER_ID)
+                , Long.parseLong(dbResult.getString(USER_ID))
                 , dbResult.getString(PROMOTED));
     }
 
@@ -131,5 +131,10 @@ public class MongoMatchRepository extends MongoRepository implements MatchReposi
     @Override
     public void dropAll() {
         matchCollection.drop();
+    }
+
+    @Override
+    public List<Result> userPredictions(long userId) {
+        return null;
     }
 }

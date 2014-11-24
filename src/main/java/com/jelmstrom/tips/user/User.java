@@ -7,20 +7,19 @@ public class User {
     public final String email;
     public final boolean admin;
     public final String token;
-    public final String id;
+    public final Long id;
     private String topScorer;
     private String winner;
-    private Long nodeId;
 
     public User(String displayName, String email, boolean admin, String token) {
         this.displayName = displayName;
         this.email = email;
         this.admin = admin;
         this.token = token;
-        this.id = "";
+        this.id = null;
     }
 
-     public User(String id, String displayName, String email, boolean admin, String token) {
+     public User(Long id, String displayName, String email, boolean admin, String token) {
         this.displayName = displayName;
         this.email = email;
         this.admin = admin;

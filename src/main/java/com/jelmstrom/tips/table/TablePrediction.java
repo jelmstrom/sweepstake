@@ -13,11 +13,11 @@ public class TablePrediction {
 
     public final String group;
     public final List<String> tablePrediction;
-    public final String userId;
+    public final Long userId;
     private Long id;
 
 
-    public TablePrediction(String group, String userId, List<String> tablePrediction) {
+    public TablePrediction(String group, Long userId, List<String> tablePrediction) {
         this.group = group;
         this.tablePrediction = tablePrediction;
         this.userId = userId;

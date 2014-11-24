@@ -39,7 +39,7 @@ public class MongoUserRepository extends MongoRepository implements UserReposito
                     .append(SCORER, user.getTopScorer())
                     .append(WINNER, user.getWinner());
         if(existingUser.isValid() && existingUser.id.equals(user.id)){
-            userCollection.update(new BasicDBObject(ID, new ObjectId(existingUser.id)), dbUser);
+            userCollection.update(new BasicDBObject(ID, new ObjectId(existingUser.id.toString())), dbUser);
         } else  {
            userCollection.insert(dbUser);
         }
@@ -47,11 +47,11 @@ public class MongoUserRepository extends MongoRepository implements UserReposito
     }
 
     @Override
-    public User read(String id) {
-        if(StringUtils.isEmpty(id)) {
+    public User read(Long id) {
+        if(null == id) {
             return User.emptyUser();
         } else {
-            return buildUser(userCollection.findOne(new BasicDBObject(ID, new ObjectId(id))));
+            return buildUser(userCollection.findOne(new BasicDBObject(ID, new ObjectId(id.toString()))));
         }
     }
 
@@ -68,7 +68,7 @@ public class MongoUserRepository extends MongoRepository implements UserReposito
 
     private User buildUser(DBObject dbUser) {
         if(dbUser != null && null != dbUser.get(ID)){
-            User user = new User(dbUser.get(ID).toString()
+            User user = new User((long) dbUser.get(ID).toString().hashCode()
                     , dbUser.get(DISPLAY_NAME).toString()
                     , dbUser.get(EMAIL).toString()
                     , Boolean.parseBoolean(dbUser.get(ADMIN).toString())
@@ -82,8 +82,8 @@ public class MongoUserRepository extends MongoRepository implements UserReposito
     }
 
     @Override
-    public void remove(String userId) {
-        userCollection.remove(new BasicDBObject(ID, new ObjectId(userId)));
+    public void remove(Long userId) {
+        userCollection.remove(new BasicDBObject(ID, new ObjectId(userId.toString())));
     }
 
     @Override

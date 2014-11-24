@@ -7,10 +7,9 @@ import com.jelmstrom.tips.match.Match;
 import com.jelmstrom.tips.match.MatchRepository;
 import com.jelmstrom.tips.match.NeoMatchRepository;
 import com.jelmstrom.tips.match.Result;
-import com.jelmstrom.tips.table.NeoTableRepository;
-import com.jelmstrom.tips.table.TableEntry;
-import com.jelmstrom.tips.table.TablePrediction;
-import com.jelmstrom.tips.table.TableRepository;
+import com.jelmstrom.tips.table.*;
+import com.jelmstrom.tips.table.NeoTablePredictionRepository;
+import com.jelmstrom.tips.table.TablePredictionRepository;
 import com.jelmstrom.tips.user.*;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -36,7 +35,7 @@ public class Sweepstake {
     private final String context;
     private final MatchRepository matchRepository;
     private final UserRepository userRepository;
-    private final TableRepository tableRepository;
+    private final TablePredictionRepository tableRepository;
     private final GroupRepository groupRepository;
 
     Sweepstake(){
@@ -53,22 +52,19 @@ public class Sweepstake {
         this.context = context;
         matchRepository = new NeoMatchRepository(context);
         userRepository = new NeoUserRepository(context);
-        tableRepository = new NeoTableRepository(context);
+        tableRepository = new NeoTablePredictionRepository(context);
         groupRepository = new NeoGroupRepository(context);
     }
 
-    @RequestMapping("/matches")
     public List<Match> getMatches() {
         return matchRepository.read();
     }
 
-    @RequestMapping("/users")
     public List<User> getUsers() {
         return userRepository.read();
     }
 
-    @RequestMapping(value = "/predictions/{user}")
-    public List<TablePrediction> getPredictions(@PathVariable String userId) {
+    public List<TablePrediction> getPredictions(Long userId) {
         User user = userRepository.read(userId);
         return tableRepository.read().stream().filter(prediction -> prediction.userId.equals(user.id)).collect(toList());
     }
@@ -76,35 +72,35 @@ public class Sweepstake {
     public List<LeaderboardEntry> fasterLeaderboard(){
         User adminUser = userRepository.findAdminUser();
         List<Match> matches = getMatches();
-        Map<String, Integer> matchScores = matches.stream()
+        Map<Long, Integer> matchScores = matches.stream()
                 .flatMap(match -> match.results.stream())
                 .collect(toMap(result -> result.userId, Result::score, Math::addExact));
 
         List<TablePrediction> tablePredictions = tableRepository.read();
         List<Result> adminResults = matches.stream().filter(match -> match.stage == GROUP).map(Match::getCorrectResult).filter(Objects::nonNull).collect(toList());
 
-        Map<String, Integer> tables = tablePredictions.stream()
+        Map<Long, Integer> tables = tablePredictions.stream()
                 .filter(prediction -> !StringUtils.isEmpty(prediction.userId))
                 .collect(toMap(pred -> pred.userId, pred -> pred.score(adminResults), Math::addExact));
 
         List<User> users = userRepository.read();
-        Map<String, Integer> userPoint
+        Map<Long, Integer> userPoint
                 =  users.stream().collect(toMap(user -> user.id, user ->  user.score(adminUser), Math::addExact));
 
 
-        Map<String, Integer> user =  mergeMaps(tables, userPoint);
-        Map<String, Integer> leaderboardmap =  mergeMaps(matchScores, user);
+        Map<Long, Integer> user =  mergeMaps(tables, userPoint);
+        Map<Long, Integer> leaderboardmap =  mergeMaps(matchScores, user);
 
         return leaderboardmap.entrySet().stream()
-                .map(entry -> new LeaderboardEntry(userRepository.read(entry.getKey()), entry.getValue()))
+                .map(entry -> new LeaderboardEntry(users.stream().filter(u -> u.id.equals(entry.getKey())).findFirst().orElse(new User("","", false, "")), entry.getValue()))
                 .filter(entry -> !StringUtils.isEmpty(entry.user.id))
                 .sorted()
                 .collect(toList());
 
     }
 
-    public Map<String, Integer> mergeMaps(Map<String, Integer> matchScores, Map<String, Integer> tables) {
-        Collector<Map.Entry, ?, Map<String, Integer>> mapJoinCollector = getEntryMapCollector();
+    public Map<Long, Integer> mergeMaps(Map<Long, Integer> matchScores, Map<Long, Integer> tables) {
+        Collector<Map.Entry, ?, Map<Long, Integer>> mapJoinCollector = getEntryMapCollector();
 
 
         return Stream.of(tables, matchScores)
@@ -113,9 +109,9 @@ public class Sweepstake {
                 .collect(mapJoinCollector);
     }
 
-    public Collector<Map.Entry, ?, Map<String, Integer>> getEntryMapCollector() {
+    public Collector<Map.Entry, ?, Map<Long, Integer>> getEntryMapCollector() {
         return toMap(
-            entry -> entry.getKey().toString(),
+            entry -> (Long)entry.getKey(),
             entry -> Integer.parseInt(entry.getValue().toString()),
             Math::addExact
         );
@@ -132,7 +128,7 @@ public class Sweepstake {
         return group.teams.stream().map(team -> TableEntry.recordForTeam(team, adminResults)).sorted().collect(toList());
     }
 
-    public User getUser(String userId) {
+    public User getUser(Long userId) {
         return userRepository.read(userId);
     }
 
@@ -164,7 +160,7 @@ public class Sweepstake {
         tableRepository.store(tablePrediction);
     }
 
-    public void deleteUser(String userId) {
+    public void deleteUser(Long userId) {
         userRepository.remove(userId);
     }
 

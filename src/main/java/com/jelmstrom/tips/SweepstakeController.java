@@ -59,7 +59,7 @@ public class SweepstakeController {
     }
     @RequestMapping(value = "/playoff",  method = RequestMethod.POST)
     public String savePlayoff(Model uiModel, HttpServletRequest request) {
-        User user = sweepstake.getUser(request.getParameter("userId"));
+        User user = sweepstake.getUser(Long.parseLong(request.getParameter("userId")));
         List<Match> resultList = getResults(request, user);
         System.out.println("Saving playoff results " + resultList);
         sweepstake.saveResults(resultList, user);
@@ -219,7 +219,7 @@ public class SweepstakeController {
         uiModel.addAttribute("group", groupLetter);
         uiModel.addAttribute("currentStandings", tableEntries);
         uiModel.addAttribute("teams", tableEntries.stream().map(entry -> entry.team).collect(toList()));
-        uiModel.addAttribute("prediction", maybe.isPresent() ? maybe.get() : new TablePrediction("", "", Arrays.asList("", "", "", "")));
+        uiModel.addAttribute("prediction", maybe.isPresent() ? maybe.get() : new TablePrediction("", null, Arrays.asList("", "", "", "")));
         return "group";
     }
 
@@ -233,8 +233,9 @@ public class SweepstakeController {
         return "user";
     }
 
-    private String sessionUserId(HttpServletRequest request) {
-        return (String) request.getSession().getAttribute(SESSION_USER);
+    private Long sessionUserId(HttpServletRequest request) {
+        String sessionId = (String) request.getSession().getAttribute(SESSION_USER);
+        return sessionId == null ? null : Long.parseLong(sessionId);
     }
 
     @RequestMapping(value = "/user", method = RequestMethod.GET)
@@ -262,7 +263,7 @@ public class SweepstakeController {
 
     @RequestMapping(value = "/delete/{userId}", method = RequestMethod.POST)
     public String deleteUser(Model uiModel, @PathVariable String userId, HttpServletRequest request) {
-        sweepstake.deleteUser(userId);
+        sweepstake.deleteUser(Long.parseLong(userId));
         return index(uiModel, request);
     }
 
@@ -281,7 +282,7 @@ public class SweepstakeController {
         } else {
             System.out.println("new");
             user = createUser(request, sweepstake);
-            if (StringUtils.isEmptyOrWhitespace(sessionUserId(request))) {
+            if (null == sessionUserId(request)) {
                 System.out.println("Logging in new user");
                 request.getSession().setAttribute(SESSION_USER, user.id);
             }
@@ -299,7 +300,7 @@ public class SweepstakeController {
                 , request.getParameter("displayName")
                 , request.getParameter("email")
                 , request.getParameter("admin")));
-        User user = new User(request.getParameter("userId")
+        User user = new User(Long.parseLong(request.getParameter("userId"))
                 , request.getParameter("displayName")
                 , request.getParameter("email")
                 , null!=request.getParameter("admin")
@@ -336,7 +337,7 @@ public class SweepstakeController {
         if(StringUtils.isEmpty(userId)){
             user = User.emptyUser();
         } else {
-            user = sweepstake.getUser(userId);
+            user = sweepstake.getUser(Long.parseLong(userId));
         }
         return setSessionUsers(request, user , uiModel);
     }
@@ -357,7 +358,7 @@ public class SweepstakeController {
 
 
     private User sessionUser(HttpServletRequest request) {
-        String currentSessionUser = sessionUserId(request);
+        Long currentSessionUser = sessionUserId(request);
         System.out.printf("Session user : %s", currentSessionUser);
         return sweepstake.getUser(currentSessionUser);
     }

@@ -1,9 +1,9 @@
 package com.jelmstrom.tips.table;
 
 import com.jelmstrom.tips.persistence.NeoRepository;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.ResourceIterator;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.*;
+import org.neo4j.graphdb.traversal.Evaluators;
+import org.neo4j.graphdb.traversal.Traverser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,8 +11,8 @@ import java.util.List;
 
 import static java.util.stream.Collectors.joining;
 
-public class NeoTableRepository extends NeoRepository implements TableRepository{
-    public NeoTableRepository(String testRepo) {
+public class NeoTablePredictionRepository extends NeoRepository implements TablePredictionRepository {
+    public NeoTablePredictionRepository(String testRepo) {
         super();
     }
 
@@ -25,15 +25,17 @@ public class NeoTableRepository extends NeoRepository implements TableRepository
             } else  {
                 node = vmTips.getNodeById(prediction.getId());
             }
-            buildTablePrediction(prediction, node);
+
+            populateNode(prediction, node);
             tx.success();
         }
     }
 
-    public void buildTablePrediction(TablePrediction prediction, Node node) {
+    public void populateNode(TablePrediction prediction, Node node) {
         node.setProperty("group", prediction.group);
         node.setProperty("groupPrediction", prediction.tablePrediction.stream().collect(joining(":")));
         node.setProperty("userId", prediction.userId);
+        vmTips.getNodeById(prediction.userId).createRelationshipTo(node, Relationships.TABLE_PREDICTION);
         prediction.setId(node.getId());
     }
 
@@ -51,17 +53,20 @@ public class NeoTableRepository extends NeoRepository implements TableRepository
     }
 
     private TablePrediction buildTablePrediction(Node nodeById) {
-        String prediction = nodeById.getProperty("groupPrediction").toString();
+        String table = nodeById.getProperty("groupPrediction").toString();
         String group = nodeById.getProperty("group").toString();
-        String userId = nodeById.getProperty("userId").toString();
-        return new TablePrediction(group, userId, Arrays.asList(prediction.split(":")));
+        Long userId = Long.parseLong(nodeById.getProperty("userId").toString());
+        TablePrediction prediction =  new TablePrediction(group, userId, Arrays.asList(table.split(":")));
+        prediction.setId(nodeById.getId());
+        return prediction;
+
     }
 
     @Override
-    public TablePrediction readPrediction(String userId, String group) {
+    public TablePrediction readPrediction(Long userId, String group) {
         try(Transaction tx = vmTips.beginTx()){
             List<TablePrediction> predictions = new ArrayList<>();
-            ResourceIterator<Node> nodes = engine.execute(String.format("MATCH (n:%s {userId : '%s', group : '%s'}) return n"
+            ResourceIterator<Node> nodes = engine.execute(String.format("MATCH (n:%s {userId : %s, group : '%s'}) return n"
                     , TABLE_PREDICTION.name()
                     , userId
                     , group)).columnAs("n");
@@ -87,5 +92,21 @@ public class NeoTableRepository extends NeoRepository implements TableRepository
     @Override
     public void dropAll() {
         dropAll(TABLE_PREDICTION);
+    }
+
+    @Override
+    public List<TablePrediction> predictionsFor(Long id) {
+        try (Transaction tx = vmTips.beginTx() ) {
+            Traverser traverse = vmTips.traversalDescription().depthFirst()
+                    .relationships(Relationships.TABLE_PREDICTION, Direction.OUTGOING)
+                    .evaluator(Evaluators.atDepth(1))
+                    .traverse(vmTips.getNodeById(id));
+            List<TablePrediction> predictions = new ArrayList<>();
+            for(Path path : traverse){
+                Node node = path.endNode();
+                predictions.add(buildTablePrediction(node));
+            }
+            return predictions;
+        }
     }
 }

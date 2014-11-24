@@ -27,9 +27,9 @@ public class NeoUserRepository extends NeoRepository implements UserRepository {
         try(Transaction tx = vmTips.beginTx()){
             Node userNode;
             User returnValue;
-            if(StringUtils.isEmpty(user.id)){
+            if(null == user.id){
                 userNode = vmTips.createNode(USER_LABEL);
-                returnValue = new User(Long.toString(userNode.getId()),
+                returnValue = new User(userNode.getId(),
                         user.displayName,
                         user.email,
                         user.admin,
@@ -37,7 +37,7 @@ public class NeoUserRepository extends NeoRepository implements UserRepository {
                 returnValue.setTopScorer(user.getTopScorer());
                 returnValue.setWinner(user.getWinner());
             } else {
-                userNode = vmTips.getNodeById(Long.parseLong(user.id));
+                userNode = vmTips.getNodeById(user.id);
                 returnValue = user;
             }
             userNode.setProperty("displayName",user.displayName );
@@ -59,19 +59,20 @@ public class NeoUserRepository extends NeoRepository implements UserRepository {
     }
 
     @Override
-    public User read(String id) {
+    public User read(Long id) {
+        if(null == id){
+            return User.emptyUser();
+        }
         try(Transaction tx = vmTips.beginTx()){
-            Node userNode = vmTips.getNodeById(Long.parseLong(id));
-
+            Node userNode = vmTips.getNodeById(id);
             User user = buildUser(userNode);
-
             tx.success();
             return user;
         }
     }
 
     public User buildUser(Node userNode) {
-        User user = new User(Long.toString(userNode.getId()),
+        User user = new User(userNode.getId(),
                 userNode.getProperty("displayName").toString(),
                 userNode.getProperty("email").toString(),
                 Boolean.parseBoolean(userNode.getProperty("admin").toString()),
@@ -90,8 +91,6 @@ public class NeoUserRepository extends NeoRepository implements UserRepository {
         List<User> users = findUsersByKeyValue("email", email);
         if(users.isEmpty()){
             return new User("", email, false, "");
-        } else if(users.size() > 1) {
-            throw new IllegalStateException(String.format("Duplicate users with email %s", email));
         } else {
             return users.get(0);
         }
@@ -104,13 +103,16 @@ public class NeoUserRepository extends NeoRepository implements UserRepository {
             nodes.forEachRemaining(node -> users.add(buildUser(node)));
             tx.success();
         }
+        if(users.size() > 1){
+            throw new IllegalStateException(String.format("Duplicate users with [%s = %s]", key, value));
+        }
         return users;
     }
 
     @Override
-    public void remove(String userId) {
+    public void remove(Long userId) {
         try(Transaction tx = vmTips.beginTx()){
-            Node userNode = vmTips.getNodeById(Long.parseLong(userId));
+            Node userNode = vmTips.getNodeById(userId);
             userNode.delete();
             tx.success();
         }
@@ -132,8 +134,6 @@ public class NeoUserRepository extends NeoRepository implements UserRepository {
         List<User> users = findUsersByKeyValue("displayName", displayName);
         if(users.isEmpty()){
             return new User(displayName, "", false, "");
-        } else if(users.size() > 1) {
-            throw new IllegalStateException(String.format("Duplicate users with displayName %s", displayName));
         } else {
             return users.get(0);
         }
@@ -144,8 +144,6 @@ public class NeoUserRepository extends NeoRepository implements UserRepository {
         List<User> users = findUsersByKeyValue("admin", "true");
         if(users.isEmpty()) {
             return new User("", "", false, "");
-        } else if(users.size() > 1) {
-            throw new IllegalStateException("Duplicate admin users found");
         } else {
             return users.get(0);
         }
@@ -156,8 +154,6 @@ public class NeoUserRepository extends NeoRepository implements UserRepository {
         List<User> users = findUsersByKeyValue("token", token);
         if(users.isEmpty()){
             return new User("", "", false, token);
-        } else if(users.size() > 1) {
-            throw new IllegalStateException(String.format("Duplicate users with token %s", token));
         } else {
             return users.get(0);
         }

@@ -1,5 +1,7 @@
 package com.jelmstrom.tips.match;
 
+import com.jelmstrom.tips.user.NeoUserRepository;
+import com.jelmstrom.tips.user.User;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,6 +51,20 @@ public class NeoMatchRepositoryTest {
         List<Match> matches = neoMatchRepository.read();
         assertThat(matches.size(), is(1));
         assertThat(matches.get(0).getNodeId(), is(equalTo(match.getNodeId())));
+    }
+
+    @Test
+    public void matchPredictionsShouldFindTwoResultsForUser(){
+        Match m2 = new Match("home2", "away2", new Date(), "a1", GROUP);
+        User user = new NeoUserRepository("").store(new User("111", "111", false, "111"));
+        Result result = new Result(m2, 2, 2, user.id);
+        m2.add(result);
+        Result result2 = new Result(match, 1,1, user.id);
+        neoMatchRepository.store(m2);
+        neoMatchRepository.store(match);
+        List<Result> results = neoMatchRepository.userPredictions(user.id);
+        assertThat(results.size(), is(2));
+
     }
 
 }

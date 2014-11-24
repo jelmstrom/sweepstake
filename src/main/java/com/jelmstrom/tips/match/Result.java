@@ -8,11 +8,11 @@ public class Result {
     public final Match match;
     public final Integer homeGoals;
     public final Integer awayGoals;
-    public final String userId;
+    public final Long userId;
     public final String promoted;
     private Long id;
 
-    public Result(Match match, Integer homeGoals, Integer awayGoals, String userId) {
+    public Result(Match match, Integer homeGoals, Integer awayGoals, Long userId) {
         this.match = match;
         this.homeGoals = homeGoals;
         this.awayGoals = awayGoals;
@@ -21,7 +21,7 @@ public class Result {
         match.add(this);
     }
 
-    public Result(Match match, Integer homeGoals, Integer awayGoals, String userId, String promoted) {
+    public Result(Match match, Integer homeGoals, Integer awayGoals, Long userId, String promoted) {
         this.match = match;
         this.homeGoals = homeGoals;
         this.awayGoals = awayGoals;
@@ -32,7 +32,7 @@ public class Result {
 
 
     public static Result emptyResult() {
-        return new Result(new Match("", "", null, ""), null, null, "");
+        return new Result(new Match("", "", null, ""), null, null, -1L);
     }
 
     public int goalsAgainst(String team) {

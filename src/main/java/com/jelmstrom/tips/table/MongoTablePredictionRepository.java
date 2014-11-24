@@ -8,12 +8,12 @@ import java.util.Collections;
 import java.util.List;
 
 
-public class MongoTableRepository extends MongoRepository implements TableRepository {
+public class MongoTablePredictionRepository extends MongoRepository implements TablePredictionRepository {
 
     public final DBCollection tablePredictionCollection;
 
 
-    public MongoTableRepository(String context) {
+    public MongoTablePredictionRepository(String context) {
         super(context);
         tablePredictionCollection = getDb().getCollection("tablePreditions");
     }
@@ -45,7 +45,7 @@ public class MongoTableRepository extends MongoRepository implements TableReposi
     }
 
     @Override
-    public TablePrediction readPrediction(String userId, String group) {
+    public TablePrediction readPrediction(Long userId, String group) {
         return readPrediction(new TablePrediction(group, userId, null));
     }
 
@@ -55,7 +55,7 @@ public class MongoTableRepository extends MongoRepository implements TableReposi
         ((BasicDBList) dbMatch.get("prediction")).forEach(entry -> predictions.add((String) entry));
         return new TablePrediction(
                 dbMatch.get("group").toString()
-                                , (String) dbMatch.get("userId")
+                                , (Long)dbMatch.get("userId")
                                 , predictions);
     }
 
@@ -71,6 +71,11 @@ public class MongoTableRepository extends MongoRepository implements TableReposi
     @Override
     public void dropAll() {
         tablePredictionCollection.drop();
+    }
+
+    @Override
+    public List<TablePrediction> predictionsFor(Long id) {
+        return null;
     }
 
 

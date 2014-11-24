@@ -1,15 +1,15 @@
 package com.jelmstrom.tips;
 
 import com.jelmstrom.tips.group.Group;
+import com.jelmstrom.tips.group.GroupRepository;
 import com.jelmstrom.tips.group.MongoGroupRepository;
-import com.jelmstrom.tips.match.Match;
-import com.jelmstrom.tips.match.MongoMatchRepository;
-import com.jelmstrom.tips.match.Result;
-import com.jelmstrom.tips.table.MongoTableRepository;
+import com.jelmstrom.tips.group.NeoGroupRepository;
+import com.jelmstrom.tips.match.*;
+import com.jelmstrom.tips.table.MongoTablePredictionRepository;
+import com.jelmstrom.tips.table.NeoTablePredictionRepository;
 import com.jelmstrom.tips.table.TablePrediction;
-import com.jelmstrom.tips.user.EmailNotification;
-import com.jelmstrom.tips.user.User;
-import com.jelmstrom.tips.user.MongoUserRepository;
+import com.jelmstrom.tips.table.TablePredictionRepository;
+import com.jelmstrom.tips.user.*;
 import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -24,24 +24,28 @@ import static org.junit.Assert.assertThat;
 public class IntegrationTest {
 
 
-    private MongoMatchRepository matchRepo = new MongoMatchRepository("testRepo");
-    private MongoTableRepository tableRepo = new MongoTableRepository("testRepo");
-    private MongoGroupRepository groupRepo = new MongoGroupRepository("testRepo");
-    private MongoUserRepository userRepo = new MongoUserRepository("userRepo");
+    private MatchRepository matchRepo = new NeoMatchRepository("testRepo");
+    private TablePredictionRepository tableRepo = new NeoTablePredictionRepository("testRepo");
+    private GroupRepository groupRepo = new NeoGroupRepository("testRepo");
+    private UserRepository userRepo = new NeoUserRepository("userRepo");
 
     @After
     public void tearDown(){
-        matchRepo.matchCollection.drop();
-        tableRepo.tablePredictionCollection.drop();
-        groupRepo.groupCollection.drop();
-        userRepo.userCollection.drop();
+        matchRepo.dropAll();
+        tableRepo.dropAll();
+        groupRepo.dropAll();
+        userRepo.dropAll();
     }
 
     @Test
     public void matchStoredInDb(){
+        User user = new User("test", "test", false, "test");
+        User user2 = new User("test", "test", false, "test");
+        user = userRepo.store(user);
+        user2 = userRepo.store(user2);
         Match match = new Match("TeamA", "TeamB", new Date(), UUID.randomUUID().toString());
-        new Result(match, 2, 1, "111");
-        new Result(match, 2, 2, "2222");
+        new Result(match, 2, 1, user.id);
+        new Result(match, 2, 2, user2.id);
         matchRepo.store(match);
         Match persisted = matchRepo.read(match.id);
         assertThat(persisted.equals(match), is(true));
@@ -50,12 +54,14 @@ public class IntegrationTest {
 
     @Test
     public void getAllMatchesShouldReturnListOfMatchesGreaterThanOne(){
+        User user = new User("_display_", "_mail_", false, "_token" );
+        user = userRepo.store(user);
         Match match = new Match("TeamA", "TeamB", new Date(), UUID.randomUUID().toString());
-        new Result(match, 2, 2, "");
-        new Result(match, 2, 2, "");
+        new Result(match, 2, 2, user.id);
+        new Result(match, 2, 2, user.id);
         Match match2 = new Match("TeamA", "TeamB", new Date(), UUID.randomUUID().toString());
-        new Result(match, 2, 1, "");
-        new Result(match, 2, 2, "");
+        new Result(match, 2, 1, user.id);
+        new Result(match, 2, 2, user.id);
         matchRepo.store(match);
         matchRepo.store(match2);
         List<Match> persisted = matchRepo.read();
@@ -65,12 +71,16 @@ public class IntegrationTest {
 
     @Test
     public void saveExistingMatchUpdates(){
+        User user = new User("test", "test", false, "test");
+        User user2 = new User("test", "test", false, "test");
+        user = userRepo.store(user);
+        user2 = userRepo.store(user2);
         Match match = new Match("TeamA", "TeamB", new Date(), UUID.randomUUID().toString());
-        new Result(match, 2, 1, "1023920139012");
+        new Result(match, 2, 1, user.id);
         matchRepo.store(match);
 
         Match versionOne = matchRepo.read(match.id);
-        new Result(match, 2, 2, "3123y18263912673");
+        new Result(match, 2, 2, user2.id);
         matchRepo.store(match);
 
         Match versionTwo = matchRepo.read(match.id);
@@ -81,7 +91,10 @@ public class IntegrationTest {
 
     @Test
     public void tablePredictionsAreStoredAndReadInCorrectOrder(){
-        TablePrediction prediction = new TablePrediction("grp","1111", Arrays.asList("teamB", "teamA", "teamC", "teamD"));
+
+        User user = new User("test", "test", false, "test");
+        user = userRepo.store(user);
+        TablePrediction prediction = new TablePrediction("grp",user.id, Arrays.asList("teamB", "teamA", "teamC", "teamD"));
         tableRepo.store(prediction);
         TablePrediction stored = tableRepo.readPrediction(prediction.userId, prediction.group);
         assertThat(stored, equalTo(prediction));
@@ -102,7 +115,7 @@ public class IntegrationTest {
         userRepo.store(newUser);
         User readUser = userRepo.findByEmail("Email");
         assertThat(readUser.isValid(), is(true));
-        assertThat(readUser.id.length(), is(greaterThan(0)));
+        assertThat(readUser.id, is(greaterThan(0L)));
     }
 
 

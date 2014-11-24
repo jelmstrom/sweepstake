@@ -5,11 +5,11 @@ import java.util.List;
 public interface UserRepository {
     User store(User user);
 
-    User read(String id);
+    User read(Long id);
 
     User findByEmail(String email);
 
-    void remove(String userId);
+    void remove(Long userId);
 
     List<User> read();
 

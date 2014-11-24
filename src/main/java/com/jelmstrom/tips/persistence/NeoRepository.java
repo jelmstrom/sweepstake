@@ -12,7 +12,7 @@ public abstract class NeoRepository {
     protected static ExecutionEngine engine;
 
     static {
-        vmTips = new GraphDatabaseFactory().newEmbeddedDatabase("VmTipsDb");
+        vmTips = new GraphDatabaseFactory().newEmbeddedDatabase("VmTipsDbd");
         engine = new ExecutionEngine( vmTips );
         registerShutdownHook(vmTips);
     }
@@ -35,7 +35,8 @@ public abstract class NeoRepository {
     public static enum Relationships implements RelationshipType {
         MATCH_PREDICTION,
         USER_PREDICTION,
-        MATCH_IN
+        TABLE_PREDICTION,
+        GROUP
     }
 
     protected void dropAll(Label label) {

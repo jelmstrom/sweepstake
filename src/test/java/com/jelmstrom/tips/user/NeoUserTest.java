@@ -4,6 +4,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.UUID;
+
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
@@ -12,9 +14,10 @@ public class NeoUserTest {
 
     UserRepository userRepository = new NeoUserRepository("test");
     User user;
+
     @Before
     public void setUp(){
-        User newUser = new User("displayName", "email", false , "token");
+        User newUser = new User("displayName", "email", false , UUID.randomUUID().toString());
         newUser.setTopScorer("scorer");
         newUser.setWinner("winner");
         this.user = userRepository.store(newUser);
@@ -61,7 +64,7 @@ public class NeoUserTest {
 
     @Test
     public void deleteUserShouldRemoveUser(){
-        User adminUser = userRepository.store(new User("Admin", "mail", true, "adminToken"));
+        User adminUser = userRepository.store(new User("deleteMe", "deleteMe", false, "deleteToken"));
         userRepository.remove(adminUser.id);
         assertThat(userRepository.read().size(), is(1));
     }
