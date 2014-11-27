@@ -25,11 +25,12 @@ public class NeoTablePredictionRepository extends NeoRepository implements Table
             Node node;
             if(null == prediction.getId()){
                 Node group = vmTips.getNodeById(prediction.group);
+
                 Optional<Relationship> existing = StreamSupport.stream(group.getRelationships(Direction.INCOMING, GROUP).spliterator(), false)
                         .filter(rel -> prediction.userId.equals((long) rel.getProperty("userId")))
                         .findFirst();
                 if(existing.isPresent()){
-                    node = existing.get().getEndNode();
+                    node = existing.get().getStartNode();
                 } else {
                     node = vmTips.createNode(TABLE_PREDICTION);
                     Relationship relationshipTo = node.createRelationshipTo(group, GROUP);

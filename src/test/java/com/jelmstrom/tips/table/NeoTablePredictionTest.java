@@ -10,9 +10,12 @@ import org.junit.After;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 
 public class NeoTablePredictionTest {
@@ -49,4 +52,26 @@ public class NeoTablePredictionTest {
 
 
     }
+
+    @Test
+    public void updatePredictionShouldStoreUpdated(){
+        User user = new User("test", "test", false, "token");
+        user = userRepo.store(user);
+        List<String> teams = Arrays.asList("a", "b", "c");
+        Group groupA = groupRepository.store(new Group("A", teams));
+        TablePrediction prediction = new TablePrediction(groupA.getGroupId(), user.id, teams);
+        repo.store(prediction);
+
+        Collections.reverse(teams);
+        TablePrediction updatePrediction = new TablePrediction(groupA.getGroupId(), user.id, teams);
+        repo.store(updatePrediction);
+
+        List<TablePrediction> tablePredictions = repo.predictionsFor(user.id);
+        assertThat(tablePredictions.size(), is(1));
+        assertThat(tablePredictions.get(0).tablePrediction, equalTo(teams));
+
+    }
+
+
+
 }
