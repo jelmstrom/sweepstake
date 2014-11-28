@@ -243,7 +243,7 @@ public class AcceptanceTest {
         new Result(matchA1, 2, 2, user.id);
         List<Match> results = Arrays.asList(matchA1);
 
-        sweepstake.saveMatches(results, user);
+        MATCH_REPOSITORY.store(results);
 
         Match fromDb = MATCH_REPOSITORY.read(matchA1.getId());
         assertThat(fromDb.results.size(), is(originalCount));

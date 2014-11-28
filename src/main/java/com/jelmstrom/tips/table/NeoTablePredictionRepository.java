@@ -11,8 +11,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
-import static com.jelmstrom.tips.persistence.NeoRepository.Relationships.*;
+import static com.jelmstrom.tips.persistence.NeoRepository.Relationships.TABLE_PREDICTION;
+import static com.jelmstrom.tips.persistence.NeoRepository.Relationships.GROUP;
 import static java.util.stream.Collectors.joining;
+import static org.neo4j.graphdb.Direction.*;
 
 public class NeoTablePredictionRepository extends NeoRepository implements TablePredictionRepository {
     public NeoTablePredictionRepository(String testRepo) {
@@ -25,10 +27,12 @@ public class NeoTablePredictionRepository extends NeoRepository implements Table
             Node node;
             if(null == prediction.getId()){
                 Node group = vmTips.getNodeById(prediction.group);
+                String property = "userId";
 
-                Optional<Relationship> existing = StreamSupport.stream(group.getRelationships(Direction.INCOMING, GROUP).spliterator(), false)
-                        .filter(rel -> prediction.userId.equals((long) rel.getProperty("userId")))
-                        .findFirst();
+                Direction direction = BOTH;
+                Relationships type = GROUP;
+                Object value = prediction.userId;
+                Optional<Relationship> existing = findRelationship(group, property, direction, type, value);
                 if(existing.isPresent()){
                     node = existing.get().getStartNode();
                 } else {
@@ -110,17 +114,15 @@ public class NeoTablePredictionRepository extends NeoRepository implements Table
 
     @Override
     public List<TablePrediction> predictionsFor(Long id) {
-        try (Transaction tx = vmTips.beginTx() ) {
-            Traverser traverse = vmTips.traversalDescription().depthFirst()
-                    .relationships(Relationships.TABLE_PREDICTION, Direction.OUTGOING)
-                    .evaluator(Evaluators.atDepth(1))
-                    .traverse(vmTips.getNodeById(id));
+        try (Transaction ignored = vmTips.beginTx() ) {
+            Traverser traverse = allRelationshipsFor(vmTips.getNodeById(id), Relationships.TABLE_PREDICTION, OUTGOING);
             List<TablePrediction> predictions = new ArrayList<>();
             for(Path path : traverse){
-                Node node = path.endNode();
-                predictions.add(buildTablePrediction(node));
+                Node predictionNode = path.endNode();
+                predictions.add(buildTablePrediction(predictionNode));
             }
             return predictions;
         }
     }
+
 }

@@ -108,9 +108,9 @@
             <th align="center">Home Team</th>
             <th width="1%">&nbsp;</th>
             <th align="center">Away Team</th>
-            <th width="8%">&nbsp;</th>
+            <th width="4%">&nbsp;</th>
             <th width="1%">&nbsp;</th>
-            <th width="8%">&nbsp;</th>
+            <th width="4%">&nbsp;</th>
             <th width="2%">Score</th>
         </tr>
         </thead>
@@ -120,41 +120,31 @@
             <td th:text="${match.homeTeam}">home</td>
             <td>-</td>
             <td th:text="${match.awayTeam}">Away</td>
-            <th:block th:if="${match.editable(activeUser)}">
-                <td align="right">
-                    <input type="text" size="2"
-                           id="${match.id}_home"
-                           th:value="${match.resultFor(activeUser.id).homeGoals}"
-                           name=""
-                           th:name="${match.id+'_h'}"
-                           th:if="${match.editable(activeUser)}"/>
-                </td>
-                <td><label>-</label></td>
-                <td>
-                    <input type="text" size="2"
-                           id="${match.id}_away"
-                           name="away"
-                           th:value="${match.resultFor(activeUser.id).awayGoals}"
-                           th:name="${match.id+'_a'}"
-                           th:if="${match.editable(activeUser)}"/>
-                </td>
-            </th:block>
 
-            <th:block th:if="not ${match.editable(activeUser)}">
-                <td align="right">
-                    <label th:text="${match.resultFor(activeUser.id).homeGoals}"
-                           th:if="${match.resultFor(activeUser.id).isValid()}">&nbsp;</label>
-                </td>
-                <td><label>-</label></td>
-                <td>
-                    <label th:text="${match.resultFor(activeUser.id).awayGoals}"
-                           th:if="${match.resultFor(activeUser.id).isValid()}">&nbsp;</label>
-                </td>
-            </th:block>
 
-            <td th:if="${activeUser.isValid()}">
-                <label th:if="${match.hasResult()}"
+            <td align="right">
+                <input type="text" size="2"
+                       id="${match.id}_home"
+                       th:value="${match.resultFor(activeUser.id).homeGoals}"
+                       name=""
+                       th:name="${match.id+'_h'}"
+                       th:readonly="not ${match.editable(activeUser)}"/>
+            </td>
+            <td><label>-</label></td>
+            <td>
+                <input type="text" size="2"
+                       id="${match.id}_away"
+                       name="away"
+                       th:value="${match.resultFor(activeUser.id).awayGoals}"
+                       th:name="${match.id+'_a'}"
+                       th:readonly="not ${match.editable(activeUser)}"/>
+            </td>
+
+            <td>
+                <th:block th:if="${activeUser.isValid()}">
+                    <label th:if="${match.hasResult()}"
                        th:text="${match.scoreFor(activeUser.id) + 'p'}"/>
+                </th:block>
             </td>
         </tr>
         <tr>

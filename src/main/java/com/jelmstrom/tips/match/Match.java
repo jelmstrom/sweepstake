@@ -35,12 +35,7 @@ public class Match implements Comparable<Match>{
 
 
     public Match(String homeTeam, String awayTeam, Date matchStart, Long groupId) {
-        this.homeTeam = homeTeam;
-        this.awayTeam = awayTeam;
-        this.matchStart = matchStart;
-        this.stage = GROUP;
-        results = new HashSet<>();
-        this.groupId = groupId;
+        this(homeTeam, awayTeam, matchStart, Stage.GROUP, groupId);
     }
 
     public Match(String homeTeam, String awayTeam, Date matchStart, Stage stage, Long groupId) {
@@ -50,6 +45,7 @@ public class Match implements Comparable<Match>{
         this.stage = stage;
         results = new HashSet<>();
         this.groupId = groupId;
+        this.correctResult = Result.emptyResult(this);
 
     }
 
@@ -136,7 +132,7 @@ public class Match implements Comparable<Match>{
 
     @SuppressWarnings("UnusedDeclaration")
     public boolean hasResult(){
-        return correctResult != null;
+        return correctResult != null && correctResult.isValid();
     }
 
     @SuppressWarnings("NullableProblems")

@@ -20,9 +20,9 @@ public class TableEntry implements Comparable<TableEntry>{
     }
 
     public static TableEntry recordForTeam(String team, List<Result> results) {
-        int points = results.stream().mapToInt(match -> match.pointsFor(team)).sum();
-        int goalsFor = results.stream().mapToInt(match -> match.goalsFor(team)).sum();
-        int goalsAgainst = results.stream().mapToInt(match -> match.goalsAgainst(team)).sum();
+        int points = results.stream().filter(Result::isValid).mapToInt(match -> match.pointsFor(team)).sum();
+        int goalsFor = results.stream().filter(Result::isValid).mapToInt(match -> match.goalsFor(team)).sum();
+        int goalsAgainst = results.stream().filter(Result::isValid).mapToInt(match -> match.goalsAgainst(team)).sum();
 
         return new TableEntry(team, goalsFor, goalsAgainst, points);
     }

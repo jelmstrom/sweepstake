@@ -35,7 +35,11 @@ public class Result {
         return new Result(new Match("", "", null, -1L), null, null, -1L);
     }
 
-    public int goalsAgainst(String team) {
+    public static Result emptyResult(Match match) {
+        return new Result(match, null, null, -1L);
+    }
+
+    public Integer goalsAgainst(String team) {
         if (match.homeTeam.equals(team)) {
             return awayGoals;
         } else if (match.awayTeam.equals(team)) {
@@ -44,7 +48,7 @@ public class Result {
         return 0;
     }
 
-    public int goalsFor(String team) {
+    public Integer goalsFor(String team) {
         if (match.homeTeam.equals(team)) {
             return homeGoals;
         } else if (match.awayTeam.equals(team)) {
@@ -54,6 +58,7 @@ public class Result {
     }
 
     public int pointsFor(String team) {
+
         switch (winner()) {
             case 1:
                 return match.homeTeam.equals(team) ? 3 : 0;

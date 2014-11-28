@@ -2,11 +2,17 @@ package com.jelmstrom.tips;
 
 
 import com.jelmstrom.tips.configuration.Config;
+import com.jelmstrom.tips.group.GroupRepository;
+import com.jelmstrom.tips.group.NeoGroupRepository;
 import com.jelmstrom.tips.match.Match;
+import com.jelmstrom.tips.match.MatchRepository;
+import com.jelmstrom.tips.match.NeoMatchRepository;
 import com.jelmstrom.tips.match.Result;
 import com.jelmstrom.tips.table.TableEntry;
 import com.jelmstrom.tips.table.TablePrediction;
+import com.jelmstrom.tips.user.NeoUserRepository;
 import com.jelmstrom.tips.user.User;
+import com.jelmstrom.tips.user.UserRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +35,9 @@ public class SweepstakeController {
     public static final String SESSION_USER = "activeUser";
     public static final String USER = "user";
     private final Sweepstake sweepstake;
+    private UserRepository userRepository = new NeoUserRepository(Config.context);
+    private MatchRepository matchRepository = new NeoMatchRepository(Config.context);
+    private GroupRepository groupRepository = new NeoGroupRepository(Config.context);
 
     public SweepstakeController() {
         sweepstake = new Sweepstake(Config.context);
@@ -36,9 +45,9 @@ public class SweepstakeController {
 
     @RequestMapping(method = RequestMethod.GET)
     public String index(Model uiModel, HttpServletRequest request) {
-        uiModel.addAttribute("userList", sweepstake.getUsers());
+        uiModel.addAttribute("userList", userRepository.read());
         uiModel.addAttribute("leaderBoard", sweepstake.fasterLeaderboard());
-        uiModel.addAttribute("groups", sweepstake.groups());
+        uiModel.addAttribute("groups", groupRepository.allGroups());
         setSessionUsers(request, uiModel);
         return "index";
     }
@@ -46,25 +55,28 @@ public class SweepstakeController {
     @RequestMapping(value = "/playoff",  method = RequestMethod.GET)
     public String playoff(Model uiModel, HttpServletRequest request) {
         User sessionUser = setSessionUsers(request, uiModel);
-        List<Match> allMatches = sweepstake.getMatches();
+
+        List<Match> allMatches = matchRepository.read();
         List<Match> last16 = allMatches.stream().filter(match-> match.stage == LAST_SIXTEEN).sorted().collect(toList());
         List<Match> quarterFinal = allMatches.stream().filter(match-> match.stage == QUARTER_FINAL).sorted().collect(toList());
         List<Match> semiFinal = allMatches.stream().filter(match-> match.stage == SEMI_FINAL).sorted().collect(toList());
         List<Match> finals = allMatches.stream().filter(match-> match.stage == FINAL || match.stage == BRONZE).sorted().collect(toList());
+
         uiModel.addAttribute("stages", Arrays.asList(last16,quarterFinal, semiFinal, finals));
-        uiModel.addAttribute("users", sweepstake.getUsers());
-        uiModel.addAttribute("groups", sweepstake.groups());
-        List<String> teams = sweepstake.getAllTeams();
+        uiModel.addAttribute("users", userRepository.read());
+        uiModel.addAttribute("groups", groupRepository.allGroups());
+        List<String> teams = groupRepository.allGroups().stream().flatMap(group -> group.teams.stream()).sorted().collect(toList());
         uiModel.addAttribute("teams", teams);
         uiModel.addAttribute("playoffTreeEditable", (sessionUser.admin || new Date().before(Config.playoffStart)));
+
         return "playoff";
     }
     @RequestMapping(value = "/playoff",  method = RequestMethod.POST)
     public String savePlayoff(Model uiModel, HttpServletRequest request) {
-        User user = sweepstake.getUser(Long.parseLong(request.getParameter("userId")));
+        User user = userRepository.read(Long.parseLong(request.getParameter("userId")));
         List<Match> resultList = getResults(request, user);
         System.out.println("Saving playoff results " + resultList);
-        sweepstake.saveMatches(resultList, user);
+        matchRepository.store(resultList);
         return playoff(uiModel, request);
     }
 
@@ -80,7 +92,7 @@ public class SweepstakeController {
         System.out.printf("table %s %s %s %s", pos1, pos2, pos3, pos4) ;
 
 
-        User user = sweepstake.getUser(sessionUserId(request));
+        User user = userRepository.read(sessionUserId(request));
         sweepstake.saveUserPrediction(new TablePrediction(Long.parseLong(groupId), user.id, Arrays.asList(pos1, pos2, pos3, pos4)));
 
         return showGroup(uiModel, groupId, request);
@@ -89,12 +101,13 @@ public class SweepstakeController {
 
     @RequestMapping(value = "/group/{groupLetter}", method = RequestMethod.POST)
     public String storeGroup(Model uiModel, @PathVariable String groupLetter, HttpServletRequest request) {
-        User user = sweepstake.getUser(sessionUserId(request));
+        User user = userRepository.read(sessionUserId(request));
 
         List<Match> resultList = getResults(request, user);
 
         System.out.println("Saving results " + resultList);
-        sweepstake.saveMatches(resultList, user);
+        matchRepository.store(resultList);
+
         return showGroup(uiModel, groupLetter, request);
 
     }
@@ -119,7 +132,7 @@ public class SweepstakeController {
                 continue;
             }
 
-            Match stored = sweepstake.getMatch(Long.parseLong(matchId));
+            Match stored = matchRepository.read(Long.parseLong(matchId));
             Match updatedMatch = updateMatchTeams(request, matchId, stored);
             addResultToMatch(request, user, updatedMatch);
             matchUpdates.put(matchId, updatedMatch);
@@ -220,10 +233,10 @@ public class SweepstakeController {
         List<TableEntry> tableEntries = sweepstake.currentStandingsForGroup(Long.parseLong(groupId));
         List<TablePrediction> predictions = sweepstake.getPredictions(sessionUserId(request));
         Optional<TablePrediction> maybe = predictions.stream().filter(entry -> entry.group.equals(Long.parseLong(groupId))).findFirst();
-        List<Match> groupMatches = sweepstake.getMatches().stream().filter(match -> match.groupId.equals(Long.parseLong(groupId)) && match.stage.equals(GROUP)).sorted().collect(toList());
+        List<Match> groupMatches = matchRepository.read().stream().filter(match -> match.groupId.equals(Long.parseLong(groupId)) && match.stage.equals(GROUP)).sorted().collect(toList());
         setSessionUsers(request, uiModel);
         uiModel.addAttribute("matches", groupMatches);
-        uiModel.addAttribute("groups", sweepstake.groups());
+        uiModel.addAttribute("groups", groupRepository.allGroups());
         uiModel.addAttribute("group", groupId);
         uiModel.addAttribute("currentStandings", tableEntries);
         uiModel.addAttribute("teams", tableEntries.stream().map(entry -> entry.team).collect(toList()));
@@ -235,10 +248,10 @@ public class SweepstakeController {
     @RequestMapping(value = "/user/{displayName}", method = RequestMethod.GET)
     public String getUser(Model uiModel, @PathVariable String displayName, HttpServletRequest request) {
 
-        setSessionUsers(request, sweepstake.findUser(displayName), uiModel);
-        List<String> teams = sweepstake.getAllTeams();
+        setSessionUsers(request, userRepository.findByDisplayName(displayName), uiModel);
+        List<String> teams = groupRepository.allGroups().stream().flatMap(group -> group.teams.stream()).sorted().collect(toList());
         uiModel.addAttribute("teams", teams);
-        uiModel.addAttribute("groups", sweepstake.groups());
+        uiModel.addAttribute("groups", groupRepository.allGroups());
         return "user";
     }
 
@@ -249,16 +262,16 @@ public class SweepstakeController {
     @RequestMapping(value = "/user", method = RequestMethod.GET)
     public String getUser(Model uiModel, HttpServletRequest request) {
         setSessionUsers(request, uiModel);
-        List<String> teams = sweepstake.getAllTeams();
+        List<String> teams = groupRepository.allGroups().stream().flatMap(group -> group.teams.stream()).sorted().collect(toList());
         uiModel.addAttribute("teams", teams);
-        uiModel.addAttribute("groups", sweepstake.groups());
+        uiModel.addAttribute("groups", groupRepository.allGroups());
         return "user";
     }
 
     @RequestMapping(value = "/authenticate/{token}", method = RequestMethod.GET)
     public String login(Model uiModel, @PathVariable String token, HttpServletRequest request) {
         System.out.println("login user by token");
-        User user = sweepstake.login(token);
+        User user = userRepository.findByToken(token);
         if(user.isValid()){
             request.getSession().setAttribute(SESSION_USER, user.id);
             return getUser(uiModel, request);
@@ -339,7 +352,7 @@ public class SweepstakeController {
         if(StringUtils.isEmpty(userId)){
             user = User.emptyUser();
         } else {
-            user = sweepstake.getUser(Long.parseLong(userId));
+            user = userRepository.read(Long.parseLong(userId));
         }
         return setSessionUsers(request, user , uiModel);
     }
@@ -362,6 +375,6 @@ public class SweepstakeController {
     private User sessionUser(HttpServletRequest request) {
         Long currentSessionUser = sessionUserId(request);
         System.out.printf("Session user : %s \n", currentSessionUser);
-        return sweepstake.getUser(currentSessionUser);
+        return userRepository.read(currentSessionUser);
     }
 }

@@ -54,14 +54,6 @@ public class Sweepstake {
         groupRepository = new NeoGroupRepository(context);
     }
 
-    public List<Match> getMatches() {
-        return matchRepository.read();
-    }
-
-    public List<User> getUsers() {
-        return userRepository.read();
-    }
-
     public List<TablePrediction> getPredictions(Long userId) {
         User user = userRepository.read(userId);
         return tableRepository.read().stream().filter(prediction -> prediction.userId.equals(user.id)).collect(toList());
@@ -69,7 +61,7 @@ public class Sweepstake {
 
     public List<LeaderboardEntry> fasterLeaderboard(){
         User adminUser = userRepository.findAdminUser();
-        List<Match> matches = getMatches();
+        List<Match> matches = matchRepository.read();
         Map<Long, Integer> matchScores = matches.stream()
                 .flatMap(match -> match.results.stream())
                 .collect(toMap(result -> result.userId, Result::score, Math::addExact));
@@ -117,34 +109,16 @@ public class Sweepstake {
 
 
     public List<TableEntry> currentStandingsForGroup(Long groupId) {
-
-        List<Result> adminResults = getMatches().stream().filter(match -> match.stage == GROUP).map(Match::getCorrectResult).filter(Objects::nonNull).collect(toList());
+       List<Result> adminResults = matchRepository.read().stream().filter(match -> match.stage == GROUP).map(Match::getCorrectResult).filter(Objects::nonNull).collect(toList());
         Group group = groupRepository.read(groupId);
         System.out.printf("Group %s :{%s}", groupId, group);
         return group.teams.stream().map(team -> TableEntry.recordForTeam(team, adminResults)).sorted().collect(toList());
-    }
-
-    public User getUser(Long userId) {
-        return userRepository.read(userId);
     }
 
     public User saveUser(User user) {
         User updated = userRepository.store(user);
         new EmailNotification().sendMail(updated);
         return updated;
-    }
-
-    public User findUser(String displayName) {
-        return userRepository.findByDisplayName(displayName);
-    }
-
-    public User login(String token) {
-        return userRepository.findByToken(token);
-    }
-
-    public void saveMatches(List<Match> matches, User user) {
-        matchRepository.store(matches);
-
     }
 
     private Match findMatch(List<Match> matches, Long id) {
@@ -160,15 +134,4 @@ public class Sweepstake {
         userRepository.remove(userId);
     }
 
-    public Match getMatch(Long matchId) {
-        return matchRepository.read(matchId);
-    }
-
-    public List<String> getAllTeams() {
-        return groupRepository.allGroups().stream().flatMap(group -> group.teams.stream()).sorted().collect(toList());
-    }
-
-    public List<Group> groups() {
-        return groupRepository.allGroups();
-    }
 }

@@ -59,7 +59,7 @@ public class User {
     }
 
     private boolean invalid() {
-        return StringUtils.isEmpty(email) || StringUtils.isEmpty(displayName);
+        return StringUtils.isEmpty(email) || StringUtils.isEmpty(displayName) || null == id;
     }
 
     public static User emptyUser() {

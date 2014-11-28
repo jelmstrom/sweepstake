@@ -5,6 +5,10 @@ import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.graphdb.traversal.*;
+
+import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 public abstract class NeoRepository {
 
@@ -16,6 +20,8 @@ public abstract class NeoRepository {
         engine = new ExecutionEngine( vmTips );
         registerShutdownHook(vmTips);
     }
+
+
 
     private static void registerShutdownHook( final GraphDatabaseService graphDb )
     {
@@ -29,7 +35,20 @@ public abstract class NeoRepository {
         } );
     }
 
+    public Optional<Relationship> findRelationship(Node source, String property, Direction direction, Relationships type, Object value) {
+        return StreamSupport.stream(source.getRelationships(direction, type).spliterator(), false)
+                            .filter(rel -> value.equals(rel.getProperty(property)))
+                            .findFirst();
+    }
+
     public abstract void dropAll();
+
+    public org.neo4j.graphdb.traversal.Traverser allRelationshipsFor(Node node, Relationships relationships, Direction direction) {
+        return vmTips.traversalDescription().depthFirst()
+                        .relationships(relationships, direction)
+                        .evaluator(Evaluators.atDepth(1))
+                        .traverse(node);
+    }
 
 
     public static enum Relationships implements RelationshipType {
