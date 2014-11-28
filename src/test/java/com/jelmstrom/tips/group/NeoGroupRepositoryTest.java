@@ -7,6 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,7 +22,8 @@ public class NeoGroupRepositoryTest {
 
     @Before
     public void before(){
-        group = new Group("A", Arrays.asList("T1", "T2 FF", "T3"));
+        List<String> teams = new ArrayList<>(Arrays.asList("T1", "T2 FF", "T3"));
+        group = new Group("A", teams);
         neoGroupRepository.store(group);
     }
 
@@ -51,6 +53,14 @@ public class NeoGroupRepositoryTest {
         List<Group> groups = neoGroupRepository.allGroups();
         assertThat(groups.size(), is(1));
         assertThat(groups.get(0).getGroupId(), is(equalTo(group.getGroupId())));
+    }
+
+    @Test
+    public void addTeamToGroupShouldAddATeam(){
+        int originalSize = group.teams.size();
+        group.teams.add("t5");
+        neoGroupRepository.store(group);
+        assertThat(neoGroupRepository.read(group.getGroupId()).teams.size(), is(originalSize+1));
     }
 
 }

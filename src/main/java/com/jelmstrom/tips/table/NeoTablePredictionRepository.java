@@ -2,7 +2,6 @@ package com.jelmstrom.tips.table;
 
 import com.jelmstrom.tips.persistence.NeoRepository;
 import org.neo4j.graphdb.*;
-import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphdb.traversal.Traverser;
 
 import java.util.ArrayList;
@@ -11,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
-import static com.jelmstrom.tips.persistence.NeoRepository.Relationships.TABLE_PREDICTION;
 import static com.jelmstrom.tips.persistence.NeoRepository.Relationships.GROUP;
 import static java.util.stream.Collectors.joining;
 import static org.neo4j.graphdb.Direction.*;
@@ -27,12 +25,10 @@ public class NeoTablePredictionRepository extends NeoRepository implements Table
             Node node;
             if(null == prediction.getId()){
                 Node group = vmTips.getNodeById(prediction.group);
-                String property = "userId";
 
-                Direction direction = BOTH;
-                Relationships type = GROUP;
-                Object value = prediction.userId;
-                Optional<Relationship> existing = findRelationship(group, property, direction, type, value);
+                Optional<Relationship> existing = StreamSupport.stream(group.getRelationships(INCOMING, GROUP).spliterator(), false)
+                        .filter(rel -> prediction.userId.equals(rel.getProperty("userId")))
+                        .findFirst();
                 if(existing.isPresent()){
                     node = existing.get().getStartNode();
                 } else {

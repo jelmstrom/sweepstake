@@ -36,6 +36,8 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
             matchNode.setProperty("matchStart", match.matchStart.getTime());
             matchNode.setProperty("stage", match.stage.toString());
             matchNode.setProperty("groupId", match.groupId);
+            //Relationship groupRelation = matchNode.createRelationshipTo(vmTips.getNodeById(match.groupId), GROUP);
+            //groupRelation.setProperty("groupId", match.groupId);
             if(match.hasResult()){
                 matchNode.setProperty("homeGoals", match.getCorrectResult().homeGoals);
                 matchNode.setProperty("awayGoals", match.getCorrectResult().awayGoals);
@@ -211,4 +213,45 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
             return results;
         }
     }
+
+    public void dropMatchesForTeam(String home2, Long groupId) {
+
+        try(Transaction tx = vmTips.beginTx()){
+            Node group = vmTips.getNodeById(groupId);
+            StreamSupport.stream(
+            group.getRelationships(INCOMING, GROUP).spliterator(), false).forEach(rel -> drop(rel.getStartNode()));
+        }
+    }
+
+    private void drop(Node matchNode) {
+        matchNode.getRelationships();
+    }
+
+
+    /*
+
+     public void dropMatchesForTeam(String home2, Long groupId) {
+
+        try(Transaction unused = vmTips.beginTx()){
+            Node group = vmTips.getNodeById(groupId);
+            StreamSupport.stream(group.getRelationships(INCOMING, GROUP).spliterator(), false)
+                        .forEach(rel -> dropMatch(rel.getStartNode()));
+
+        }
+    }
+
+    private void dropMatch(Node matchNode) {
+        StreamSupport.stream(matchNode.getRelationships(OUTGOING, USER_PREDICTION).spliterator(), false)
+                .forEach(rel -> dropResult(rel.getStartNode()));
+        matchNode.getRelationships().forEach(Relationship::delete);
+        matchNode.delete();
+
+    }
+
+    private void dropResult(Node resultNode) {
+        resultNode.getRelationships().forEach(Relationship::delete);
+        resultNode.delete();
+    }
+}
+     */
 }

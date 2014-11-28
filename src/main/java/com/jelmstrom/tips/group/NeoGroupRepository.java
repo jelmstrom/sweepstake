@@ -1,17 +1,22 @@
 package com.jelmstrom.tips.group;
 
 import com.jelmstrom.tips.persistence.NeoRepository;
+import org.apache.lucene.search.Collector;
+import org.hsqldb.lib.StringUtil;
 import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
+import org.parboiled.common.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 public class NeoGroupRepository extends NeoRepository implements GroupRepository {
 
@@ -51,7 +56,7 @@ public class NeoGroupRepository extends NeoRepository implements GroupRepository
         List<String> teams = new ArrayList<>();
         if(node.hasProperty("Teams")){
             String teamString = node.getProperty("Teams").toString();
-            teams.addAll(Arrays.asList(teamString.split(":")));
+            teams.addAll(Arrays.asList(teamString.split(":")).stream().filter(StringUtils::isNotEmpty).collect(toList()));
         }
         Group group = new Group(node.getProperty("Name").toString(), teams);
         group.setGroupId(node.getId());

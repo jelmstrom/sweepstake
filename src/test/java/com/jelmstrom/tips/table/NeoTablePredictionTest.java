@@ -69,7 +69,6 @@ public class NeoTablePredictionTest {
         List<TablePrediction> tablePredictions = repo.predictionsFor(user.id);
         assertThat(tablePredictions.size(), is(1));
         assertThat(tablePredictions.get(0).tablePrediction, equalTo(teams));
-
     }
 
 

@@ -35,12 +35,6 @@ public abstract class NeoRepository {
         } );
     }
 
-    public Optional<Relationship> findRelationship(Node source, String property, Direction direction, Relationships type, Object value) {
-        return StreamSupport.stream(source.getRelationships(direction, type).spliterator(), false)
-                            .filter(rel -> value.equals(rel.getProperty(property)))
-                            .findFirst();
-    }
-
     public abstract void dropAll();
 
     public org.neo4j.graphdb.traversal.Traverser allRelationshipsFor(Node node, Relationships relationships, Direction direction) {

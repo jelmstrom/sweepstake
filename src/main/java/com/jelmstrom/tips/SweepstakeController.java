@@ -2,6 +2,7 @@ package com.jelmstrom.tips;
 
 
 import com.jelmstrom.tips.configuration.Config;
+import com.jelmstrom.tips.group.Group;
 import com.jelmstrom.tips.group.GroupRepository;
 import com.jelmstrom.tips.group.NeoGroupRepository;
 import com.jelmstrom.tips.match.Match;
@@ -99,7 +100,39 @@ public class SweepstakeController {
     }
 
 
-    @RequestMapping(value = "/group/{groupLetter}", method = RequestMethod.POST)
+    @RequestMapping(value = "/group/{groupId}/add", method = RequestMethod.POST)
+    public String addTeamToGroup(Model uiModel, @PathVariable String groupId, HttpServletRequest request){
+        Group group = groupRepository.read(Long.parseLong(groupId));
+        group.teams.add(request.getParameter("newTeam"));
+        groupRepository.store(group);
+        return showGroup(uiModel, groupId, request);
+    }
+    @RequestMapping(value = "/group/new", method = RequestMethod.GET)
+    public String createGroup(Model uiModel, HttpServletRequest request){
+        Group group = new Group("new", Collections.emptyList());
+        group = groupRepository.store(group);
+        return getGroupInternal(uiModel, request, group.getGroupId());
+    }
+
+    @RequestMapping(value = "/group/{groupId}/drop/{team}", method = RequestMethod.POST)
+    public String dropTeamFromGroup(Model uiModel, @PathVariable String groupId, @PathVariable String team , HttpServletRequest request){
+        Group group = groupRepository.read(Long.parseLong(groupId));
+        group.teams.remove(team);
+        groupRepository.store(group);
+        return showGroup(uiModel, groupId, request);
+    }
+
+    @RequestMapping(value = "/group/{groupId}/name", method = RequestMethod.POST)
+    public String updateGroupName(Model uiModel, @PathVariable String groupId, HttpServletRequest request){
+        Group group = groupRepository.read(Long.parseLong(groupId));
+        Group updated = new Group(request.getParameter("groupName"), group.teams);
+        updated.setGroupId(group.getGroupId());
+        groupRepository.store(updated);
+        return showGroup(uiModel, groupId, request);
+    }
+
+
+    @RequestMapping(value = "/results/{groupLetter}", method = RequestMethod.POST)
     public String storeGroup(Model uiModel, @PathVariable String groupLetter, HttpServletRequest request) {
         User user = userRepository.read(sessionUserId(request));
 
@@ -229,15 +262,19 @@ public class SweepstakeController {
 
     @RequestMapping(value = "/group/{groupId}", method = RequestMethod.GET)
     public String showGroup(Model uiModel, @PathVariable String groupId, HttpServletRequest request) {
+        long groupID = Long.parseLong(groupId);
+        return getGroupInternal(uiModel, request, groupID);
+    }
 
-        List<TableEntry> tableEntries = sweepstake.currentStandingsForGroup(Long.parseLong(groupId));
+    public String getGroupInternal(Model uiModel, HttpServletRequest request, long groupID) {
+        List<TableEntry> tableEntries = sweepstake.currentStandingsForGroup(groupID);
         List<TablePrediction> predictions = sweepstake.getPredictions(sessionUserId(request));
-        Optional<TablePrediction> maybe = predictions.stream().filter(entry -> entry.group.equals(Long.parseLong(groupId))).findFirst();
-        List<Match> groupMatches = matchRepository.read().stream().filter(match -> match.groupId.equals(Long.parseLong(groupId)) && match.stage.equals(GROUP)).sorted().collect(toList());
+        Optional<TablePrediction> maybe = predictions.stream().filter(entry -> entry.group.equals(groupID)).findFirst();
+        List<Match> groupMatches = matchRepository.read().stream().filter(match -> match.groupId.equals(groupID) && match.stage.equals(GROUP)).sorted().collect(toList());
         setSessionUsers(request, uiModel);
         uiModel.addAttribute("matches", groupMatches);
         uiModel.addAttribute("groups", groupRepository.allGroups());
-        uiModel.addAttribute("group", groupId);
+        uiModel.addAttribute("group",groupRepository.read(groupID));
         uiModel.addAttribute("currentStandings", tableEntries);
         uiModel.addAttribute("teams", tableEntries.stream().map(entry -> entry.team).collect(toList()));
         uiModel.addAttribute("prediction", maybe.orElse(TablePrediction.emptyPrediction()));

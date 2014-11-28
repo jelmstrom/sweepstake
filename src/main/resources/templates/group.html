@@ -14,9 +14,10 @@
             <li><a href="/">Leaderboard</a></li>
             <th:block th:each="group : ${groups}">
                 <li>
-                    <a href="index" th:href="@{'/group/' + ${group.getGroupId()}}" th:text="${'Group'+ group.groupName}">grp</a>
+                    <a href="index" th:href="@{'/group/' + ${group.getGroupId()}}" th:text="${'Group '+ group.groupName}">grp</a>
                 </li>
             </th:block>
+            <li th:if="${activeUser.admin}"><a href="/group/new">New group</a></li>
             <li><a href="/playoff">Playoff</a></li>
             <li><a href="user"
                    th:href="@{'/user/'+ ${activeUser.displayName}}"
@@ -33,8 +34,22 @@
 </div>
 
 <table width="75%">
+    <tr th:if="${activeUser.admin}">
+
+        <td width="30%">
+            <form id="groupNameForm" action="" th:action="@{'/group/'+${group.getGroupId()}+'/name'}" method="post">
+                    <input type="text" name="groupName" id="groupName" th:value="${group.groupName}" size="25"/>
+                    <button class="btn btn-sm btn-success" type="submit" name="addTeam">Update</button>
+            </form>
+        </td>
+        <td width="15%"></td>
+        <td width="30%"></td>
+
+    </tr>
+
     <tr>
         <td width="30%">
+
             <table valign="top" width="100%" class="table table-striped">
                 <thead>
                 <tr>
@@ -45,18 +60,33 @@
                     <th align="center">Against</th>
                     <th align="center">+/-</th>
                     <th align="center">Points</th>
+                    <th align="center">&nbsp;</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="tableEntry, iterStat : ${currentStandings}">
-                    <td width="15%"><label id="position" th:text="${iterStat.count}">label</label></td>
-                    <td width="40%" id="team" th:text="${tableEntry.team}">team</td>
-                    <td width="10%" th:text="${tableEntry.goalsFor}">for</td>
-                    <td width="5%"> -</td>
-                    <td width="10%" th:text="${tableEntry.goalsAgainst}">against</td>
-                    <td width="10%" th:text="${tableEntry.goalDifference()}">diff</td>
-                    <td width="10%" th:text="${tableEntry.points + 'p'}">points</td>
-                </tr>
+                    <tr th:each="tableEntry, iterStat : ${currentStandings}">
+                        <td width="15%"><label id="position" th:text="${iterStat.count}">label</label></td>
+                        <td width="40%" id="team" th:text="${tableEntry.team}">team</td>
+                        <td width="10%" th:text="${tableEntry.goalsFor}">for</td>
+                        <td width="5%"> -</td>
+                        <td width="10%" th:text="${tableEntry.goalsAgainst}">against</td>
+                        <td width="10%" th:text="${tableEntry.goalDifference()}">diff</td>
+                        <td width="5%" th:text="${tableEntry.points + 'p'}">points</td>
+                        <td width="5%">
+                               <th:block th:if="${activeUser.admin}">
+                                   <form id="dropTeamForm" action="" th:action="@{'/group/'+${group.getGroupId()}+'/drop/'+${tableEntry.team}}" method="post">
+                                        <button class="btn btn-xs btn-danger" type="submit" name="dropTeam">-</button>
+                                   </form>
+                               </th:block>
+                        </td>
+                    </tr>
+                    <tr th:if="${activeUser.admin}">
+                        <form id="teamForm" action="" th:action="@{'/group/'+${group.getGroupId()}+'/add'}" method="post">
+                            <td colspan="8"><input type="text" name="newTeam" id="newTeam" size="25"/>
+                                <button class="btn btn-sm btn-success" type="submit" name="addTeam">addTeam</button>
+                            </td>
+                        </form>
+                    </tr>
                 </tbody>
             </table>
         </td>
@@ -64,7 +94,7 @@
             &nbsp;
         </td>
         <td width="30%">
-            <form id="predicionForm" action="" th:action="@{'/prediction/'+${group}}" method="post">
+            <form id="predicionForm" action="" th:action="@{'/prediction/'+${group.getGroupId()}}" method="post">
                 <table width="100%" th:if="${canEdit}" class="table table-striped">
                     <thead>
                     <tr>
@@ -100,7 +130,7 @@
 </table>
 <p height="30px">&nbsp;</p>
 
-<form id="matchForm" action="" th:action="@{'/group/'+${group}}" method="post">
+<form id="matchForm" action="" th:action="@{'/results/'+${group.getGroupId()}}" method="post">
     <table width="75%" class="table table-striped">
         <thead>
         <tr>
