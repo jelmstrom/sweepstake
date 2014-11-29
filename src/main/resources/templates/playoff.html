@@ -17,6 +17,7 @@
                     <a href="index" th:href="@{'/group/' + ${group.getGroupId()}}" th:text="${'Group'+ group.groupName}">grp</a>
                 </li>
             </th:block>
+            <li th:if="${activeUser.admin}"><a href="/group/new">New group</a></li>
             <li><a href="/playoff">Playoff</a></li>
             <li><a href="user"
                    th:href="@{'/user/'+ ${activeUser.displayName}}"

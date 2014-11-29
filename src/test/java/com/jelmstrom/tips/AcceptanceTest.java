@@ -46,6 +46,12 @@ public class AcceptanceTest {
 
     @Before
     public void setup(){
+
+        MATCH_REPOSITORY.dropAll();
+        GROUP_REPOSITORY.dropAll();
+        TABLE_REPOSITORY.dropAll();
+        USER_REPOSITORY.dropAll();
+
         groupA = GROUP_REPOSITORY.store(groupA);
         adminUser = USER_REPOSITORY.store(new User("admin", ADMIN_EMAIL, true, ""));
         user = USER_REPOSITORY.store(new User("user", USER_EMAIL, false, "3213ou1+297319u"));
@@ -104,10 +110,10 @@ public class AcceptanceTest {
 
     @After
     public void tearDown(){
-       MATCH_REPOSITORY.dropAll();
-       GROUP_REPOSITORY.dropAll();
-       TABLE_REPOSITORY.dropAll();
-       USER_REPOSITORY.dropAll();
+        MATCH_REPOSITORY.dropAll();
+        GROUP_REPOSITORY.dropAll();
+        TABLE_REPOSITORY.dropAll();
+        USER_REPOSITORY.dropAll();
     }
 
 

@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.thymeleaf.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -107,11 +109,31 @@ public class SweepstakeController {
         groupRepository.store(group);
         return showGroup(uiModel, groupId, request);
     }
+
     @RequestMapping(value = "/group/new", method = RequestMethod.GET)
     public String createGroup(Model uiModel, HttpServletRequest request){
         Group group = new Group("new", Collections.emptyList());
         group = groupRepository.store(group);
         return getGroupInternal(uiModel, request, group.getGroupId());
+    }
+
+    @RequestMapping(value = "/group/{groupId}/match", method = RequestMethod.POST)
+    public String addMatchToGroup(Model uiModel, @PathVariable String groupId, HttpServletRequest request){
+
+        long group = Long.parseLong(groupId);
+        String dateString = request.getParameter("matchDate");
+        try {
+            Date startTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse(dateString);
+            Match newMatch = new Match(request.getParameter("homeTeam")
+                    , request.getParameter("awayTeam")
+                    , startTime
+                    , group);
+            matchRepository.store(newMatch);
+        } catch (ParseException e) {
+            uiModel.addAttribute("dateFormatError", dateString + " invalid. Use yyyy-MM-ddTHH:mm or use Chrome");
+        }
+
+        return getGroupInternal(uiModel, request, group);
     }
 
     @RequestMapping(value = "/group/{groupId}/drop/{team}", method = RequestMethod.POST)

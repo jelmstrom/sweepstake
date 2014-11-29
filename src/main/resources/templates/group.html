@@ -130,7 +130,6 @@
 </table>
 <p height="30px">&nbsp;</p>
 
-<form id="matchForm" action="" th:action="@{'/results/'+${group.getGroupId()}}" method="post">
     <table width="75%" class="table table-striped">
         <thead>
         <tr>
@@ -145,6 +144,30 @@
         </tr>
         </thead>
         <tbody>
+        <tr th:if="${activeUser.admin}">
+            <form id="addForm" action="" th:action="@{'/group/'+${group.getGroupId()}+'/match'}" method="post">
+                <td><input type="datetime-local" name="matchDate"/></td>
+                <td>
+                    <select name="homeTeam">
+                        <option th:each="team : ${group.teams}" th:text="${team}">teams</option>
+                    </select>
+                </td>
+                <td>-</td>
+                <td>
+                    <select name="awayTeam">
+                        <option th:each="team : ${group.teams}" th:text="${team}">teams</option>
+                    </select>
+                </td>
+                <td colspan="3">
+                    <label th:text="${dateFormatError}">&nbsp;</label>
+                </td>
+                <td>
+                    <button class="btn btn-xs btn-success" type="submit" th:if="${prediction.editable(activeUser)}">+</button>
+                </td>
+
+            </form>
+        </tr>
+        <form id="matchForm" action="" th:action="@{'/results/'+${group.getGroupId()}}" method="post">
         <tr th:each="match,iterStat : ${matches}">
             <td th:text="${#dates.format(match.matchStart,'dd MMMM yyyy HH:mm')}">start</td>
             <td th:text="${match.homeTeam}">home</td>
@@ -180,11 +203,11 @@
         <tr>
             <td colspan="5"></td>
             <td colspan="3" align="left">
-                <button class="btn btn-sm btn-success" type="submit" th:if="${prediction.editable(activeUser)}">Submit</button>
+                 <button class="btn btn-sm btn-success" type="submit" th:if="${prediction.editable(activeUser)}">Submit</button>
             </td>
         </tr>
+        </form>
         </tbody>
     </table>
-</form>
 </body>
 </html>
