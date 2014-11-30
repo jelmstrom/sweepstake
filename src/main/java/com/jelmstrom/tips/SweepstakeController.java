@@ -78,7 +78,6 @@ public class SweepstakeController {
     public String savePlayoff(Model uiModel, HttpServletRequest request) {
         User user = userRepository.read(Long.parseLong(request.getParameter("userId")));
         List<Match> resultList = getResults(request, user);
-        System.out.println("Saving playoff results " + resultList);
         matchRepository.store(resultList);
         return playoff(uiModel, request);
     }
@@ -89,11 +88,6 @@ public class SweepstakeController {
         String pos2 = request.getParameter("prediction2");
         String pos3 = request.getParameter("prediction3");
         String pos4 = request.getParameter("prediction4");
-
-
-
-        System.out.printf("table %s %s %s %s", pos1, pos2, pos3, pos4) ;
-
 
         User user = userRepository.read(sessionUserId(request));
         sweepstake.saveUserPrediction(new TablePrediction(Long.parseLong(groupId), user.id, Arrays.asList(pos1, pos2, pos3, pos4)));
@@ -150,7 +144,6 @@ public class SweepstakeController {
     public String dropTeamFromGroup(Model uiModel, @PathVariable String groupId, @PathVariable String team , HttpServletRequest request){
         Group group = groupRepository.read(Long.parseLong(groupId));
         group.teams.remove(team);
-        matchRepository.groupMatches(group.getGroupId());
         groupRepository.store(group);
         return showGroup(uiModel, groupId, request);
     }
@@ -163,7 +156,6 @@ public class SweepstakeController {
         groupRepository.store(updated);
         return showGroup(uiModel, groupId, request);
     }
-
 
     @RequestMapping(value = "/results/{groupLetter}", method = RequestMethod.POST)
     public String storeGroup(Model uiModel, @PathVariable String groupLetter, HttpServletRequest request) {
