@@ -153,4 +153,15 @@ public class MongoMatchRepository extends MongoRepository implements MatchReposi
     public List<Result> userPredictions(long userId) {
         return null;
     }
+
+    @Override
+    public void drop(Long id) {
+
+    }
+
+    @Override
+    public List<Match> groupMatches(Long groupId) {
+        return null;
+    }
+
 }

@@ -36,8 +36,8 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
             matchNode.setProperty("matchStart", match.matchStart.getTime());
             matchNode.setProperty("stage", match.stage.toString());
             matchNode.setProperty("groupId", match.groupId);
-            //Relationship groupRelation = matchNode.createRelationshipTo(vmTips.getNodeById(match.groupId), GROUP);
-            //groupRelation.setProperty("groupId", match.groupId);
+            Relationship groupRelation = matchNode.createRelationshipTo(vmTips.getNodeById(match.groupId), GROUP);
+            groupRelation.setProperty("groupId", match.groupId);
             if(match.hasResult()){
                 matchNode.setProperty("homeGoals", match.getCorrectResult().homeGoals);
                 matchNode.setProperty("awayGoals", match.getCorrectResult().awayGoals);
@@ -50,10 +50,10 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
         return match;
     }
 
-    private void storeResults(HashSet<Result> results, Node parent) {
+    private void storeResults(HashSet<Result> results, Node match) {
         for(Result result : results){
             Node resultNode;
-            resultNode = getResultNode(parent, result);
+            resultNode = getResultNode(match, result);
             result.setId(resultNode.getId());
             resultNode.setProperty("awayGoals", result.awayGoals.toString());
             resultNode.setProperty("homeGoals", result.homeGoals.toString());
@@ -63,13 +63,13 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
         }
     }
 
-    private Node getResultNode(Node parent, Result result) {
+    private Node getResultNode(Node match, Result result) {
         if(null != result.getId()){
             return vmTips.getNodeById(result.getId());
         } else {
 
             Optional<Relationship> relationship = StreamSupport.stream(
-                    parent.getRelationships(OUTGOING, MATCH_PREDICTION).spliterator(), false)
+                    match.getRelationships(OUTGOING, MATCH_PREDICTION).spliterator(), false)
                     .filter(rel -> checkRelationshipProperty(result.userId, rel))
                     .findFirst();
 
@@ -78,7 +78,7 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
                 resultNode = relationship.get().getEndNode();
             } else {
                 resultNode = vmTips.createNode(RESULT_LABEL);
-                Relationship relationshipTo = parent.createRelationshipTo(resultNode, MATCH_PREDICTION);
+                Relationship relationshipTo = match.createRelationshipTo(resultNode, MATCH_PREDICTION);
                 relationshipTo.setProperty("userId", result.userId);
             }
 
@@ -90,27 +90,6 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
         return userId.equals(endNode.getProperty("userId"));
     }
 
-    private void removeIfUpdate(Relationship item, Result result) {
-        Long userId = (Long) item.getEndNode().getProperty("userId");
-        if(result.userId.equals(userId));
-        item.getEndNode().delete();
-    }
-
-
-    private Long checkForUpdate(Result result) {
-        List<Long> results = new ArrayList<>();
-        String query = String.format("MATCH (n:%s {userId:%s , matchId:%s }) return n:id"
-                , RESULT_LABEL.name()
-                , result.userId
-                , result.match.getId());
-        ResourceIterator<Long> nodes = engine.execute(query).columnAs("n");
-        nodes.forEachRemaining(results::add);
-        if(results.isEmpty()){
-            return -1L;
-        } else {
-            return results.get(0);
-        }
-    }
 
     @Override
     public Match read(Long matchId) {
@@ -204,54 +183,66 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
             TraversalDescription td = vmTips.traversalDescription().breadthFirst().relationships(USER_PREDICTION, OUTGOING)
                     .evaluator(includeWhereLastRelationshipTypeIs(USER_PREDICTION));
             Traverser paths = td.traverse(vmTips.getNodeById(userId));
+
             for(Path path : paths){
+                System.out.printf("Path %d (%s) Nodes %d (%s) -> %d (%s) \n"
+                        , path.lastRelationship().getId()
+                        , path.lastRelationship().getType().name()
+                        , path.startNode().getId()
+                        , path.startNode().getLabels().iterator().next().name()
+                        , path.endNode().getId()
+                        , path.endNode().getLabels().iterator().next().name()
+
+                );
                 Node resultNode = path.endNode();
                 Node matchNode = resultNode.getRelationships(MATCH_PREDICTION, INCOMING).iterator().next().getStartNode();
-                matchNode.getPropertyKeys().forEach(key -> System.out.println(key  + " = " + matchNode.getProperty(key)));
                 results.add(buildResult(resultNode, buildMatch(matchNode)));
             }
+            tx.success();
             return results;
         }
     }
 
-    public void dropMatchesForTeam(String home2, Long groupId) {
+    @Override
+    public void drop(Long id) {
+        try(Transaction tx = vmTips.beginTx()){
+            Node matchNode = vmTips.getNodeById(id);
+            Iterable<Relationship> relationships = matchNode.getRelationships(Direction.BOTH);
+            relationships.forEach(this::remove);
+            matchNode.delete();
+            tx.success();
+        }
+    }
+
+    @Override
+    public List<Match> groupMatches(Long groupId) {
 
         try(Transaction tx = vmTips.beginTx()){
+            List<Match> matches = new ArrayList<>();
             Node group = vmTips.getNodeById(groupId);
-            StreamSupport.stream(
-            group.getRelationships(INCOMING, GROUP).spliterator(), false).forEach(rel -> drop(rel.getStartNode()));
+            group.getRelationships(INCOMING, GROUP).forEach(rel -> matches.add(buildMatch(rel.getStartNode())));
+            tx.success();
+            return matches;
         }
     }
 
-    private void drop(Node matchNode) {
-        matchNode.getRelationships();
-    }
+    private void remove(Relationship rel) {
+        System.out.printf("Relation  %d [%s] Nodes %d (%s) ->  %d(%s) \n"
+                , rel.getId()
+                , rel.getType().name()
+                , rel.getStartNode().getId()
+                , rel.getStartNode().getLabels().iterator().next().name()
+                , rel.getEndNode().getId()
+                , rel.getEndNode().getLabels().iterator().next().name());
 
-
-    /*
-
-     public void dropMatchesForTeam(String home2, Long groupId) {
-
-        try(Transaction unused = vmTips.beginTx()){
-            Node group = vmTips.getNodeById(groupId);
-            StreamSupport.stream(group.getRelationships(INCOMING, GROUP).spliterator(), false)
-                        .forEach(rel -> dropMatch(rel.getStartNode()));
-
+        if(rel.getType().name().equals(Relationships.MATCH_PREDICTION.name())){
+            System.out.printf("Delete Prediction %d %s \n"
+                    , rel.getEndNode().getId(),
+                    rel.getEndNode().getLabels().iterator().next().name());
+            rel.getEndNode().getRelationships().forEach(Relationship::delete);
+            rel.getEndNode().delete();
+        } else {
+            rel.delete();
         }
     }
-
-    private void dropMatch(Node matchNode) {
-        StreamSupport.stream(matchNode.getRelationships(OUTGOING, USER_PREDICTION).spliterator(), false)
-                .forEach(rel -> dropResult(rel.getStartNode()));
-        matchNode.getRelationships().forEach(Relationship::delete);
-        matchNode.delete();
-
-    }
-
-    private void dropResult(Node resultNode) {
-        resultNode.getRelationships().forEach(Relationship::delete);
-        resultNode.delete();
-    }
-}
-     */
 }

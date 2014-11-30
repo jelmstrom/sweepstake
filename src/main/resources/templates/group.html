@@ -133,7 +133,8 @@
     <table width="75%" class="table table-striped">
         <thead>
         <tr>
-            <th width="20%">Date</th>
+            <th width="5%">&nbsp;</th>
+            <th width="15%">Date</th>
             <th align="center">Home Team</th>
             <th width="1%">&nbsp;</th>
             <th align="center">Away Team</th>
@@ -146,6 +147,7 @@
         <tbody>
         <tr th:if="${activeUser.admin}">
             <form id="addForm" action="" th:action="@{'/group/'+${group.getGroupId()}+'/match'}" method="post">
+                <td>&nbsp;</td>
                 <td><input type="datetime-local" name="matchDate"/></td>
                 <td>
                     <select name="homeTeam">
@@ -169,6 +171,15 @@
         </tr>
         <form id="matchForm" action="" th:action="@{'/results/'+${group.getGroupId()}}" method="post">
         <tr th:each="match,iterStat : ${matches}">
+            <td>
+                <th:block th:if="${activeUser.admin}">
+                    <a href="user"
+                       class="btn btn-xs btn-danger"
+                       th:href="@{'/match/'+${match.id}+'/delete'}">-</a>
+
+                </th:block>
+            </td>
+
             <td th:text="${#dates.format(match.matchStart,'dd MMMM yyyy HH:mm')}">start</td>
             <td th:text="${match.homeTeam}">home</td>
             <td>-</td>

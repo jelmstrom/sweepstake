@@ -34,10 +34,10 @@
 </div>
 <form action="/playoff" method="get" name="form">
     <select th:name="userId" onchange="this.form.submit()">
-        <option th:each=" userEntry : ${users}"
+        <option th:each="userEntry : ${users}"
                 th:value="${userEntry.id}"
                 th:text="${userEntry.displayName}"
-                th:selected="${user.id != null && user.id.equals(userEntry.id)}">teams
+                th:selected="${user.id.equals(userEntry.id)}">teams
         </option>
     </select>
 </form>

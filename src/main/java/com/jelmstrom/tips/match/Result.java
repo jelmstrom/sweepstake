@@ -110,8 +110,7 @@ public class Result {
     public boolean isValid() {
         return this.homeGoals != null
                 && this.awayGoals != null
-                && !StringUtils.isEmpty(this.userId)
-                && this.match.getId() != null && match.getId() > 0;
+                && !StringUtils.isEmpty(this.userId);
     }
 
     public Long getId() {

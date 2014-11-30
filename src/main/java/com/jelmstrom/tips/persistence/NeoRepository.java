@@ -7,8 +7,6 @@ import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.traversal.*;
 
-import java.util.Optional;
-import java.util.stream.StreamSupport;
 
 public abstract class NeoRepository {
 
@@ -65,6 +63,16 @@ public abstract class NeoRepository {
         n.getRelationships().forEach(Relationship::delete);
         n.delete();
 
+    }
+
+
+    public Node get(Long id){
+
+        try(Transaction tx = vmTips.beginTx()){
+            Node node =  vmTips.getNodeById(id);
+            tx.success();
+            return node;
+        }
     }
 
     protected static final Label GROUP_LABEL = () -> "Group";

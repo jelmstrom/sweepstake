@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 
 import static com.jelmstrom.tips.match.Match.Stage.GROUP;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
@@ -62,5 +63,7 @@ public class MongoMatchRepositoryTest {
         assertThat(matches.size(), is(1));
         assertThat(matches.get(0).getId(), is(equalTo(match.getId())));
     }
+
+
 
 }

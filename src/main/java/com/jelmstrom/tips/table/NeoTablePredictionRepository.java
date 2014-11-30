@@ -22,25 +22,26 @@ public class NeoTablePredictionRepository extends NeoRepository implements Table
     @Override
     public void store(TablePrediction prediction) {
         try(Transaction tx = vmTips.beginTx()) {
-            Node node;
+            Node predictionNode;
             if(null == prediction.getId()){
                 Node group = vmTips.getNodeById(prediction.group);
 
                 Optional<Relationship> existing = StreamSupport.stream(group.getRelationships(INCOMING, GROUP).spliterator(), false)
-                        .filter(rel -> prediction.userId.equals(rel.getProperty("userId")))
+                        .filter(rel -> rel.getStartNode().hasLabel(TABLE_PREDICTION) &&
+                                      prediction.userId.equals(rel.getProperty("userId")))
                         .findFirst();
                 if(existing.isPresent()){
-                    node = existing.get().getStartNode();
+                    predictionNode = existing.get().getStartNode();
                 } else {
-                    node = vmTips.createNode(TABLE_PREDICTION);
-                    Relationship relationshipTo = node.createRelationshipTo(group, GROUP);
+                    predictionNode = vmTips.createNode(TABLE_PREDICTION);
+                    Relationship relationshipTo = predictionNode.createRelationshipTo(group, GROUP);
                     relationshipTo.setProperty("userId", prediction.userId);
                 }
             } else  {
-                node = vmTips.getNodeById(prediction.getId());
+                predictionNode = vmTips.getNodeById(prediction.getId());
             }
 
-            populateNode(prediction, node);
+            populateNode(prediction, predictionNode);
             tx.success();
         }
     }

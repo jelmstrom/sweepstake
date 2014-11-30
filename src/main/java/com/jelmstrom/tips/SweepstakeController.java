@@ -136,10 +136,21 @@ public class SweepstakeController {
         return getGroupInternal(uiModel, request, group);
     }
 
+    // GET because form inside form creates problems
+    @RequestMapping(value = "/match/{matchId}/delete", method = RequestMethod.GET)
+    public String deleteMatch(Model uiModel,  @PathVariable String matchId , HttpServletRequest request){
+        System.out.printf(" Delete match %s \n", matchId );
+        Long match = Long.parseLong(matchId);
+        Long groupId = matchRepository.read(match).groupId;
+        matchRepository.drop(match);
+        return showGroup(uiModel, groupId.toString(), request);
+    }
+
     @RequestMapping(value = "/group/{groupId}/drop/{team}", method = RequestMethod.POST)
     public String dropTeamFromGroup(Model uiModel, @PathVariable String groupId, @PathVariable String team , HttpServletRequest request){
         Group group = groupRepository.read(Long.parseLong(groupId));
         group.teams.remove(team);
+        matchRepository.groupMatches(group.getGroupId());
         groupRepository.store(group);
         return showGroup(uiModel, groupId, request);
     }
@@ -339,7 +350,7 @@ public class SweepstakeController {
         }
     }
 
-    @RequestMapping(value = "/delete/{userId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/drop/{userId}", method = RequestMethod.POST)
     public String deleteUser(Model uiModel, @PathVariable String userId, HttpServletRequest request) {
         sweepstake.deleteUser(Long.parseLong(userId));
         return index(uiModel, request);
