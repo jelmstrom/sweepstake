@@ -123,17 +123,7 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
         }
 
         Collection<Result> results = new HashSet<>();
-
-        TraversalDescription td = vmTips.traversalDescription().breadthFirst()
-                .relationships(MATCH_PREDICTION, OUTGOING)
-                .evaluator(includeWhereLastRelationshipTypeIs(MATCH_PREDICTION));
-        Traverser traverse = td.traverse(matchNode);
-
-        for(Path path: traverse){
-            Node resultNode = path.endNode();
-            Result result = buildResult(resultNode, match);
-            results.add(result);
-        }
+        matchNode.getRelationships(OUTGOING, MATCH_PREDICTION).forEach(rel -> buildResult(rel.getEndNode(), match));
 
         match.results.addAll(results);
         return match;

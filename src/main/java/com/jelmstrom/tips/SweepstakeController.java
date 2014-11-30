@@ -303,7 +303,8 @@ public class SweepstakeController {
         List<TableEntry> tableEntries = sweepstake.currentStandingsForGroup(groupID);
         List<TablePrediction> predictions = sweepstake.getPredictions(sessionUserId(request));
         Optional<TablePrediction> maybe = predictions.stream().filter(entry -> entry.group.equals(groupID)).findFirst();
-        List<Match> groupMatches = matchRepository.read().stream().filter(match -> match.groupId.equals(groupID) && match.stage.equals(GROUP)).sorted().collect(toList());
+        List<Match> groupMatches = matchRepository.groupMatches(groupID);
+        Collections.sort(groupMatches);
         setSessionUsers(request, uiModel);
         uiModel.addAttribute("matches", groupMatches);
         uiModel.addAttribute("groups", groupRepository.allGroups());
