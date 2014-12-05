@@ -5,6 +5,7 @@ import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Traverser;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.StreamSupport;
@@ -27,27 +28,40 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
             if(match.getId() == null){
                 matchNode = vmTips.createNode(MATCH_LABEL);
                 match.setId(matchNode.getId());
+                Relationship groupRelation = matchNode.createRelationshipTo(vmTips.getNodeById(match.groupId), GROUP);
+                groupRelation.setProperty("groupId", match.groupId);
             } else {
                 matchNode = vmTips.getNodeById(match.getId());
             }
 
-            matchNode.setProperty("awayTeam", match.awayTeam);
-            matchNode.setProperty("homeTeam", match.homeTeam);
+            if(!StringUtils.isEmpty(match.awayTeam) ||  !matchNode.hasProperty("awayTeam")){
+                matchNode.setProperty("awayTeam", match.awayTeam);
+            }
+            if(!StringUtils.isEmpty(match.homeTeam) || !matchNode.hasProperty("homeTeam")){
+                matchNode.setProperty("homeTeam", match.homeTeam);
+            }
             matchNode.setProperty("matchStart", match.matchStart.getTime());
             matchNode.setProperty("stage", match.stage.toString());
             matchNode.setProperty("groupId", match.groupId);
-            Relationship groupRelation = matchNode.createRelationshipTo(vmTips.getNodeById(match.groupId), GROUP);
-            groupRelation.setProperty("groupId", match.groupId);
+
             if(match.hasResult()){
                 matchNode.setProperty("homeGoals", match.getCorrectResult().homeGoals);
                 matchNode.setProperty("awayGoals", match.getCorrectResult().awayGoals);
                 matchNode.setProperty("adminUser", match.getCorrectResult().userId);
                 matchNode.setProperty("promoted",  match.getCorrectResult().promoted);
+                Iterable<Relationship> relationships = matchNode.getRelationships(OUTGOING, Relationships.WINNER);
+                relationships.forEach(rel -> updatePromotedTeam(rel, match.getCorrectResult().promoted ));
             }
+
             storeResults(match.results, matchNode);
             tx.success();
         }
         return match;
+    }
+
+    private void updatePromotedTeam(Relationship rel, String promoted) {
+        System.out.println(rel.getEndNode().getId() + " - " + rel.getProperty("teamPosition") + " => " + promoted );
+        rel.getEndNode().setProperty(rel.getProperty("teamPosition").toString(), promoted);
     }
 
     private void storeResults(HashSet<Result> results, Node match) {
@@ -175,15 +189,6 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
             Traverser paths = td.traverse(vmTips.getNodeById(userId));
 
             for(Path path : paths){
-                System.out.printf("Path %d (%s) Nodes %d (%s) -> %d (%s) \n"
-                        , path.lastRelationship().getId()
-                        , path.lastRelationship().getType().name()
-                        , path.startNode().getId()
-                        , path.startNode().getLabels().iterator().next().name()
-                        , path.endNode().getId()
-                        , path.endNode().getLabels().iterator().next().name()
-
-                );
                 Node resultNode = path.endNode();
                 Node matchNode = resultNode.getRelationships(MATCH_PREDICTION, INCOMING).iterator().next().getStartNode();
                 results.add(buildResult(resultNode, buildMatch(matchNode)));
@@ -234,5 +239,17 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
         } else {
             rel.delete();
         }
+    }
+
+    public void addRelation(Match match, String team, Match nextStage) {
+        try(Transaction tx = vmTips.beginTx()){
+            Node matchNode = vmTips.getNodeById(match.getId());
+            Node nextStageNode = vmTips.getNodeById(nextStage.getId());
+            Relationship relationshipTo = matchNode.createRelationshipTo(nextStageNode, Relationships.WINNER);
+            relationshipTo.setProperty("teamPosition", team);
+            tx.success();
+
+        }
+
     }
 }

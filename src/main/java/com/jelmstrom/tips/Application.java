@@ -36,7 +36,7 @@ public class Application {
     @SuppressWarnings("UnusedDeclaration")
     @Bean
     public EmbeddedServletContainerFactory containerFactory(){
-        return new TomcatEmbeddedServletContainerFactory(8080);
+        return new TomcatEmbeddedServletContainerFactory(8085);
     }
 
     @Bean

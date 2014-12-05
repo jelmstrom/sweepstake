@@ -8,30 +8,9 @@
 
 </head>
 <body>
-<div class="navbar navbar-default">
-    <div class="navbar-collapse collapse">
-        <ul class="nav navbar-nav">
-            <li><a href="/">Leaderboard</a></li>
-            <th:block th:each="group : ${groups}">
-                <li>
-                    <a href="index" th:href="@{'/group/' + ${group.getGroupId()}}" th:text="${'Group'+ group.groupName}">grp</a>
-                </li>
-            </th:block>
-            <li th:if="${activeUser.admin}"><a href="/group/new">New group</a></li>
-            <li><a href="/playoff">Playoff</a></li>
-            <li><a href="user"
-                   th:href="@{'/user/'+ ${activeUser.displayName}}"
-                   th:text="${activeUser.displayName}"
-                   th:if="${activeUser.isValid()}"></a>
-            </li>
-            <li><a href="/user"
-                   th:if="${not activeUser.isValid()}">Register</a>
-            </li>
-            <li><a href="/logout" th:if="${activeUser.isValid()}">Logout</a></li>
-        </ul>
-    </div>
-    <!--/.nav-collapse -->
-</div>
+
+<div th:replace="fragments/header :: header">...</div>
+
 <form action="/playoff" method="get" name="form">
     <select th:name="userId" onchange="this.form.submit()">
         <option th:each="userEntry : ${users}"
@@ -92,11 +71,18 @@
                             <tr>
                                 <td colspan="3">
                                     <label th:if="not ${user.admin and activeUser.admin }" th:text="${match.homeTeam}"></label>
-                                    <input type="text"
-                                           th:value="${match.homeTeam}"
-                                           th:id="${match.id +'_homeTeam'}"
-                                           th:name="${match.id +'_homeTeam'}"
-                                           th:if="${user.admin and activeUser.admin }"/>
+
+                                    <select th:id="${match.id +'_homeTeam'}"
+                                            th:name="${match.id +'_homeTeam'}"
+                                            th:disabled="not ${user.admin and activeUser.admin }">
+
+                                        <option value="">--</option>
+                                        <option th:each="team : ${teams}"
+                                                th:value="${team}"
+                                                th:text="${team}"
+                                                th:selected="${match.homeTeam.equals(team)}"
+                                                >teams</option>
+                                    </select>
 
                                 </td>
                                 <td>
@@ -106,6 +92,7 @@
                                            th:value="${match.resultFor(user.id).homeGoals}"
                                            th:name="${match.id+'_h'}"
                                            th:if="${match.editable(activeUser) and canEdit} "/>
+
                                     <th:block th:if="${user.isValid()}">
                                         <label th:if="${not match.editable(activeUser)}"
                                                th:text="${match.resultFor(user.id).homeGoals}">
@@ -116,11 +103,18 @@
                             <tr>
                                 <td colspan="3">
                                     <label th:if="not ${user.admin and activeUser.admin}" th:text="${match.awayTeam}"></label>
-                                    <input type="text"
-                                           th:value="${match.awayTeam}"
-                                           th:id="${match.id +'_awayTeam'}"
-                                           th:name="${match.id +'_awayTeam'}"
-                                           th:if="${user.admin and activeUser.admin}"/>
+
+                                    <select th:id="${match.id +'awayTeam'}"
+                                            th:name="${match.id +'_awayTeam'}"
+                                            th:disabled="not ${user.admin and activeUser.admin }">
+
+                                        <option value="">--</option>
+                                        <option th:each="team : ${teams}"
+                                                th:value="${team}"
+                                                th:text="${team}"
+                                                th:selected="${match.awayTeam.equals(team)}"
+                                                >teams</option>
+                                    </select>
                                 </td>
                                 <td>
                                     <input type="text" size="2" maxlength="2"

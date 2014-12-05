@@ -1,5 +1,7 @@
 package com.jelmstrom.tips.group;
 
+import com.jelmstrom.tips.match.Match;
+
 import java.util.List;
 
 public interface GroupRepository {
@@ -12,4 +14,5 @@ public interface GroupRepository {
     void dropAll();
 
 
+    List<Group> read(Match.Stage group);
 }

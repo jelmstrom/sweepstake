@@ -9,31 +9,8 @@
 
 </head>
 <body>
-<div class="navbar navbar-default">
-    <div class="navbar-collapse collapse">
-        <ul class="nav navbar-nav">
-            <li><a href="/">Leaderboard</a></li>
-            <th:block th:each="group : ${groups}">
-                <li>
-                    <a href="index" th:href="@{'/group/' + ${group.getGroupId()}}" th:text="${'Group'+ group.groupName}">grp</a>
-                </li>
-            </th:block>
-            <li th:if="${activeUser.admin}"><a href="/group/new">New group</a></li>
-            <li><a href="/playoff">Playoff</a></li>
-            <li><a href="user"
-                   th:href="@{'/user/'+ ${activeUser.displayName}}"
-                   th:text="${activeUser.displayName}"
-                   th:if="${activeUser.isValid()}"></a>
-            </li>
-            <li><a href="/user"
-                   th:if="${not activeUser.isValid()}">Register</a>
-            </li>
-            <li><a href="/logout" th:if="${activeUser.isValid()}">Logout</a></li>
-        </ul>
-    </div>
-    <!--/.nav-collapse -->
-</div>
 
+<div th:replace="fragments/header :: header">...</div>
 
 <table width="100%" >
     <thead>

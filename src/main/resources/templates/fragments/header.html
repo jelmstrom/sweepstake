@@ -1,0 +1,44 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+    <head>
+
+        <link rel="stylesheet" href="http://getbootstrap.com/dist/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="http://getbootstrap.com/dist/css/bootstrap-theme.min.css"/>
+        <link rel="stylesheet" href="http://getbootstrap.com/examples/dashboard/dashboard.css"/>
+
+    </head>
+    <body>
+
+    <div class="navbar navbar-default" th:fragment="header">
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="/">Leaderboard</a></li>
+                <th:block th:each="group : ${groups}">
+                    <th:block th:if="${group.stage.name().equals('GROUP')}">
+                        <li>
+                            <a href="index" th:href="@{'/group/' + ${group.getGroupId()}}"
+                               th:text="${'Group '+ group.groupName}">grp</a>
+                        </li>
+                    </th:block>
+                </th:block>
+                <li th:if="${activeUser.admin}"><a href="/group/new">New group</a></li>
+                <li><a href="/playoff" th:if="${activeUser.isValid()}">Playoff</a></li>
+                <li><a href="user"
+                       th:href="@{'/user/'+ ${activeUser.displayName}}"
+                       th:text="${activeUser.displayName}"
+                       th:if="${activeUser.isValid()}"></a>
+                </li>
+                <li><a href="/user"
+                       th:if="${not activeUser.isValid()}">Register</a>
+                </li>
+                <li><a href="/config"
+                       th:if="${activeUser.admin}">Config</a>
+                </li>
+                <li><a href="/logout" th:if="${activeUser.isValid()}">Logout</a></li>
+            </ul>
+        </div>
+        <!--/.nav-collapse -->
+    </div>
+    </body>
+</html>

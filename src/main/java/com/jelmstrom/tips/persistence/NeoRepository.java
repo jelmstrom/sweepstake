@@ -1,6 +1,7 @@
 package com.jelmstrom.tips.persistence;
 
 
+import com.jelmstrom.tips.match.Match;
 import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.*;
@@ -43,11 +44,13 @@ public abstract class NeoRepository {
     }
 
 
+
+
     public static enum Relationships implements RelationshipType {
         MATCH_PREDICTION,
         USER_PREDICTION,
         TABLE_PREDICTION,
-        GROUP
+        WINNER, GROUP
     }
 
     protected void dropAll(Label label) {

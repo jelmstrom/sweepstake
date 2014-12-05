@@ -1,18 +1,28 @@
 package com.jelmstrom.tips.group;
 
+import com.jelmstrom.tips.match.Match;
+
 import java.util.List;
 
 public class Group {
     public final String groupName;
     public final List<String> teams;
     private Long groupId;
+    public final Match.Stage stage;
+
 
 
     public Group(String groupName, List<String> teams) {
         this.groupName = groupName;
         this.teams = teams;
+        stage = Match.Stage.GROUP;
     }
 
+    public Group(String groupName, List<String> teams, Match.Stage stage) {
+        this.groupName = groupName;
+        this.teams = teams;
+        this.stage = stage;
+    }
 
     @SuppressWarnings("RedundantIfStatement")
     @Override
@@ -48,5 +58,5 @@ public class Group {
     }
 
 
-
+    
 }

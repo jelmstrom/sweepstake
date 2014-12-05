@@ -3,9 +3,11 @@ package com.jelmstrom.tips.match;
 import com.jelmstrom.tips.group.Group;
 import com.jelmstrom.tips.group.GroupRepository;
 import com.jelmstrom.tips.group.NeoGroupRepository;
+import com.jelmstrom.tips.persistence.NeoRepository;
 import com.jelmstrom.tips.user.NeoUserRepository;
 import com.jelmstrom.tips.user.User;
 import com.jelmstrom.tips.user.UserRepository;
+import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,7 +17,7 @@ import java.util.Date;
 import java.util.List;
 
 import static com.jelmstrom.tips.match.Match.Stage.GROUP;
-import static java.util.stream.Collectors.toList;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -102,4 +104,33 @@ public class NeoMatchRepositoryTest {
         assertThat(matches.size(), is(1));
     }
 
+
+    @Test
+    public void createPlayoffMatch(){
+        Group playoff = new Group("playoff", Collections.EMPTY_LIST);
+        playoff = groupRepository.store(playoff);
+        Match match = new Match("", "", new Date(), Match.Stage.LAST_SIXTEEN, playoff.getGroupId());
+        match = neoMatchRepository.store(match);
+        assertThat(match.getId(), is(notNullValue()));
+    }
+
+
+    @Test
+    public void playoffRelationShouldPopulateDownstream(){
+        Group ls = new Group("playoff", Collections.EMPTY_LIST, Match.Stage.LAST_SIXTEEN);
+        Group qf = new Group("playoff", Collections.EMPTY_LIST, Match.Stage.QUARTER_FINAL);
+        ls = groupRepository.store(ls);
+        qf = groupRepository.store(qf);
+        Match match = new Match("", "", new Date(), Match.Stage.LAST_SIXTEEN, ls.getGroupId());
+        Match matchQf = new Match("", "", new Date(), Match.Stage.QUARTER_FINAL, ls.getGroupId());
+        match = neoMatchRepository.store(match);
+        matchQf = neoMatchRepository.store(matchQf);
+        neoMatchRepository.addRelation(match, "homeTeam", matchQf);
+        match.setCorrectResult(new Result(match, 1, 2, user.id, "Team2"));
+        neoMatchRepository.store(match);
+        String homeTeam = neoMatchRepository.read(matchQf.getId()).homeTeam;
+        assertThat(homeTeam, Matchers.equalTo("Team2"));
+
+
+    }
 }

@@ -3,12 +3,14 @@ package com.jelmstrom.tips.group;
 
 import com.jelmstrom.tips.group.Group;
 import com.jelmstrom.tips.group.NeoGroupRepository;
+import com.jelmstrom.tips.match.Match;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.core.Is.is;
@@ -37,6 +39,23 @@ public class NeoGroupRepositoryTest {
         Group persisted = neoGroupRepository.read(group.getGroupId());
         assertThat(group.getGroupId(), is(equalTo(persisted.getGroupId())));
         assertThat(group, is(equalTo(persisted)));
+        assertThat(group.stage, is(Match.Stage.GROUP));
+    }
+
+    @Test
+    public void getGroupByStageReturnsGroup(){
+        Group read = neoGroupRepository.read(Match.Stage.GROUP).get(0);
+        assertThat(read, is(equalTo(group)));
+        assertThat(read.stage, is(Match.Stage.GROUP));
+    }
+
+    @Test
+    public void createPlayoffGroupShouldStoreGroup(){
+        Group playoff = new Group("pl", Collections.<String>emptyList(), Match.Stage.FINAL);
+        Group persisted = neoGroupRepository.store(playoff);
+        assertThat(playoff.getGroupId(), is(equalTo(persisted.getGroupId())));
+        assertThat(playoff, is(equalTo(persisted)));
+        assertThat(persisted.stage, is(Match.Stage.FINAL));
     }
 
     @Test

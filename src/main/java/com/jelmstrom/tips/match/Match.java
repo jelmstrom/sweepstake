@@ -157,6 +157,7 @@ public class Match implements Comparable<Match>{
     @Override
     public String toString() {
         return "Match{" +
+                "id='" + id + '\'' +
                 "homeTeam='" + homeTeam + '\'' +
                 ", awayTeam='" + awayTeam + '\'' +
                 ", matchStart=" + matchStart +

@@ -11,9 +11,13 @@ import com.jelmstrom.tips.match.NeoMatchRepository;
 import com.jelmstrom.tips.match.Result;
 import com.jelmstrom.tips.table.TableEntry;
 import com.jelmstrom.tips.table.TablePrediction;
+import com.jelmstrom.tips.twitter.Tweeter;
 import com.jelmstrom.tips.user.NeoUserRepository;
 import com.jelmstrom.tips.user.User;
 import com.jelmstrom.tips.user.UserRepository;
+import org.joda.time.DateTime;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,12 +31,12 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static com.jelmstrom.tips.match.Match.Stage.*;
 import static java.util.stream.Collectors.toList;
 
 @SuppressWarnings("UnusedDeclaration")
 @Controller
 @RequestMapping(value = "/")
+@EnableScheduling
 public class SweepstakeController {
 
     public static final String SESSION_USER = "activeUser";
@@ -60,11 +64,14 @@ public class SweepstakeController {
         User sessionUser = setSessionUsers(request, uiModel);
 
         List<Match> allMatches = matchRepository.read();
-        List<Match> last16 = allMatches.stream().filter(match-> match.stage == LAST_SIXTEEN).sorted().collect(toList());
-        List<Match> quarterFinal = allMatches.stream().filter(match-> match.stage == QUARTER_FINAL).sorted().collect(toList());
-        List<Match> semiFinal = allMatches.stream().filter(match-> match.stage == SEMI_FINAL).sorted().collect(toList());
-        List<Match> finals = allMatches.stream().filter(match-> match.stage == FINAL || match.stage == BRONZE).sorted().collect(toList());
 
+        List<Match> last16 = matchRepository.groupMatches(groupRepository.read(Match.Stage.LAST_SIXTEEN).get(0).getGroupId());
+        List<Match> quarterFinal = matchRepository.groupMatches(groupRepository.read(Match.Stage.QUARTER_FINAL).get(0).getGroupId());
+        List<Match> semiFinal = matchRepository.groupMatches(groupRepository.read(Match.Stage.SEMI_FINAL).get(0).getGroupId());
+        List<Match> finals = matchRepository.groupMatches(groupRepository.read(Match.Stage.FINAL).get(0).getGroupId());
+        List<Match> bronze = matchRepository.groupMatches(groupRepository.read(Match.Stage.BRONZE).get(0).getGroupId());
+
+        semiFinal.forEach(System.out::println);
         uiModel.addAttribute("stages", Arrays.asList(last16,quarterFinal, semiFinal, finals));
         uiModel.addAttribute("users", userRepository.read());
         uiModel.addAttribute("groups", groupRepository.allGroups());
@@ -163,7 +170,6 @@ public class SweepstakeController {
 
         List<Match> resultList = getResults(request, user);
 
-        System.out.println("Saving results " + resultList);
         matchRepository.store(resultList);
 
         return showGroup(uiModel, groupLetter, request);
@@ -177,7 +183,6 @@ public class SweepstakeController {
         while (parameterNames.hasMoreElements()) {
             String parameterName = parameterNames.nextElement();
             String value = request.getParameter(parameterName);
-            System.out.println("Parameter : " + parameterName + " = " + value);
             int endIndex = parameterName.indexOf("_");
 
             if(endIndex == -1){
@@ -189,6 +194,7 @@ public class SweepstakeController {
             if(matchUpdates.containsKey(matchId)){
                 continue;
             }
+
 
             Match stored = matchRepository.read(Long.parseLong(matchId));
             Match updatedMatch = updateMatchTeams(request, matchId, stored);
@@ -208,29 +214,38 @@ public class SweepstakeController {
            ) {
             //no change keep stored.
             updatedMatch = stored;
+
         } else {
             //preserve details that are not possible to change
             updatedMatch = new Match(homeTeam, awayTeam, stored.matchStart, stored.stage, stored.groupId);
-            System.out.println("Updated match details : " + updatedMatch);
+            updatedMatch.setId(Long.parseLong(matchId));
             updatedMatch.results.addAll(stored.results);
         }
         return updatedMatch;
     }
 
     public void addResultToMatch(HttpServletRequest request, User user, Match match) {
-        Result previousResult = match.resultFor(user.id);
+        Result existingResult = match.resultFor(user.id);
+
+        Integer homeGoals = getHomeGoals(request, match, existingResult);
+        Integer awayGoals = getAwayGoals(request, match, existingResult);
+
+        String winner = getWinner(request, match, existingResult);
+        if(     null != homeGoals
+                && null != awayGoals
+                && Integer.compare(homeGoals, awayGoals) != 0) {
+            winner = Integer.compare(homeGoals, awayGoals) > 0?match.homeTeam:match.awayTeam;
+        }
 
         Result result = new Result(match,
-                getHomeGoals(request, match, previousResult),
-                getAwayGoals(request, match, previousResult),
+                homeGoals,
+                awayGoals,
                 user.id,
-                getWinner(request, match, previousResult));
+                winner);
 
-        System.out.println("Added result : " + result);
 
         if(user.admin){
             match.setCorrectResult(result);
-            System.out.println("Added Correct result : " + match);
         }
 
     }
@@ -265,13 +280,11 @@ public class SweepstakeController {
     public boolean hasResults(String homeGoals, String awayGoals) {
         boolean result = !(StringUtils.isEmptyOrWhitespace(homeGoals)
                 && StringUtils.isEmptyOrWhitespace(awayGoals));
-        System.out.println(" result : " + homeGoals +":"+ awayGoals + " => " + result);
         return result;
     }
 
     private Result buildResult_(User user, Map<String, int[]> results, String key, Long groupId) {
         int[] resultPair = results.get(key);
-        System.out.println(String.format("Creating Result for %s", key));
         return new Result(new Match("", "", null, groupId)
                 , resultPair[0]
                 , resultPair[1]
@@ -349,6 +362,24 @@ public class SweepstakeController {
         return index(uiModel, request);
     }
 
+
+    @RequestMapping(value = "/config", method = RequestMethod.GET)
+    public String showConfig(Model uiModel, HttpServletRequest request) {
+        setSessionUsers(request, uiModel);
+        return "config";
+    }
+
+
+    @RequestMapping(value = "/config/twitter", method = RequestMethod.POST)
+    public String deleteUser(Model uiModel, HttpServletRequest request) {
+        Tweeter.configure(request.getParameter("tokenSecret")
+                        , request.getParameter("token")
+                        , request.getParameter("secret")
+                        , request.getParameter("key"));
+        setSessionUsers(request, uiModel);
+        return "config";
+    }
+
     @RequestMapping(value = "/user", method = RequestMethod.POST)
     public String updateUser(Model uiModel, HttpServletRequest request) {
 
@@ -373,11 +404,11 @@ public class SweepstakeController {
     }
 
     private User saveUserDetails(HttpServletRequest request, Sweepstake sweepstake) {
-        System.out.println(String.format("updating user %s, %s %s %s"
+        System.out.println(String.format("updating user %s, DisplayName: %s email : %s "
                 ,  request.getParameter("userId")
                 , request.getParameter("displayName")
-                , request.getParameter("email")
-                , request.getParameter("admin")));
+                , request.getParameter("email")));
+
         User user = new User(Long.parseLong(request.getParameter("userId"))
                 , request.getParameter("displayName")
                 , request.getParameter("email")
@@ -386,7 +417,7 @@ public class SweepstakeController {
         user.setTopScorer(request.getParameter("topScorer"));
         user.setWinner(request.getParameter("winner"));
         user = sweepstake.saveUser(user);
-        System.out.println(String.format("user %s updated %s", user.displayName, (user.admin?" -> admin <-":"")));
+        System.out.println(String.format("user %s updated %s", user.displayName, (user.admin?" (admin)":"")));
         return user;
     }
 
@@ -396,7 +427,8 @@ public class SweepstakeController {
                 , request.getParameter("email")
                 , false
                 , UUID.randomUUID().toString());
-        System.out.println(String.format("create user %s ", user.email));
+
+        System.out.println(String.format("creating user %s ", user.email));
         return sweepstake.saveUser(user);
     }
 
@@ -425,8 +457,6 @@ public class SweepstakeController {
         if (!user.isValid()) {
             user = sessionUser;
         }
-
-        System.out.println(String.format("User : %s", user.email));
         boolean editable = (user.isValid() && user.equals(sessionUser)) || sessionUser.admin;
         model.addAttribute("canEdit", editable);
         model.addAttribute(USER, user);
