@@ -10,7 +10,7 @@ Prerequisites : MongoDB installed locally.
 
 
  Build dockerfile
- docker build -tag=vmtips:1.2.0
+ docker build --tag=vmtips:1.2.0
 
 
 
