@@ -10,7 +10,9 @@ Prerequisites : MongoDB installed locally.
 
 
  Build dockerfile
- docker build --tag=vmtips:1.2.0
+ docker build -t "vmtips:1.2.0" .
+ #run export port 8085 as 8080 on docker host
+ docker run -p8080:8085 vmtips:1.2.0
 
 
 
