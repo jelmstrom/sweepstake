@@ -7,7 +7,7 @@
     <groupId>vmtips</groupId>
     <artifactId>vmtips</artifactId>
     <packaging>war</packaging>
-    <version>1.2.0</version>
+    <version>1.2.1-SNAPSHOT</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>

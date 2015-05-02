@@ -19,12 +19,10 @@ public class Tweeter {
             System.out.println(" ############  Tweet : " + message);
 
             try {
-
                 twitter.updateStatus(message);
             } catch (TwitterException e) {
                 System.out.print("Tweet failed + " + e.getMessage()) ;
-                e.printStackTrace();
-                // who cares?
+
             }
         }
 

@@ -15,9 +15,7 @@ import com.jelmstrom.tips.twitter.Tweeter;
 import com.jelmstrom.tips.user.NeoUserRepository;
 import com.jelmstrom.tips.user.User;
 import com.jelmstrom.tips.user.UserRepository;
-import org.joda.time.DateTime;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,7 +51,7 @@ public class SweepstakeController {
     @RequestMapping(method = RequestMethod.GET)
     public String index(Model uiModel, HttpServletRequest request) {
         uiModel.addAttribute("userList", userRepository.read());
-        uiModel.addAttribute("leaderBoard", sweepstake.fasterLeaderboard());
+        uiModel.addAttribute("leaderBoard", sweepstake.leaderboard());
         uiModel.addAttribute("groups", groupRepository.allGroups());
         setSessionUsers(request, uiModel);
         return "index";
@@ -65,13 +63,11 @@ public class SweepstakeController {
 
         List<Match> allMatches = matchRepository.read();
 
-        List<Match> last16 = matchRepository.groupMatches(groupRepository.read(Match.Stage.LAST_SIXTEEN).get(0).getGroupId());
-        List<Match> quarterFinal = matchRepository.groupMatches(groupRepository.read(Match.Stage.QUARTER_FINAL).get(0).getGroupId());
-        List<Match> semiFinal = matchRepository.groupMatches(groupRepository.read(Match.Stage.SEMI_FINAL).get(0).getGroupId());
-        List<Match> finals = matchRepository.groupMatches(groupRepository.read(Match.Stage.FINAL).get(0).getGroupId());
-        List<Match> bronze = matchRepository.groupMatches(groupRepository.read(Match.Stage.BRONZE).get(0).getGroupId());
-
-        semiFinal.forEach(System.out::println);
+        List<Match> last16 = matchRepository.stageMatches(Match.Stage.LAST_SIXTEEN);
+        List<Match> quarterFinal = matchRepository.stageMatches(Match.Stage.LAST_SIXTEEN);
+        List<Match> semiFinal = matchRepository.stageMatches(Match.Stage.SEMI_FINAL);
+        List<Match> bronze = matchRepository.stageMatches(Match.Stage.BRONZE);
+        List<Match> finals = matchRepository.stageMatches(Match.Stage.FINAL);
         uiModel.addAttribute("stages", Arrays.asList(last16,quarterFinal, semiFinal, finals));
         uiModel.addAttribute("users", userRepository.read());
         uiModel.addAttribute("groups", groupRepository.allGroups());
@@ -381,7 +377,7 @@ public class SweepstakeController {
     }
 
     @RequestMapping(value = "/user", method = RequestMethod.POST)
-    public String updateUser(Model uiModel, HttpServletRequest request) {
+    public String storeUser(Model uiModel, HttpServletRequest request) {
 
         System.out.println(String.format("%s user", request.getParameter("action")));
 
@@ -416,6 +412,7 @@ public class SweepstakeController {
                 , UUID.randomUUID().toString());
         user.setTopScorer(request.getParameter("topScorer"));
         user.setWinner(request.getParameter("winner"));
+        
         user = sweepstake.saveUser(user);
         System.out.println(String.format("user %s updated %s", user.displayName, (user.admin?" (admin)":"")));
         return user;

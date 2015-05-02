@@ -10,12 +10,12 @@ import org.neo4j.graphdb.traversal.*;
 
 
 public abstract class NeoRepository {
-
+    
     protected static final GraphDatabaseService vmTips;
     protected static ExecutionEngine engine;
 
     static {
-        vmTips = new GraphDatabaseFactory().newEmbeddedDatabase("VmTipsDbd");
+        vmTips = new GraphDatabaseFactory().newEmbeddedDatabase("/data/neo4j/vmtips");
         engine = new ExecutionEngine( vmTips );
         registerShutdownHook(vmTips);
     }

@@ -257,7 +257,7 @@ public class AcceptanceTest {
     }
 
     public int pointsForUser(User user) {
-        return sweepstake.fasterLeaderboard().stream().filter(entry -> entry.user.id.equals(user.id)).findFirst().get().points;
+        return sweepstake.leaderboard().stream().filter(entry -> entry.user.id.equals(user.id)).findFirst().get().points;
     }
 
 }

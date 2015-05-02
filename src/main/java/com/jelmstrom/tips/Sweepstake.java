@@ -18,7 +18,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 import static com.jelmstrom.tips.match.Match.Stage.GROUP;
@@ -59,7 +58,7 @@ public class Sweepstake {
         return tableRepository.read().stream().filter(prediction -> prediction.userId.equals(user.id)).collect(toList());
     }
 
-    public List<LeaderboardEntry> fasterLeaderboard(){
+    public List<LeaderboardEntry> leaderboard(){
         User adminUser = userRepository.findAdminUser();
         List<Match> matches = matchRepository.read();
         Map<Long, Integer> matchScores = matches.stream()
@@ -67,11 +66,8 @@ public class Sweepstake {
                 .collect(toMap(result -> result.userId, Result::score, Math::addExact));
 
         List<TablePrediction> tablePredictions = tableRepository.read();
-        List<Result> adminResults = matches.stream().filter(match -> match.stage == GROUP).map(Match::getCorrectResult).filter(Objects::nonNull).collect(toList());
-
-        Map<Long, Integer> tables = tablePredictions.stream()
-                .filter(prediction -> !StringUtils.isEmpty(prediction.userId))
-                .collect(toMap(pred -> pred.userId, pred -> pred.score(adminResults), Math::addExact));
+        
+        Map<Long, Integer> tables = scoreTablePredictions(matches, tablePredictions);
 
         List<User> users = userRepository.read();
         Map<Long, Integer> userPoint
@@ -89,22 +85,22 @@ public class Sweepstake {
 
     }
 
-    public Map<Long, Integer> mergeMaps(Map<Long, Integer> matchScores, Map<Long, Integer> tables) {
-        Collector<Map.Entry, ?, Map<Long, Integer>> mapJoinCollector = getEntryMapCollector();
-
-
-        return Stream.of(tables, matchScores)
-                .map(map -> map.entrySet())
-                .flatMap(entrySet -> entrySet.stream())
-                .collect(mapJoinCollector);
+    public Map<Long, Integer> scoreTablePredictions(List<Match> matches, List<TablePrediction> tablePredictions) {
+        List<Result> adminResults = matches.stream().filter(match -> match.stage == GROUP).map(Match::getCorrectResult).filter(Objects::nonNull).collect(toList());
+        return tablePredictions.stream()
+                .filter(prediction -> !StringUtils.isEmpty(prediction.userId))
+                .collect(toMap(prediction -> prediction.userId, prediction -> prediction.score(adminResults), Math::addExact));
     }
 
-    public Collector<Map.Entry, ?, Map<Long, Integer>> getEntryMapCollector() {
-        return toMap(
-            entry -> (Long)entry.getKey(),
-            entry -> Integer.parseInt(entry.getValue().toString()),
-            Math::addExact
-        );
+    public Map<Long, Integer> mergeMaps(Map<Long, Integer> map1, Map<Long, Integer> map2) {
+        return Stream.of(map2, map1)
+                .map(Map::entrySet)
+                .flatMap(Collection::stream)
+                .collect(toMap(
+                        entry -> (Long) entry.getKey(),
+                        entry -> Integer.parseInt(entry.getValue().toString()),
+                        Math::addExact
+                ));
     }
 
 
@@ -115,16 +111,19 @@ public class Sweepstake {
         return group.teams.stream().map(team -> TableEntry.recordForTeam(team, adminResults)).sorted().collect(toList());
     }
 
+    private Match findMatch(List<Match> matches, Long id) {
+        System.out.println(String.format("Finding match for %s", id));
+        return matches.stream().filter(match -> match.getId().equals(id)).findFirst().get();
+    }
+
+
+
     public User saveUser(User user) {
         User updated = userRepository.store(user);
         new EmailNotification().sendMail(updated);
         return updated;
     }
 
-    private Match findMatch(List<Match> matches, Long id) {
-        System.out.println(String.format("Finding match for %s", id));
-        return matches.stream().filter(match -> match.getId().equals(id)).findFirst().get();
-    }
 
     public void saveUserPrediction(TablePrediction tablePrediction) {
         tableRepository.store(tablePrediction);

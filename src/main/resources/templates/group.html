@@ -17,7 +17,7 @@
         <td width="30%">
             <form id="groupNameForm" action="" th:action="@{'/group/'+${group.getGroupId()}+'/name'}" method="post">
                     <input type="text" name="groupName" id="groupName" th:value="${group.groupName}" size="25"/>
-                    <button class="btn btn-sm btn-success" type="submit" name="addTeam">Update</button>
+                    <button class="btn btn-sm btn-success" type="submit" name="groupName">Rename</button>
             </form>
         </td>
         <td width="15%"></td>

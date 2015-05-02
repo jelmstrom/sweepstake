@@ -14,6 +14,7 @@ public interface MatchRepository {
     void drop(Long id);
 
     List<Match> groupMatches(Long groupId);
+    List<Match> stageMatches(Match.Stage stage);
 
 
 }

@@ -221,6 +221,20 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
         }
     }
 
+    @Override
+    public List<Match> stageMatches(Match.Stage stage) {
+        List<Match> matches = new ArrayList<>();
+        try(Transaction tx = vmTips.beginTx()){
+            ExecutionResult execute = engine.execute("MATCH (n:" + MATCH_LABEL.name()
+                                    + " {stage:'" + stage.toString() + "'}"
+                                    + ") return n");
+            ResourceIterator<Node> nodes = execute.columnAs("n");
+            nodes.forEachRemaining(item -> matches.add(buildMatch(item)));
+            tx.success();
+        }
+        return matches;
+    }
+
     private void remove(Relationship rel) {
         System.out.printf("Relation  %d [%s] Nodes %d (%s) ->  %d(%s) \n"
                 , rel.getId()

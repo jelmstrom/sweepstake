@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.List;
 
 import static com.jelmstrom.tips.match.Match.Stage.GROUP;
+import static com.jelmstrom.tips.match.Match.Stage.LAST_SIXTEEN;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -109,10 +110,21 @@ public class NeoMatchRepositoryTest {
     public void createPlayoffMatch(){
         Group playoff = new Group("playoff", Collections.EMPTY_LIST);
         playoff = groupRepository.store(playoff);
-        Match match = new Match("", "", new Date(), Match.Stage.LAST_SIXTEEN, playoff.getGroupId());
+        Match match = new Match("", "", new Date(), LAST_SIXTEEN, playoff.getGroupId());
         match = neoMatchRepository.store(match);
         assertThat(match.getId(), is(notNullValue()));
     }
+
+    @Test
+    public void getByStage(){
+        Group playoff = new Group("playoff", Collections.EMPTY_LIST);
+        playoff = groupRepository.store(playoff);
+        Match match = new Match("", "", new Date(), LAST_SIXTEEN, playoff.getGroupId());
+        match = neoMatchRepository.store(match);
+        assertThat(match.getId(), is(notNullValue()));
+        assertThat(neoMatchRepository.stageMatches(LAST_SIXTEEN).size(), is(1));
+    }
+
 
 
     @Test
@@ -130,7 +142,6 @@ public class NeoMatchRepositoryTest {
         neoMatchRepository.store(match);
         String homeTeam = neoMatchRepository.read(matchQf.getId()).homeTeam;
         assertThat(homeTeam, Matchers.equalTo("Team2"));
-
 
     }
 }
