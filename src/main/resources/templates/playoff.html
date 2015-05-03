@@ -44,31 +44,32 @@
                         <th></th>
                     </thead>
                     <tbody>
-                        <th:block th:each="match : ${stage}">
-                            <tr>
-                                <td>
-                                    <label  class="label label-success" th:text="${match.id}"></label>
-                                </td>
-                                <td>
-                                    <label class="badge" th:text="${#dates.format(match.matchStart,'dd MMMM HH:mm')}"> start</label>
-                                </td>
-                                <td>
-                                    <select th:name="${match.id + '_promoted'}" th:disabled="not ${playoffTreeEditable}">
-                                        <option value="">--</option>
-                                        <option th:each="team : ${teams}"
-                                                th:value="${team}"
-                                                th:text="${team}"
-                                                th:selected="${match.resultFor(user.id).promoted.equals(team)}"
-                                                >teams</option>
-                                    </select>
-                                </td>
-                                <td>
-                                    <label th:if="${match.hasResult()}"
-                                           th:text="${match.scoreFor(user.id) + 'p'}"/>
-                                </td>
+                        <th:block th:each=" stages : ${stage}">
+                            <th:block th:each="match : ${stages.value}">
+                                <tr> <!-- Header row id | date | winner | points-->
+                                    <td>
+                                        <label  class="label label-success" th:text="${match.id}"></label>
+                                    </td>
+                                    <td>
+                                        <label class="badge" th:text="${#dates.format(match.matchStart,'dd MMMM HH:mm')}"> start</label>
+                                    </td>
+                                    <td>
+                                        <select th:name="${match.id + '_promoted'}" th:disabled="not ${playoffTreeEditable}">
+                                            <option value="">--</option>
+                                            <option th:each="team : ${teams}"
+                                                    th:value="${team}"
+                                                    th:text="${team}"
+                                                    th:selected="${match.resultFor(user.id).promoted.equals(team)}"
+                                                    >teams</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <label th:if="${match.hasResult()}"
+                                               th:text="${match.scoreFor(user.id) + 'p'}"/>
+                                    </td>
 
-                            </tr>
-                            <tr>
+                                </tr>
+                            <tr> <!-- team | goals scored -->
                                 <td colspan="3">
                                     <label th:if="not ${user.admin and activeUser.admin }" th:text="${match.homeTeam}"></label>
 
@@ -100,7 +101,7 @@
                                     </th:block>
                                 </td>
                             </tr>
-                            <tr>
+                            <tr> <!-- team | goals scored -->
                                 <td colspan="3">
                                     <label th:if="not ${user.admin and activeUser.admin}" th:text="${match.awayTeam}"></label>
 
@@ -129,7 +130,11 @@
                                     </th:block>
                                 </td>
                             </tr>
-                        </th:block>
+                            </th:block>
+                            <th:block th:if="${stages.value.isEmpty()}">
+                                <a href="new" th:href="@{'/playoff/' + ${stages.key}}" class="btn btn-sm btn-success">+ Create</a>
+                            </th:block>
+                         </th:block>
                     </tbody>
                 </table>
                 </td>

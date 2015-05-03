@@ -66,9 +66,14 @@ public class SweepstakeController {
         List<Match> last16 = matchRepository.stageMatches(Match.Stage.LAST_SIXTEEN);
         List<Match> quarterFinal = matchRepository.stageMatches(Match.Stage.LAST_SIXTEEN);
         List<Match> semiFinal = matchRepository.stageMatches(Match.Stage.SEMI_FINAL);
-        List<Match> bronze = matchRepository.stageMatches(Match.Stage.BRONZE);
         List<Match> finals = matchRepository.stageMatches(Match.Stage.FINAL);
-        uiModel.addAttribute("stages", Arrays.asList(last16,quarterFinal, semiFinal, finals));
+        SortedMap<Match.Stage, List<Match>> playoffMap = new TreeMap<>();
+        playoffMap.put(Match.Stage.LAST_SIXTEEN, last16);
+        playoffMap.put(Match.Stage.QUARTER_FINAL, quarterFinal);
+        playoffMap.put(Match.Stage.SEMI_FINAL, semiFinal);
+        playoffMap.put(Match.Stage.FINAL, finals);
+
+        uiModel.addAttribute("stages",playoffMap);
         uiModel.addAttribute("users", userRepository.read());
         uiModel.addAttribute("groups", groupRepository.allGroups());
         List<String> teams = groupRepository.allGroups().stream().flatMap(group -> group.teams.stream()).sorted().collect(toList());
