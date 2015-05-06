@@ -10,13 +10,24 @@
 </head>
 <body>
 <div th:replace="fragments/header :: header">...</div>
-Config...
+
+<th:block th:if="${!stages.isEmpty()}">
+    <form action="playoff/stage" method="post">
+        <select name="stage">
+            <option th:each="stage:${stages}"
+                    th:value="${stage}"
+                    th:text="${stage}"
+                    >stages</option>
+        </select>
+        <button class="btn btn-sm btn-success" type="submit" name="action" value="update">Add Stage</button>
+    </form>
+</th:block>
 
 <table>
     <tr>
        <td>
            <table>
-               <form>
+               <form name="twitter">
                    debug=true
                    oauth.consumerKey=*********************
                    oauth.consumerSecret=******************************************

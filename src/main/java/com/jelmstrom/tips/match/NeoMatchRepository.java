@@ -255,12 +255,12 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
         }
     }
 
-    public void addRelation(Match match, String team, Match nextStage) {
+    public void addRelation(Match match, String label, Match nextStage) {
         try(Transaction tx = vmTips.beginTx()){
             Node matchNode = vmTips.getNodeById(match.getId());
             Node nextStageNode = vmTips.getNodeById(nextStage.getId());
             Relationship relationshipTo = matchNode.createRelationshipTo(nextStageNode, Relationships.WINNER);
-            relationshipTo.setProperty("teamPosition", team);
+            relationshipTo.setProperty("teamPosition", label);
             tx.success();
 
         }

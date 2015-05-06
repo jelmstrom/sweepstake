@@ -29,6 +29,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static com.jelmstrom.tips.match.Match.Stage.*;
+import static com.jelmstrom.tips.match.Match.Stage.FINAL;
+import static com.jelmstrom.tips.match.Match.Stage.SEMI_FINAL;
 import static java.util.stream.Collectors.toList;
 
 @SuppressWarnings("UnusedDeclaration")
@@ -39,10 +42,10 @@ public class SweepstakeController {
 
     public static final String SESSION_USER = "activeUser";
     public static final String USER = "user";
-    private final Sweepstake sweepstake;
-    private UserRepository userRepository = new NeoUserRepository(Config.context);
-    private MatchRepository matchRepository = new NeoMatchRepository(Config.context);
-    private GroupRepository groupRepository = new NeoGroupRepository(Config.context);
+    protected final Sweepstake sweepstake;
+    protected UserRepository userRepository = new NeoUserRepository(Config.context);
+    protected MatchRepository matchRepository = new NeoMatchRepository(Config.context);
+    protected GroupRepository groupRepository = new NeoGroupRepository(Config.context);
 
     public SweepstakeController() {
         sweepstake = new Sweepstake(Config.context);
@@ -57,38 +60,6 @@ public class SweepstakeController {
         return "index";
     }
 
-    @RequestMapping(value = "/playoff",  method = RequestMethod.GET)
-    public String playoff(Model uiModel, HttpServletRequest request) {
-        User sessionUser = setSessionUsers(request, uiModel);
-
-        List<Match> allMatches = matchRepository.read();
-
-        List<Match> last16 = matchRepository.stageMatches(Match.Stage.LAST_SIXTEEN);
-        List<Match> quarterFinal = matchRepository.stageMatches(Match.Stage.LAST_SIXTEEN);
-        List<Match> semiFinal = matchRepository.stageMatches(Match.Stage.SEMI_FINAL);
-        List<Match> finals = matchRepository.stageMatches(Match.Stage.FINAL);
-        SortedMap<Match.Stage, List<Match>> playoffMap = new TreeMap<>();
-        playoffMap.put(Match.Stage.LAST_SIXTEEN, last16);
-        playoffMap.put(Match.Stage.QUARTER_FINAL, quarterFinal);
-        playoffMap.put(Match.Stage.SEMI_FINAL, semiFinal);
-        playoffMap.put(Match.Stage.FINAL, finals);
-
-        uiModel.addAttribute("stages",playoffMap);
-        uiModel.addAttribute("users", userRepository.read());
-        uiModel.addAttribute("groups", groupRepository.allGroups());
-        List<String> teams = groupRepository.allGroups().stream().flatMap(group -> group.teams.stream()).sorted().collect(toList());
-        uiModel.addAttribute("teams", teams);
-        uiModel.addAttribute("playoffTreeEditable", (sessionUser.admin || new Date().before(Config.playoffStart)));
-
-        return "playoff";
-    }
-    @RequestMapping(value = "/playoff",  method = RequestMethod.POST)
-    public String savePlayoff(Model uiModel, HttpServletRequest request) {
-        User user = userRepository.read(Long.parseLong(request.getParameter("userId")));
-        List<Match> resultList = getResults(request, user);
-        matchRepository.store(resultList);
-        return playoff(uiModel, request);
-    }
 
     @RequestMapping(value = "/prediction/{groupId}", method = RequestMethod.POST)
     public String storePrediction(Model uiModel, @PathVariable String groupId, HttpServletRequest request) {
@@ -177,7 +148,7 @@ public class SweepstakeController {
 
     }
 
-    private List<Match> getResults(HttpServletRequest request, User user) {
+    protected List<Match> getResults(HttpServletRequest request, User user) {
         Enumeration<String> parameterNames = request.getParameterNames();
         Map<String, Match> matchUpdates = new HashMap<>();
 
@@ -203,7 +174,7 @@ public class SweepstakeController {
             matchUpdates.put(matchId, updatedMatch);
         }
 
-        return matchUpdates.entrySet().stream().map(entry -> entry.getValue()).collect(toList());
+        return matchUpdates.entrySet().stream().map(Map.Entry::getValue).collect(toList());
     }
 
     private Match updateMatchTeams(HttpServletRequest request, String matchId, Match stored) {
@@ -279,9 +250,8 @@ public class SweepstakeController {
     }
 
     public boolean hasResults(String homeGoals, String awayGoals) {
-        boolean result = !(StringUtils.isEmptyOrWhitespace(homeGoals)
+        return !(StringUtils.isEmptyOrWhitespace(homeGoals)
                 && StringUtils.isEmptyOrWhitespace(awayGoals));
-        return result;
     }
 
     private Result buildResult_(User user, Map<String, int[]> results, String key, Long groupId) {
@@ -364,23 +334,6 @@ public class SweepstakeController {
     }
 
 
-    @RequestMapping(value = "/config", method = RequestMethod.GET)
-    public String showConfig(Model uiModel, HttpServletRequest request) {
-        setSessionUsers(request, uiModel);
-        return "config";
-    }
-
-
-    @RequestMapping(value = "/config/twitter", method = RequestMethod.POST)
-    public String deleteUser(Model uiModel, HttpServletRequest request) {
-        Tweeter.configure(request.getParameter("tokenSecret")
-                        , request.getParameter("token")
-                        , request.getParameter("secret")
-                        , request.getParameter("key"));
-        setSessionUsers(request, uiModel);
-        return "config";
-    }
-
     @RequestMapping(value = "/user", method = RequestMethod.POST)
     public String storeUser(Model uiModel, HttpServletRequest request) {
 
@@ -406,7 +359,7 @@ public class SweepstakeController {
 
     private User saveUserDetails(HttpServletRequest request, Sweepstake sweepstake) {
         System.out.println(String.format("updating user %s, DisplayName: %s email : %s "
-                ,  request.getParameter("userId")
+                , request.getParameter("userId")
                 , request.getParameter("displayName")
                 , request.getParameter("email")));
 
@@ -419,7 +372,7 @@ public class SweepstakeController {
         user.setWinner(request.getParameter("winner"));
         
         user = sweepstake.saveUser(user);
-        System.out.println(String.format("user %s updated %s", user.displayName, (user.admin?" (admin)":"")));
+        System.out.println(String.format("user %s updated %s", user.displayName, (user.admin ? " (admin)" : "")));
         return user;
     }
 
@@ -438,12 +391,12 @@ public class SweepstakeController {
         return !StringUtils.isEmpty(request.getParameter("new"));
     }
 
-    private boolean isUpdateUser(HttpServletRequest request) {
+    protected boolean isUpdateUser(HttpServletRequest request) {
         return !StringUtils.isEmpty(request.getParameter("action"));
     }
 
 
-    private User setSessionUsers(HttpServletRequest request, Model uiModel) {
+    protected User setSessionUsers(HttpServletRequest request, Model uiModel) {
         User user;
         String userId = request.getParameter("userId");
         if(StringUtils.isEmpty(userId)){
@@ -472,4 +425,164 @@ public class SweepstakeController {
         System.out.printf("Session user : %s \n", currentSessionUser);
         return userRepository.read(currentSessionUser);
     }
+
+    @RequestMapping(value = "/config", method = RequestMethod.GET)
+    public String showConfig(Model uiModel, HttpServletRequest request) {
+        setSessionUsers(request, uiModel);
+        ArrayList <Match.Stage>stages = new ArrayList<>();
+        for (Match.Stage stage : Match.Stage.values()) {
+            if(matchRepository.stageMatches(stage).isEmpty()){
+                stages.add(stage);
+            }
+        }
+        uiModel.addAttribute("stages", stages);
+        return "config";
+    }
+
+    @RequestMapping(value = "/config/twitter", method = RequestMethod.POST)
+    public String configureTwitter(Model uiModel, HttpServletRequest request) {
+        Tweeter.configure(request.getParameter("tokenSecret")
+                , request.getParameter("token")
+                , request.getParameter("secret")
+                , request.getParameter("key"));
+        setSessionUsers(request, uiModel);
+        return "config";
+    }
+
+    @RequestMapping(value = "/playoff",  method = RequestMethod.GET)
+    public String playoff(Model uiModel, HttpServletRequest request) {
+        User sessionUser = setSessionUsers(request, uiModel);
+
+        List<Match> allMatches = matchRepository.read();
+
+        List<Match> last16 = matchRepository.stageMatches(LAST_SIXTEEN);
+        List<Match> quarterFinal = matchRepository.stageMatches(QUARTER_FINAL);
+        List<Match> semiFinal = matchRepository.stageMatches(SEMI_FINAL);
+        List<Match> finals = matchRepository.stageMatches(FINAL);
+        SortedMap<Match.Stage, List<Match>> playoffMap = new TreeMap<>();
+        playoffMap.put(LAST_SIXTEEN, last16);
+        playoffMap.put(QUARTER_FINAL, quarterFinal);
+        playoffMap.put(SEMI_FINAL, semiFinal);
+        playoffMap.put(FINAL, finals);
+
+        uiModel.addAttribute("stages",playoffMap);
+        uiModel.addAttribute("users", userRepository.read());
+        uiModel.addAttribute("groups", groupRepository.allGroups());
+        List<String> teams = groupRepository.allGroups().stream().flatMap(group -> group.teams.stream()).sorted().collect(toList());
+        uiModel.addAttribute("teams", teams);
+        uiModel.addAttribute("playoffTreeEditable", (sessionUser.admin || new Date().before(Config.playoffStart)));
+
+        return "playoff";
+    }
+
+    @RequestMapping(value = "/playoff",  method = RequestMethod.POST)
+    public String savePlayoff(Model uiModel, HttpServletRequest request) {
+        User user = userRepository.read(Long.parseLong(request.getParameter("userId")));
+        List<Match> resultList = getResults(request, user);
+        matchRepository.store(resultList);
+        return playoff(uiModel, request);
+    }
+
+    @RequestMapping(value = "/playoff/stage",  method = RequestMethod.POST)
+    public String createPlayoffStage(Model uiModel,  HttpServletRequest request) {
+        String stage = request.getParameter("stage");
+        Match.Stage newStage = valueOf(stage);
+        switch (newStage){
+            case  FINAL : {
+                createFinalStage();
+                break;
+            }
+            case  SEMI_FINAL: {
+                createSemiFinalStage();
+                break;
+            }
+            case  QUARTER_FINAL: {
+                createQuarterFinalStage();
+                break;
+            }
+
+            case  LAST_SIXTEEN: {
+                createLastSixteenStage();
+                break;
+            }
+            default :{
+
+            }
+        }
+
+        return playoff(uiModel, request);
+
+    }
+
+    public List<Match> createLastSixteenStage() {
+        Group lastSixteen = groupRepository.store(new Group("16", Collections.<String>emptyList(), Match.Stage.LAST_SIXTEEN));
+        Match match1 = matchRepository.store(new Match("", "", new Date() , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+        Match match2 = matchRepository.store(new Match("", "", new Date() , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+
+        Match match3 = matchRepository.store(new Match("", "", new Date() , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+        Match match4 = matchRepository.store(new Match("", "", new Date() , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+
+        Match match5 = matchRepository.store(new Match("", "", new Date() , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+        Match match6 = matchRepository.store(new Match("", "", new Date() , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+
+        Match match7 = matchRepository.store(new Match("", "", new Date() , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+        Match match8 = matchRepository.store(new Match("", "", new Date() , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+
+        List<Match> quarterFinals=  matchRepository.stageMatches(QUARTER_FINAL);
+        if(quarterFinals.isEmpty()){
+            quarterFinals = createQuarterFinalStage();
+        }
+        matchRepository.addRelation(match1, "homeTeam", quarterFinals.get(0));
+        matchRepository.addRelation(match2, "awayTeam", quarterFinals.get(0));
+
+        matchRepository.addRelation(match3, "homeTeam", quarterFinals.get(1));
+        matchRepository.addRelation(match4, "awayTeam", quarterFinals.get(1));
+
+        matchRepository.addRelation(match5, "homeTeam", quarterFinals.get(2));
+        matchRepository.addRelation(match6, "awayTeam", quarterFinals.get(2));
+
+        matchRepository.addRelation(match7, "homeTeam", quarterFinals.get(3));
+        matchRepository.addRelation(match8, "awayTeam", quarterFinals.get(3));
+        return Arrays.asList(match1, match2, match3, match4, match5, match6, match7, match8);
+    }
+
+    public List<Match> createQuarterFinalStage() {
+        Group quarterFinals = groupRepository.store(new Group("QF", Collections.<String>emptyList(), Match.Stage.QUARTER_FINAL));
+        Match match1 = matchRepository.store(new Match("", "", new Date() , Match.Stage.QUARTER_FINAL, quarterFinals.getGroupId()));
+        Match match2 = matchRepository.store(new Match("", "", new Date() , Match.Stage.QUARTER_FINAL, quarterFinals.getGroupId()));
+
+        Match match3 = matchRepository.store(new Match("", "", new Date() , Match.Stage.QUARTER_FINAL, quarterFinals.getGroupId()));
+        Match match4 = matchRepository.store(new Match("", "", new Date() , Match.Stage.QUARTER_FINAL, quarterFinals.getGroupId()));
+
+        List<Match> semis =  matchRepository.stageMatches(SEMI_FINAL);
+        if(semis.isEmpty()){
+            semis = createSemiFinalStage();
+        }
+        matchRepository.addRelation(match1, "homeTeam", semis.get(0));
+        matchRepository.addRelation(match2, "awayTeam", semis.get(0));
+
+        matchRepository.addRelation(match3, "homeTeam", semis.get(1));
+        matchRepository.addRelation(match4, "awayTeam", semis.get(1));
+        return Arrays.asList(match1, match2, match3, match4);
+    }
+
+    public List<Match> createSemiFinalStage() {
+        Group semis = groupRepository.store(new Group("Semi", Collections.<String>emptyList(), Match.Stage.SEMI_FINAL));
+        Match semi1 = matchRepository.store(new Match("", "", new Date() , Match.Stage.SEMI_FINAL, semis.getGroupId()));
+        Match semi2 = matchRepository.store(new Match("", "", new Date() , Match.Stage.SEMI_FINAL, semis.getGroupId()));
+
+        List<Match> finalStage=  matchRepository.stageMatches(FINAL);
+        if(finalStage.isEmpty()){
+            finalStage =  createFinalStage();
+        }
+        matchRepository.addRelation(semi1, "homeTeam", finalStage.get(0));
+        matchRepository.addRelation(semi2, "awayTeam", finalStage.get(0));
+        return Arrays.asList(semi1, semi1);
+    }
+
+    public List<Match> createFinalStage() {
+        Group finals = groupRepository.store(new Group("Final", Collections.<String>emptyList(), Match.Stage.FINAL));
+        return Collections.singletonList(matchRepository.store(new Match("", "", new Date(), Match.Stage.FINAL, finals.getGroupId())));
+    }
+
 }

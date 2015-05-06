@@ -23,122 +23,109 @@
 <form action="/playoff" method="post">
 <input type="hidden" th:value="${user.id}" name="userId" />
 <table width="100%">
-    <thead>
-    <th width="24%">Last sixteen</th>
-    <th width="1%">&nbsp;</th>
-    <th width="24%">Quarter Finals</th>
-    <th width="1%">&nbsp;</th>
-    <th width="24%">Semi Finals</th>
-    <th width="1%">&nbsp;</th>
-    <th width="25%">Final</th>
-    </thead>
     <tbody>
         <tr>
             <th:block th:each="stage : ${stages}">
-                <td width="24%">
-                    <table class="table table-striped" width="100%">
-                    <thead>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                    </thead>
-                    <tbody>
-                        <th:block th:each=" stages : ${stage}">
-                            <th:block th:each="match : ${stages.value}">
-                                <tr> <!-- Header row id | date | winner | points-->
-                                    <td>
-                                        <label  class="label label-success" th:text="${match.id}"></label>
-                                    </td>
-                                    <td>
-                                        <label class="badge" th:text="${#dates.format(match.matchStart,'dd MMMM HH:mm')}"> start</label>
-                                    </td>
-                                    <td>
-                                        <select th:name="${match.id + '_promoted'}" th:disabled="not ${playoffTreeEditable}">
-                                            <option value="">--</option>
-                                            <option th:each="team : ${teams}"
-                                                    th:value="${team}"
-                                                    th:text="${team}"
-                                                    th:selected="${match.resultFor(user.id).promoted.equals(team)}"
-                                                    >teams</option>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <label th:if="${match.hasResult()}"
-                                               th:text="${match.scoreFor(user.id) + 'p'}"/>
-                                    </td>
+                <th:block th:each=" stages : ${stage}">
+                    <th:block th:if="${!stages.value.isEmpty()}">
+                        <td width="24%">
+                            <table class="table table-striped" width="100%">
+                                <thead>
+                                    <th colspan="4"><span th:text="${stages.key}">Test</span></th>
+                                </thead>
+                                <tbody>
+                                    <th:block th:each="match : ${stages.value}">
+                                        <tr> <!-- Header row id | date | winner | points-->
+                                            <td>
+                                                <label  class="label label-success" th:text="${match.id}"></label>
+                                            </td>
+                                            <td>
+                                                <label class="badge" th:text="${#dates.format(match.matchStart,'dd MMMM HH:mm')}"> start</label>
+                                            </td>
+                                            <td>
+                                                <select th:name="${match.id + '_promoted'}" th:disabled="not ${playoffTreeEditable}">
+                                                    <option value="">--</option>
+                                                    <option th:each="team : ${teams}"
+                                                            th:value="${team}"
+                                                            th:text="${team}"
+                                                            th:selected="${match.resultFor(user.id).promoted.equals(team)}"
+                                                            >teams</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <label th:if="${match.hasResult()}"
+                                                       th:text="${match.scoreFor(user.id) + 'p'}"/>
+                                            </td>
 
-                                </tr>
-                            <tr> <!-- team | goals scored -->
-                                <td colspan="3">
-                                    <label th:if="not ${user.admin and activeUser.admin }" th:text="${match.homeTeam}"></label>
+                                        </tr>
+                                    <tr> <!-- team | goals scored -->
+                                        <td colspan="3">
+                                            <label th:if="not ${user.admin and activeUser.admin }" th:text="${match.homeTeam}"></label>
 
-                                    <select th:id="${match.id +'_homeTeam'}"
-                                            th:name="${match.id +'_homeTeam'}"
-                                            th:disabled="not ${user.admin and activeUser.admin }">
+                                            <select th:id="${match.id +'_homeTeam'}"
+                                                    th:name="${match.id +'_homeTeam'}"
+                                                    th:disabled="not ${user.admin and activeUser.admin }">
 
-                                        <option value="">--</option>
-                                        <option th:each="team : ${teams}"
-                                                th:value="${team}"
-                                                th:text="${team}"
-                                                th:selected="${match.homeTeam.equals(team)}"
-                                                >teams</option>
-                                    </select>
+                                                <option value="">--</option>
+                                                <option th:each="team : ${teams}"
+                                                        th:value="${team}"
+                                                        th:text="${team}"
+                                                        th:selected="${match.homeTeam.equals(team)}"
+                                                        >teams</option>
+                                            </select>
 
-                                </td>
-                                <td>
-                                    <input type="text" size="2" maxlength="2"
-                                           th:id="${match.id + '_h'}"
-                                           name="away"
-                                           th:value="${match.resultFor(user.id).homeGoals}"
-                                           th:name="${match.id+'_h'}"
-                                           th:if="${match.editable(activeUser) and canEdit} "/>
+                                        </td>
+                                        <td>
+                                            <input type="text" size="2" maxlength="2"
+                                                   th:id="${match.id + '_h'}"
+                                                   name="away"
+                                                   th:value="${match.resultFor(user.id).homeGoals}"
+                                                   th:name="${match.id+'_h'}"
+                                                   th:if="${match.editable(activeUser) and canEdit} "/>
 
-                                    <th:block th:if="${user.isValid()}">
-                                        <label th:if="${not match.editable(activeUser)}"
-                                               th:text="${match.resultFor(user.id).homeGoals}">
-                                        </label>
+                                            <th:block th:if="${user.isValid()}">
+                                                <label th:if="${not match.editable(activeUser)}"
+                                                       th:text="${match.resultFor(user.id).homeGoals}">
+                                                </label>
+                                            </th:block>
+                                        </td>
+                                    </tr>
+                                    <tr> <!-- team | goals scored -->
+                                        <td colspan="3">
+                                            <label th:if="not ${user.admin and activeUser.admin}" th:text="${match.awayTeam}"></label>
+
+                                            <select th:id="${match.id +'awayTeam'}"
+                                                    th:name="${match.id +'_awayTeam'}"
+                                                    th:disabled="not ${user.admin and activeUser.admin }">
+
+                                                <option value="">--</option>
+                                                <option th:each="team : ${teams}"
+                                                        th:value="${team}"
+                                                        th:text="${team}"
+                                                        th:selected="${match.awayTeam.equals(team)}"
+                                                        >teams</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" size="2" maxlength="2"
+                                                   th:id="${match.id+'_a'}"
+                                                   name="away"
+                                                   th:value="${match.resultFor(user.id).awayGoals}"
+                                                   th:name="${match.id+'_a'}"
+                                                   th:if="${match.editable(activeUser) and canEdit}"/>
+                                            <th:block th:if="${user.isValid()}">
+                                                <label th:if="${not match.editable(activeUser)}"
+                                                   th:text="${match.resultFor(user.id).awayGoals}"></label>
+                                            </th:block>
+                                        </td>
+                                    </tr>
                                     </th:block>
-                                </td>
-                            </tr>
-                            <tr> <!-- team | goals scored -->
-                                <td colspan="3">
-                                    <label th:if="not ${user.admin and activeUser.admin}" th:text="${match.awayTeam}"></label>
-
-                                    <select th:id="${match.id +'awayTeam'}"
-                                            th:name="${match.id +'_awayTeam'}"
-                                            th:disabled="not ${user.admin and activeUser.admin }">
-
-                                        <option value="">--</option>
-                                        <option th:each="team : ${teams}"
-                                                th:value="${team}"
-                                                th:text="${team}"
-                                                th:selected="${match.awayTeam.equals(team)}"
-                                                >teams</option>
-                                    </select>
-                                </td>
-                                <td>
-                                    <input type="text" size="2" maxlength="2"
-                                           th:id="${match.id+'_a'}"
-                                           name="away"
-                                           th:value="${match.resultFor(user.id).awayGoals}"
-                                           th:name="${match.id+'_a'}"
-                                           th:if="${match.editable(activeUser) and canEdit}"/>
-                                    <th:block th:if="${user.isValid()}">
-                                        <label th:if="${not match.editable(activeUser)}"
-                                           th:text="${match.resultFor(user.id).awayGoals}"></label>
-                                    </th:block>
-                                </td>
-                            </tr>
-                            </th:block>
-                            <th:block th:if="${stages.value.isEmpty()}">
-                                <a href="new" th:href="@{'/playoff/' + ${stages.key}}" class="btn btn-sm btn-success">+ Create</a>
-                            </th:block>
-                         </th:block>
-                    </tbody>
-                </table>
-                </td>
-                <td>&nbsp;</td>
+                                </tbody>
+                            </table>
+                        </td>
+                        <td>&nbsp;</td>
+                    </th:block>
+                </th:block>
             </th:block>
         </tr>
         <tr th:if="${canEdit}">

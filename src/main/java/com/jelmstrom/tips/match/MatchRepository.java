@@ -15,6 +15,7 @@ public interface MatchRepository {
 
     List<Match> groupMatches(Long groupId);
     List<Match> stageMatches(Match.Stage stage);
+    void addRelation(Match match, String label, Match nextStage);
 
 
 }
