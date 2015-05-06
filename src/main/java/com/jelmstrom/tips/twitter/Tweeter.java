@@ -21,14 +21,14 @@ public class Tweeter {
             try {
                 twitter.updateStatus(message);
             } catch (TwitterException e) {
-                System.out.print("Tweet failed + " + e.getMessage()) ;
+                System.out.println("Tweet failed + " + e.getMessage()) ;
 
             }
         }
 
     }
 
-    public static void configure(String accessTokenSecret, String accessToken, String consumerSecret, String consumerKey){
+    public static void configure(String accessTokenSecret, String accessToken, String consumerSecret, String consumerKey, Boolean enabled){
         ConfigurationBuilder cb = new ConfigurationBuilder();
         cb.setDebugEnabled(true)
                 .setOAuthAccessTokenSecret(accessTokenSecret)
@@ -37,5 +37,8 @@ public class Tweeter {
                 .setOAuthConsumerSecret(consumerSecret);
         TwitterFactory tf = new TwitterFactory(cb.build());
         twitter = tf.getInstance();
+        Tweeter.enabled=enabled;
+        System.out.println("Tweet configured" + (Tweeter.enabled ? " and enabled" : " but disabled ")) ;
+
     }
 }

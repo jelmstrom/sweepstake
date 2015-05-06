@@ -11,50 +11,61 @@
 <body>
 <div th:replace="fragments/header :: header">...</div>
 
-<th:block th:if="${!stages.isEmpty()}">
-    <form action="playoff/stage" method="post">
-        <select name="stage">
-            <option th:each="stage:${stages}"
-                    th:value="${stage}"
-                    th:text="${stage}"
-                    >stages</option>
-        </select>
-        <button class="btn btn-sm btn-success" type="submit" name="action" value="update">Add Stage</button>
-    </form>
-</th:block>
 
-<table>
+<div class="container">
+    <div class="hero-unit">
+
+        <p>
+        <th:block th:if="${!stages.isEmpty()}">
+            <form action="playoff/stage" method="post">
+                <select name="stage">
+                    <option th:each="stage:${stages}"
+                            th:value="${stage}"
+                            th:text="${stage}"
+                            >stages</option>
+                </select>
+                <button class="btn btn-sm btn-success" type="submit" name="action" value="update">Add Stage</button>
+            </form>
+        </th:block>
+        </p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="hero-unit">
+    <table>
     <tr>
        <td>
            <table>
-               <form name="twitter">
-                   debug=true
-                   oauth.consumerKey=*********************
-                   oauth.consumerSecret=******************************************
-                   oauth.accessToken=**************************************************
-                   oauth.accessTokenSecret=******************************************
+               <form name="twitter" action="/config/twitter" method="post">
                    <tr>
                        <td>Oauth consumerKey </td>
                        <td>
-                           <input type="text" name="oauth.consumerKey"/>
+                           <input type="password" name="oauth.consumerKey"/>
                        </td>
-                   </tr>
-                   <tr>
                        <td>Oauth consumerSecret </td>
                        <td>
-                           <input type="text" name="oauth.consumerSecret"/>
+                           <input type="password" name="oauth.consumerSecret"/>
                        </td>
                    </tr>
                    <tr>
                        <td>Oauth accessToken </td>
                        <td>
-                           <input type="text" name="oauth.accessToken"/>
+                           <input type="password" name="oauth.accessToken"/>
+                       </td>
+                       <td>Oauth accessTokenSecret </td>
+                       <td>
+                           <input type="password" name="oauth.accessTokenSecret"/>
                        </td>
                    </tr>
                    <tr>
-                       <td>Oauth accessTokenSecret </td>
-                       <td>
-                           <input type="text" name="oauth.accessTokenSecret"/>
+                       <td colspan = "2">
+                           <input type="checkbox" name="enabled" value="true">Enabled</input>
+                       </td>
+                   </tr>
+                   <tr>
+                       <td colspan = "2">
+                           <button class="btn btn-sm btn-success" type="submit" name="action" value="update">Submit</button>
                        </td>
                    </tr>
                </form>
@@ -62,6 +73,7 @@
        </td>
     </tr>
 </table>
-
+    </div>
+</div>
 </body>
 </html>

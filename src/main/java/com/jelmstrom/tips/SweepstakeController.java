@@ -441,12 +441,13 @@ public class SweepstakeController {
 
     @RequestMapping(value = "/config/twitter", method = RequestMethod.POST)
     public String configureTwitter(Model uiModel, HttpServletRequest request) {
+        System.out.println(request.getParameter("enabled"));
         Tweeter.configure(request.getParameter("tokenSecret")
                 , request.getParameter("token")
                 , request.getParameter("secret")
-                , request.getParameter("key"));
-        setSessionUsers(request, uiModel);
-        return "config";
+                , request.getParameter("key")
+                , Boolean.valueOf(request.getParameter("enabled")));
+        return showConfig(uiModel, request);
     }
 
     @RequestMapping(value = "/playoff",  method = RequestMethod.GET)
