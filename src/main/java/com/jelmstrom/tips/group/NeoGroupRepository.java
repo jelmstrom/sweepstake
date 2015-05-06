@@ -69,7 +69,7 @@ public class NeoGroupRepository extends NeoRepository implements GroupRepository
     @Override
     public List<Group> allGroups() {
         try(Transaction tx = vmTips.beginTx()){
-            ExecutionResult execute = engine.execute("MATCH (n:" + GROUP_LABEL.name() + ") return n");
+            ExecutionResult execute = engine.execute("MATCH (n:" + GROUP_LABEL.name() + ") return n ORDER BY n.Name");
             ResourceIterator<Node> nodes = execute.columnAs("n");
             List<Group> groups = new ArrayList<>();
             nodes.forEachRemaining(item -> groups.add(buildGroup(item)));
