@@ -7,12 +7,19 @@ import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.traversal.*;
+import org.neo4j.graphdb.traversal.Traverser;
 
 
 public abstract class NeoRepository {
-    
+
     protected static final GraphDatabaseService vmTips;
     protected static ExecutionEngine engine;
+
+    protected static final Label GROUP_LABEL = () -> "Group";
+    protected static final Label MATCH_LABEL = () -> "Match";
+    protected static final Label TABLE_PREDICTION = () -> "TablePrediction";
+    protected static final Label RESULT_LABEL = () -> "Result";
+    protected static final Label USER_LABEL = () -> "User";
 
     static {
         vmTips = new GraphDatabaseFactory().newEmbeddedDatabase("/data/neo4j/vmtips");
@@ -20,6 +27,14 @@ public abstract class NeoRepository {
         registerShutdownHook(vmTips);
     }
 
+
+
+    public enum Relationships implements RelationshipType {
+        MATCH_PREDICTION,
+        USER_PREDICTION,
+        TABLE_PREDICTION,
+        WINNER, GROUP
+    }
 
 
     private static void registerShutdownHook( final GraphDatabaseService graphDb )
@@ -36,21 +51,11 @@ public abstract class NeoRepository {
 
     public abstract void dropAll();
 
-    public org.neo4j.graphdb.traversal.Traverser allRelationshipsFor(Node node, Relationships relationships, Direction direction) {
+    public Traverser allRelationshipsFor(Node node, Relationships relationships, Direction direction) {
         return vmTips.traversalDescription().depthFirst()
                         .relationships(relationships, direction)
                         .evaluator(Evaluators.atDepth(1))
                         .traverse(node);
-    }
-
-
-
-
-    public static enum Relationships implements RelationshipType {
-        MATCH_PREDICTION,
-        USER_PREDICTION,
-        TABLE_PREDICTION,
-        WINNER, GROUP
     }
 
     protected void dropAll(Label label) {
@@ -68,19 +73,11 @@ public abstract class NeoRepository {
 
     }
 
-
     public Node get(Long id){
-
         try(Transaction tx = vmTips.beginTx()){
             Node node =  vmTips.getNodeById(id);
             tx.success();
             return node;
         }
     }
-
-    protected static final Label GROUP_LABEL = () -> "Group";
-    protected static final Label MATCH_LABEL = () -> "Match";
-    protected static final Label TABLE_PREDICTION = () -> "TablePrediction";
-    protected static final Label RESULT_LABEL = () -> "Result";
-    protected static final Label USER_LABEL = () -> "User";
 }

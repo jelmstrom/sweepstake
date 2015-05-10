@@ -1,8 +1,10 @@
 package com.jelmstrom.tips.match;
 
+import com.jelmstrom.tips.SweepstakeController;
 import org.neo4j.graphdb.Node;
 
 import java.util.List;
+import java.util.SortedMap;
 
 public interface MatchRepository {
     Match store(Match match);
@@ -18,4 +20,5 @@ public interface MatchRepository {
     void addRelation(Match match, String label, Match nextStage);
 
 
+    SortedMap<Match.Stage, List<Match>> getPlayoffMatches();
 }

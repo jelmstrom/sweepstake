@@ -454,17 +454,7 @@ public class SweepstakeController {
     public String playoff(Model uiModel, HttpServletRequest request) {
         User sessionUser = setSessionUsers(request, uiModel);
 
-        List<Match> allMatches = matchRepository.read();
-
-        List<Match> last16 = matchRepository.stageMatches(LAST_SIXTEEN);
-        List<Match> quarterFinal = matchRepository.stageMatches(QUARTER_FINAL);
-        List<Match> semiFinal = matchRepository.stageMatches(SEMI_FINAL);
-        List<Match> finals = matchRepository.stageMatches(FINAL);
-        SortedMap<Match.Stage, List<Match>> playoffMap = new TreeMap<>();
-        playoffMap.put(LAST_SIXTEEN, last16);
-        playoffMap.put(QUARTER_FINAL, quarterFinal);
-        playoffMap.put(SEMI_FINAL, semiFinal);
-        playoffMap.put(FINAL, finals);
+        SortedMap<Match.Stage, List<Match>> playoffMap = matchRepository.getPlayoffMatches();
 
         uiModel.addAttribute("stages",playoffMap);
         uiModel.addAttribute("users", userRepository.read());
