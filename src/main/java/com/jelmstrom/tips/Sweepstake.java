@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static com.jelmstrom.tips.match.Match.Stage.GROUP;
+import static com.jelmstrom.tips.match.Match.Stage.*;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
@@ -133,4 +133,74 @@ public class Sweepstake {
         userRepository.remove(userId);
     }
 
+    public List<Match> createLastSixteenStage() {
+        Group lastSixteen = groupRepository.store(new Group("16", Collections.<String>emptyList(), Match.Stage.LAST_SIXTEEN));
+        Match match1 = matchRepository.store(new Match("", "", new Date() , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+        Match match2 = matchRepository.store(new Match("", "", new Date() , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+
+        Match match3 = matchRepository.store(new Match("", "", new Date() , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+        Match match4 = matchRepository.store(new Match("", "", new Date() , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+
+        Match match5 = matchRepository.store(new Match("", "", new Date(), Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+        Match match6 = matchRepository.store(new Match("", "", new Date() , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+
+        Match match7 = matchRepository.store(new Match("", "", new Date() , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+        Match match8 = matchRepository.store(new Match("", "", new Date() , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+
+        List<Match> quarterFinals=  matchRepository.stageMatches(QUARTER_FINAL);
+        if(quarterFinals.isEmpty()){
+            quarterFinals = createQuarterFinalStage();
+        }
+        matchRepository.addRelation(match1, "homeTeam", quarterFinals.get(0));
+        matchRepository.addRelation(match2, "awayTeam", quarterFinals.get(0));
+
+        matchRepository.addRelation(match3, "homeTeam", quarterFinals.get(1));
+        matchRepository.addRelation(match4, "awayTeam", quarterFinals.get(1));
+
+        matchRepository.addRelation(match5, "homeTeam", quarterFinals.get(2));
+        matchRepository.addRelation(match6, "awayTeam", quarterFinals.get(2));
+
+        matchRepository.addRelation(match7, "homeTeam", quarterFinals.get(3));
+        matchRepository.addRelation(match8, "awayTeam", quarterFinals.get(3));
+        return Arrays.asList(match1, match2, match3, match4, match5, match6, match7, match8);
+    }
+
+    public List<Match> createQuarterFinalStage() {
+        Group quarterFinals = groupRepository.store(new Group("QF", Collections.<String>emptyList(), Match.Stage.QUARTER_FINAL));
+        Match match1 = matchRepository.store(new Match("", "", new Date() , Match.Stage.QUARTER_FINAL, quarterFinals.getGroupId()));
+        Match match2 = matchRepository.store(new Match("", "", new Date() , Match.Stage.QUARTER_FINAL, quarterFinals.getGroupId()));
+
+        Match match3 = matchRepository.store(new Match("", "", new Date(), Match.Stage.QUARTER_FINAL, quarterFinals.getGroupId()));
+        Match match4 = matchRepository.store(new Match("", "", new Date() , Match.Stage.QUARTER_FINAL, quarterFinals.getGroupId()));
+
+        List<Match> semis =  matchRepository.stageMatches(SEMI_FINAL);
+        if(semis.isEmpty()){
+            semis = createSemiFinalStage();
+        }
+        matchRepository.addRelation(match1, "homeTeam", semis.get(0));
+        matchRepository.addRelation(match2, "awayTeam", semis.get(0));
+
+        matchRepository.addRelation(match3, "homeTeam", semis.get(1));
+        matchRepository.addRelation(match4, "awayTeam", semis.get(1));
+        return Arrays.asList(match1, match2, match3, match4);
+    }
+
+    public List<Match> createSemiFinalStage() {
+        Group semis = groupRepository.store(new Group("Semi", Collections.<String>emptyList(), Match.Stage.SEMI_FINAL));
+        Match semi1 = matchRepository.store(new Match("", "", new Date() , Match.Stage.SEMI_FINAL, semis.getGroupId()));
+        Match semi2 = matchRepository.store(new Match("", "", new Date() , Match.Stage.SEMI_FINAL, semis.getGroupId()));
+
+        List<Match> finalStage=  matchRepository.stageMatches(FINAL);
+        if(finalStage.isEmpty()){
+            finalStage =  createFinalStage();
+        }
+        matchRepository.addRelation(semi1, "homeTeam", finalStage.get(0));
+        matchRepository.addRelation(semi2, "awayTeam", finalStage.get(0));
+        return Arrays.asList(semi1, semi1);
+    }
+
+    public List<Match> createFinalStage() {
+        Group finals = groupRepository.store(new Group("Final", Collections.<String>emptyList(), FINAL));
+        return Collections.singletonList(matchRepository.store(new Match("", "", new Date(), FINAL, finals.getGroupId())));
+    }
 }
