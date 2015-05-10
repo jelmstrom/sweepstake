@@ -114,8 +114,6 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
     }
 
     private Match buildMatch(Node matchNode) {
-        matchNode.getLabels().forEach(System.out::println);
-        matchNode.getPropertyKeys().forEach(System.out::println);
         Match match = new Match(
                 matchNode.getProperty("homeTeam").toString(),
                 matchNode.getProperty("awayTeam").toString(),
@@ -216,7 +214,7 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
         try(Transaction tx = vmTips.beginTx()){
             List<Match> matches = new ArrayList<>();
             Node group = vmTips.getNodeById(groupId);
-            StreamSupport.stream(group.getRelationships(INCOMING, GROUP).spliterator(), true)
+            StreamSupport.stream(group.getRelationships(INCOMING, GROUP).spliterator(), false)
                     .filter(rel -> rel.getStartNode().hasLabel(MATCH_LABEL))
                     .forEach(rel -> matches.add(buildMatch(rel.getStartNode())));
             tx.success();

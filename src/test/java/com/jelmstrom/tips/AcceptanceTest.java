@@ -170,11 +170,9 @@ public class AcceptanceTest {
 
     @Test
     public void groupScoreForCompletelyCorrectTableShouldBeSeven(){
-        List<String> userPrediction = asList(brazil, argentina, australia, germany);
-        TablePrediction prediction = new TablePrediction(groupA.getGroupId(), user.id, userPrediction);
-        TABLE_REPOSITORY.store(prediction);
+        storePrediction(user, groupA);
         int points = pointsForUser(user);
-        assertThat(points, is(7+9));
+        assertThat(points, is(7 + 9));
     }
 
 
@@ -219,9 +217,7 @@ public class AcceptanceTest {
     @Test
     public void totalScoreForGamesAndTableShouldBeSixteen(){
 
-        List<String> userPrediction = asList(brazil, argentina, australia, germany);
-        TablePrediction prediction = new TablePrediction(groupA.getGroupId(), user.id, userPrediction);
-        TABLE_REPOSITORY.store(prediction);
+        storePrediction(user, groupA);
         int points = pointsForUser(user);
         assertThat(points, is(16));
     }
@@ -231,9 +227,8 @@ public class AcceptanceTest {
     @Test
     public void totalScoreCalculationHandlesEmptyActualGroupPositions(){
 
-        List<String> userPrediction = asList(brazil, argentina, australia, germany);
-        TablePrediction prediction = new TablePrediction(groupA.getGroupId(), user.id,userPrediction);
-        TABLE_REPOSITORY.store(prediction);
+        storePrediction(user, groupA);
+        TablePrediction prediction;
         List<String> userPrediction2 = asList("4", "3", "2", "1");
         Group groupB  = new Group("B", userPrediction2);
         GROUP_REPOSITORY.store(groupB);
@@ -241,6 +236,12 @@ public class AcceptanceTest {
         TABLE_REPOSITORY.store(prediction);
         int points = pointsForUser(user);
         assertThat(points, is(16));
+    }
+
+    public void storePrediction(User user, Group groupA) {
+        List<String> userPrediction = asList(brazil, argentina, australia, germany);
+        TablePrediction prediction = new TablePrediction(groupA.getGroupId(), user.id,userPrediction);
+        TABLE_REPOSITORY.store(prediction);
     }
 
     @Test
@@ -258,6 +259,15 @@ public class AcceptanceTest {
 
     public int pointsForUser(User user) {
         return sweepstake.leaderboard().stream().filter(entry -> entry.user.id.equals(user.id)).findFirst().get().points;
+    }
+
+    @Test
+    public void groupWithPredictionAndMatchesLoadsCorrectly(){
+        storePrediction(user, groupA);
+        List<Match> matches = MATCH_REPOSITORY.groupMatches(groupA.getGroupId());
+        assertThat(matches.size(), is(10));
+
+
     }
 
 }

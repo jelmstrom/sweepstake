@@ -90,7 +90,7 @@ public class SweepstakeController extends BaseController {
     }
 
     // GET because form inside form creates problems
-    @RequestMapping(value = "/match/{matchId}/delete", method = RequestMethod.GET)
+    @RequestMapping(value = "/group/match/{matchId}/delete", method = RequestMethod.GET)
     public String deleteMatch(Model uiModel,  @PathVariable String matchId , HttpServletRequest request){
         System.out.printf(" Delete match %s \n", matchId );
         Long match = Long.parseLong(matchId);
