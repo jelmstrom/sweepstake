@@ -41,13 +41,13 @@ public class SweepstakeController extends BaseController {
     }
 
 
-    @RequestMapping(value = "/prediction/{groupId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/user/prediction/{groupId}", method = RequestMethod.POST)
     public String storePrediction(Model uiModel, @PathVariable String groupId, HttpServletRequest request) {
         String pos1 = request.getParameter("prediction1");
         String pos2 = request.getParameter("prediction2");
         String pos3 = request.getParameter("prediction3");
         String pos4 = request.getParameter("prediction4");
-
+        System.out.println("store prediction");
         User user = userRepository.read(sessionUserId(request));
         sweepstake.saveUserPrediction(new TablePrediction(Long.parseLong(groupId), user.id, Arrays.asList(pos1, pos2, pos3, pos4)));
 
@@ -116,7 +116,7 @@ public class SweepstakeController extends BaseController {
         return showGroup(uiModel, groupId, request);
     }
 
-    @RequestMapping(value = "/results/{groupLetter}", method = RequestMethod.POST)
+    @RequestMapping(value = "/user/results/{groupLetter}", method = RequestMethod.POST)
     public String storeGroup(Model uiModel, @PathVariable String groupLetter, HttpServletRequest request) {
         User user = userRepository.read(sessionUserId(request));
 

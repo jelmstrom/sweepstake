@@ -128,7 +128,7 @@ public class NeoMatchRepositoryTest {
 
 
     @Test
-    public void playoffRelationShouldPopulateDownstream(){
+    public void playoffRelationShouldPopulateDownstream() {
         Group ls = new Group("playoff", Collections.EMPTY_LIST, Match.Stage.LAST_SIXTEEN);
         Group qf = new Group("playoff", Collections.EMPTY_LIST, Match.Stage.QUARTER_FINAL);
         ls = groupRepository.store(ls);

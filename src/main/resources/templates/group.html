@@ -72,7 +72,7 @@
             &nbsp;
         </td>
         <td width="30%">
-            <form id="predicionForm" action="" th:action="@{'/prediction/'+${group.getGroupId()}}" method="post">
+            <form id="predicionForm" action="" th:action="@{'/user/prediction/'+${group.getGroupId()}}" method="post">
                 <table width="100%" th:if="${canEdit}" class="table table-striped">
                     <thead>
                     <tr>
@@ -147,7 +147,7 @@
 
             </form>
         </tr>
-        <form id="matchForm" action="" th:action="@{'/results/'+${group.getGroupId()}}" method="post">
+        <form id="matchForm" action="" th:action="@{'/user/results/'+${group.getGroupId()}}" method="post">
         <tr th:each="match,iterStat : ${matches}">
             <td>
                 <th:block th:if="${activeUser.admin}">

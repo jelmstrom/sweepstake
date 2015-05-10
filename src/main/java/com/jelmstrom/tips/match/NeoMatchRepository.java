@@ -10,7 +10,6 @@ import org.springframework.util.StringUtils;
 import java.util.*;
 import java.util.stream.StreamSupport;
 
-import static com.jelmstrom.tips.match.Match.Stage.*;
 import static com.jelmstrom.tips.persistence.NeoRepository.Relationships.*;
 import static org.neo4j.graphdb.Direction.*;
 import static org.neo4j.graphdb.traversal.Evaluators.*;
@@ -28,7 +27,7 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
             if(match.getId() == null){
                 matchNode = vmTips.createNode(MATCH_LABEL);
                 match.setId(matchNode.getId());
-                Relationship groupRelation = matchNode.createRelationshipTo(vmTips.getNodeById(match.groupId), Relationships.GROUP);
+                Relationship groupRelation = matchNode.createRelationshipTo(vmTips.getNodeById(match.groupId), GROUP);
                 groupRelation.setProperty("groupId", match.groupId);
             } else {
                 matchNode = vmTips.getNodeById(match.getId());
@@ -115,6 +114,8 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
     }
 
     private Match buildMatch(Node matchNode) {
+        matchNode.getLabels().forEach(System.out::println);
+        matchNode.getPropertyKeys().forEach(System.out::println);
         Match match = new Match(
                 matchNode.getProperty("homeTeam").toString(),
                 matchNode.getProperty("awayTeam").toString(),
@@ -215,7 +216,9 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
         try(Transaction tx = vmTips.beginTx()){
             List<Match> matches = new ArrayList<>();
             Node group = vmTips.getNodeById(groupId);
-            group.getRelationships(INCOMING, Relationships.GROUP).forEach(rel -> matches.add(buildMatch(rel.getStartNode())));
+            StreamSupport.stream(group.getRelationships(INCOMING, GROUP).spliterator(), true)
+                    .filter(rel -> rel.getStartNode().hasLabel(MATCH_LABEL))
+                    .forEach(rel -> matches.add(buildMatch(rel.getStartNode())));
             tx.success();
             return matches;
         }
@@ -269,15 +272,15 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
 
     @Override
     public SortedMap<Match.Stage, List<Match>> getPlayoffMatches() {
-        List<Match> last16 = stageMatches(LAST_SIXTEEN);
-        List<Match> quarterFinal = stageMatches(QUARTER_FINAL);
-        List<Match> semiFinal = stageMatches(SEMI_FINAL);
-        List<Match> finals = stageMatches(FINAL);
+        List<Match> last16 = stageMatches(Match.Stage.LAST_SIXTEEN);
+        List<Match> quarterFinal = stageMatches(Match.Stage.QUARTER_FINAL);
+        List<Match> semiFinal = stageMatches(Match.Stage.SEMI_FINAL);
+        List<Match> finals = stageMatches(Match.Stage.FINAL);
         SortedMap<Match.Stage, List<Match>> playoffMap = new TreeMap<>();
-        playoffMap.put(LAST_SIXTEEN, last16);
-        playoffMap.put(QUARTER_FINAL, quarterFinal);
-        playoffMap.put(SEMI_FINAL, semiFinal);
-        playoffMap.put(FINAL, finals);
+        playoffMap.put(Match.Stage.LAST_SIXTEEN, last16);
+        playoffMap.put(Match.Stage.QUARTER_FINAL, quarterFinal);
+        playoffMap.put(Match.Stage.SEMI_FINAL, semiFinal);
+        playoffMap.put(Match.Stage.FINAL, finals);
         return playoffMap;
     }
 }
