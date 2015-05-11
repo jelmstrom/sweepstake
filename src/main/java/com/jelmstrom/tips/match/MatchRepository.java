@@ -1,8 +1,5 @@
 package com.jelmstrom.tips.match;
 
-import com.jelmstrom.tips.SweepstakeController;
-import org.neo4j.graphdb.Node;
-
 import java.util.List;
 import java.util.SortedMap;
 

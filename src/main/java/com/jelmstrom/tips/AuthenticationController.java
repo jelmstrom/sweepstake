@@ -28,9 +28,12 @@ public class AuthenticationController extends BaseController {
         System.out.println("login user by token");
         User user = userRepository.findByToken(token);
         if(user.isValid()){
+            System.out.println("Valid token");
             request.getSession().setAttribute(SESSION_USER, user.id);
             return getUser(uiModel, request);
         } else {
+            System.out.println("Unknown token");
+            request.getSession().setAttribute(SESSION_USER, null);
             return indexModel(uiModel, request);
         }
     }

@@ -1,6 +1,4 @@
-package com.jelmstrom.tips;
-
-import com.jelmstrom.tips.user.User;
+package com.jelmstrom.tips.user;
 
 public class LeaderboardEntry implements Comparable {
 
