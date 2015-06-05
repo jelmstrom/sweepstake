@@ -1,19 +1,17 @@
-package com.jelmstrom.tips.twitter;
+package com.jelmstrom.tips.notification;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
 
-/**
- * Created by jelmstrom on 05/12/14.
- */
 public class Tweeter {
 
     public static Twitter twitter;
     public static boolean enabled;
 
-    public static void tweet(String message) {
+    @SuppressWarnings("unused")
+    public boolean send(String message) {
 
         if (enabled) {
             System.out.println(" ############  Tweet : " + message);
@@ -21,11 +19,11 @@ public class Tweeter {
             try {
                 twitter.updateStatus(message);
             } catch (TwitterException e) {
-                System.out.println("Tweet failed + " + e.getMessage()) ;
-
+                System.out.println("Tweet failed + " + e.getMessage());
+                return false;
             }
         }
-
+        return true;
     }
 
     public static void configure(String accessTokenSecret, String accessToken, String consumerSecret, String consumerKey, Boolean enabled){

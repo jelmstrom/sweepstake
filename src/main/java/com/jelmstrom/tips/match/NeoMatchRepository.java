@@ -11,60 +11,63 @@ import java.util.*;
 import java.util.stream.StreamSupport;
 
 import static com.jelmstrom.tips.persistence.NeoRepository.Relationships.*;
-import static org.neo4j.graphdb.Direction.*;
-import static org.neo4j.graphdb.traversal.Evaluators.*;
+import static org.neo4j.graphdb.Direction.INCOMING;
+import static org.neo4j.graphdb.Direction.OUTGOING;
+import static org.neo4j.graphdb.traversal.Evaluators.includeWhereLastRelationshipTypeIs;
 
-public class NeoMatchRepository extends NeoRepository implements MatchRepository{
+public class NeoMatchRepository extends NeoRepository implements MatchRepository {
 
+    @SuppressWarnings("UnusedParameters")
     public NeoMatchRepository(String context) {
         super();
     }
 
     @Override
-    public Match store(Match match) {
-        try(Transaction tx = vmTips.beginTx()){
+    public Match store(Match newMatch) {
+        try (Transaction tx = vmTips.beginTx()) {
             Node matchNode;
-            if(match.getId() == null){
+
+            if (newMatch.getId() == null) {
                 matchNode = vmTips.createNode(MATCH_LABEL);
-                match.setId(matchNode.getId());
-                Relationship groupRelation = matchNode.createRelationshipTo(vmTips.getNodeById(match.groupId), GROUP);
-                groupRelation.setProperty("groupId", match.groupId);
+                newMatch.setId(matchNode.getId());
+                Relationship groupRelation = matchNode.createRelationshipTo(vmTips.getNodeById(newMatch.groupId), GROUP);
+                groupRelation.setProperty("groupId", newMatch.groupId);
             } else {
-                matchNode = vmTips.getNodeById(match.getId());
+                matchNode = vmTips.getNodeById(newMatch.getId());
             }
 
-            if(!StringUtils.isEmpty(match.awayTeam) ||  !matchNode.hasProperty("awayTeam")){
-                matchNode.setProperty("awayTeam", match.awayTeam);
+            if (!StringUtils.isEmpty(newMatch.awayTeam) || !matchNode.hasProperty("awayTeam")) {
+                matchNode.setProperty("awayTeam", newMatch.awayTeam);
             }
-            if(!StringUtils.isEmpty(match.homeTeam) || !matchNode.hasProperty("homeTeam")){
-                matchNode.setProperty("homeTeam", match.homeTeam);
+            if (!StringUtils.isEmpty(newMatch.homeTeam) || !matchNode.hasProperty("homeTeam")) {
+                matchNode.setProperty("homeTeam", newMatch.homeTeam);
             }
-            matchNode.setProperty("matchStart", match.matchStart.getTime());
-            matchNode.setProperty("stage", match.stage.toString());
-            matchNode.setProperty("groupId", match.groupId);
+            matchNode.setProperty("matchStart", newMatch.matchStart.getTime());
+            matchNode.setProperty("stage", newMatch.stage.toString());
+            matchNode.setProperty("groupId", newMatch.groupId);
 
-            if(match.hasResult()){
-                matchNode.setProperty("homeGoals", match.getCorrectResult().homeGoals);
-                matchNode.setProperty("awayGoals", match.getCorrectResult().awayGoals);
-                matchNode.setProperty("adminUser", match.getCorrectResult().userId);
-                matchNode.setProperty("promoted",  match.getCorrectResult().promoted);
+            if (newMatch.hasResult()) {
+                matchNode.setProperty("homeGoals", newMatch.getCorrectResult().homeGoals);
+                matchNode.setProperty("awayGoals", newMatch.getCorrectResult().awayGoals);
+                matchNode.setProperty("adminUser", newMatch.getCorrectResult().userId);
+                matchNode.setProperty("promoted", newMatch.getCorrectResult().promoted);
                 Iterable<Relationship> relationships = matchNode.getRelationships(OUTGOING, Relationships.WINNER);
-                relationships.forEach(rel -> updatePromotedTeam(rel, match.getCorrectResult().promoted ));
+                relationships.forEach(rel -> updatePromotedTeam(rel, newMatch.getCorrectResult().promoted));
             }
 
-            storeResults(match.results, matchNode);
+            storeResults(newMatch.results, matchNode);
             tx.success();
         }
-        return match;
+        return newMatch;
     }
 
     private void updatePromotedTeam(Relationship rel, String promoted) {
-        System.out.println(rel.getEndNode().getId() + " - " + rel.getProperty("teamPosition") + " => " + promoted );
+        System.out.println(rel.getEndNode().getId() + " - " + rel.getProperty("teamPosition") + " => " + promoted);
         rel.getEndNode().setProperty(rel.getProperty("teamPosition").toString(), promoted);
     }
 
     private void storeResults(HashSet<Result> results, Node match) {
-        for(Result result : results){
+        for (Result result : results) {
             Node resultNode;
             resultNode = getResultNode(match, result);
             result.setId(resultNode.getId());
@@ -77,7 +80,7 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
     }
 
     private Node getResultNode(Node match, Result result) {
-        if(null != result.getId()){
+        if (null != result.getId()) {
             return vmTips.getNodeById(result.getId());
         } else {
 
@@ -87,7 +90,7 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
                     .findFirst();
 
             Node resultNode;
-            if(relationship.isPresent()){
+            if (relationship.isPresent()) {
                 resultNode = relationship.get().getEndNode();
             } else {
                 resultNode = vmTips.createNode(RESULT_LABEL);
@@ -106,7 +109,7 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
 
     @Override
     public Match read(Long matchId) {
-        try(Transaction tx = vmTips.beginTx()){
+        try (Transaction tx = vmTips.beginTx()) {
             Match match = buildMatch(vmTips.getNodeById(matchId));
             tx.success();
             return match;
@@ -124,30 +127,29 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
         match.setId(matchNode.getId());
 
 
-        if(matchNode.hasProperty("homeGoals")){
+        if (matchNode.hasProperty("homeGoals")) {
             Result correct = new Result(match
-                        , Integer.parseInt(matchNode.getProperty("homeGoals").toString())
-                        , Integer.parseInt(matchNode.getProperty("awayGoals").toString())
-                        , Long.parseLong(matchNode.getProperty("adminUser").toString())
-                        , (String)matchNode.getProperty("promoted") //  nullable
+                    , Integer.parseInt(matchNode.getProperty("homeGoals").toString())
+                    , Integer.parseInt(matchNode.getProperty("awayGoals").toString())
+                    , Long.parseLong(matchNode.getProperty("adminUser").toString())
+                    , (String) matchNode.getProperty("promoted") //  nullable
             );
 
             match.setCorrectResult(correct);
         }
 
-        Collection<Result> results = new HashSet<>();
         matchNode.getRelationships(OUTGOING, MATCH_PREDICTION).forEach(rel -> buildResult(rel.getEndNode(), match));
 
-        match.results.addAll(results);
+        match.results.addAll(new HashSet<>());
         return match;
     }
 
     private Result buildResult(Node resultNode, Match match) {
-        Result result =  new Result(match
-                    , Integer.parseInt(resultNode.getProperty("homeGoals").toString())
-                    , Integer.parseInt(resultNode.getProperty("awayGoals").toString())
-                    , Long.parseLong(resultNode.getProperty("userId").toString())
-                    , (String)resultNode.getProperty("promoted"));
+        Result result = new Result(match
+                , Integer.parseInt(resultNode.getProperty("homeGoals").toString())
+                , Integer.parseInt(resultNode.getProperty("awayGoals").toString())
+                , Long.parseLong(resultNode.getProperty("userId").toString())
+                , (String) resultNode.getProperty("promoted"));
         result.setId(resultNode.getId());
         return result;
     }
@@ -155,7 +157,7 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
     @Override
     public List<Match> read() {
         List<Match> matches = new ArrayList<>();
-        try(Transaction tx = vmTips.beginTx()){
+        try (Transaction tx = vmTips.beginTx()) {
             ExecutionResult execute = engine.execute("MATCH (n:" + MATCH_LABEL.name() + ") return n");
             ResourceIterator<Node> nodes = execute.columnAs("n");
             nodes.forEachRemaining(item -> matches.add(buildMatch(item)));
@@ -165,10 +167,9 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
     }
 
 
-
     @Override
     public void store(List<Match> matches) {
-        for(Match match : matches){
+        for (Match match : matches) {
             store(match);
         }
     }
@@ -181,13 +182,13 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
 
     @Override
     public List<Result> userPredictions(long userId) {
-        List<Result> results  = new ArrayList<>();
-        try(Transaction tx = vmTips.beginTx()){
+        List<Result> results = new ArrayList<>();
+        try (Transaction tx = vmTips.beginTx()) {
             TraversalDescription td = vmTips.traversalDescription().breadthFirst().relationships(USER_PREDICTION, OUTGOING)
                     .evaluator(includeWhereLastRelationshipTypeIs(USER_PREDICTION));
             Traverser paths = td.traverse(vmTips.getNodeById(userId));
 
-            for(Path path : paths){
+            for (Path path : paths) {
                 Node resultNode = path.endNode();
                 Node matchNode = resultNode.getRelationships(MATCH_PREDICTION, INCOMING).iterator().next().getStartNode();
                 results.add(buildResult(resultNode, buildMatch(matchNode)));
@@ -199,7 +200,7 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
 
     @Override
     public void drop(Long id) {
-        try(Transaction tx = vmTips.beginTx()){
+        try (Transaction tx = vmTips.beginTx()) {
             Node matchNode = vmTips.getNodeById(id);
             Iterable<Relationship> relationships = matchNode.getRelationships(Direction.BOTH);
             relationships.forEach(this::remove);
@@ -211,7 +212,7 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
     @Override
     public List<Match> groupMatches(Long groupId) {
 
-        try(Transaction tx = vmTips.beginTx()){
+        try (Transaction tx = vmTips.beginTx()) {
             List<Match> matches = new ArrayList<>();
             Node group = vmTips.getNodeById(groupId);
             StreamSupport.stream(group.getRelationships(INCOMING, GROUP).spliterator(), false)
@@ -225,10 +226,10 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
     @Override
     public List<Match> stageMatches(Match.Stage stage) {
         List<Match> matches = new ArrayList<>();
-        try(Transaction tx = vmTips.beginTx()){
+        try (Transaction tx = vmTips.beginTx()) {
             ExecutionResult execute = engine.execute("MATCH (n:" + MATCH_LABEL.name()
-                                    + " {stage:'" + stage.toString() + "'}"
-                                    + ") return n");
+                    + " {stage:'" + stage.toString() + "'}"
+                    + ") return n");
             ResourceIterator<Node> nodes = execute.columnAs("n");
             nodes.forEachRemaining(item -> matches.add(buildMatch(item)));
             tx.success();
@@ -245,7 +246,7 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
                 , rel.getEndNode().getId()
                 , rel.getEndNode().getLabels().iterator().next().name());
 
-        if(rel.getType().name().equals(Relationships.MATCH_PREDICTION.name())){
+        if (rel.getType().name().equals(Relationships.MATCH_PREDICTION.name())) {
             System.out.printf("Delete Prediction %d %s \n"
                     , rel.getEndNode().getId(),
                     rel.getEndNode().getLabels().iterator().next().name());
@@ -257,7 +258,7 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
     }
 
     public void addRelation(Match match, String label, Match nextStage) {
-        try(Transaction tx = vmTips.beginTx()){
+        try (Transaction tx = vmTips.beginTx()) {
             Node matchNode = vmTips.getNodeById(match.getId());
             Node nextStageNode = vmTips.getNodeById(nextStage.getId());
             Relationship relationshipTo = matchNode.createRelationshipTo(nextStageNode, Relationships.WINNER);

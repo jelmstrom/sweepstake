@@ -11,9 +11,6 @@ import com.jelmstrom.tips.user.NeoUserRepository;
 import com.jelmstrom.tips.user.User;
 import com.jelmstrom.tips.user.UserRepository;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.thymeleaf.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,9 +18,6 @@ import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 
-/**
- * Created by jelmstrom on 10/05/15.
- */
 public class BaseController {
 
     public static final String SESSION_USER = "activeUser";
@@ -39,27 +33,8 @@ public class BaseController {
         sweepstake = new Sweepstake(Config.context);
     }
 
-    @RequestMapping(value = "/user/{displayName}", method = RequestMethod.GET)
-    public String getUser(Model uiModel, @PathVariable String displayName, HttpServletRequest request) {
-
-        setSessionUsers(request, userRepository.findByDisplayName(displayName), uiModel);
-        List<String> teams = groupRepository.allGroups().stream().flatMap(group -> group.teams.stream()).sorted().collect(toList());
-        uiModel.addAttribute("teams", teams);
-        uiModel.addAttribute("groups", groupRepository.allGroups());
-        return "user";
-    }
-
     protected Long sessionUserId(HttpServletRequest request) {
         return (Long) request.getSession().getAttribute(SESSION_USER);
-    }
-
-    @RequestMapping(value = "/user", method = RequestMethod.GET)
-    public String getUser(Model uiModel, HttpServletRequest request) {
-        setSessionUsers(request, uiModel);
-        List<String> teams = groupRepository.allGroups().stream().flatMap(group -> group.teams.stream()).sorted().collect(toList());
-        uiModel.addAttribute("teams", teams);
-        uiModel.addAttribute("groups", groupRepository.allGroups());
-        return "user";
     }
 
     protected User setSessionUsers(HttpServletRequest request, Model uiModel) {
@@ -73,7 +48,7 @@ public class BaseController {
         return setSessionUsers(request, user , uiModel);
     }
 
-    private User setSessionUsers(HttpServletRequest request, User user, Model model) {
+    protected User setSessionUsers(HttpServletRequest request, User user, Model model) {
         User sessionUser = sessionUser(request);
         if (!user.isValid()) {
             user = sessionUser;
@@ -105,7 +80,6 @@ public class BaseController {
 
         while (parameterNames.hasMoreElements()) {
             String parameterName = parameterNames.nextElement();
-            String value = request.getParameter(parameterName);
             int endIndex = parameterName.indexOf("_");
 
             if(endIndex == -1){
@@ -120,6 +94,7 @@ public class BaseController {
 
 
             Match stored = matchRepository.read(Long.parseLong(matchId));
+
             Match updatedMatch = updateMatchTeams(request, matchId, stored);
             addResultToMatch(request, user, updatedMatch);
             matchUpdates.put(matchId, updatedMatch);
@@ -132,15 +107,18 @@ public class BaseController {
         Match updatedMatch;
         String homeTeam = request.getParameter(matchId + "_homeTeam");
         String awayTeam = request.getParameter(matchId + "_awayTeam");
-        if((StringUtils.isEmptyOrWhitespace(homeTeam)|| StringUtils.isEmpty(homeTeam))
-            || (homeTeam.equals(stored.homeTeam) && awayTeam.equals(stored.awayTeam))
+        String dateString = request.getParameter(matchId + "_startTime");
+        Date startTime = Config.date(dateString);
+        System.out.println(homeTeam + "Start time " + dateString) ;
+         if(homeTeam.equals(stored.homeTeam) && awayTeam.equals(stored.awayTeam) && startTime.equals(stored.matchStart)
            ) {
-            //no change keep stored.
+            //no change :  keep stored.
+            System.out.println("Not updating") ;
             updatedMatch = stored;
-
         } else {
             //preserve details that are not possible to change
-            updatedMatch = new Match(homeTeam, awayTeam, stored.matchStart, stored.stage, stored.groupId);
+            System.out.println("Updating") ;
+            updatedMatch = new Match(homeTeam, awayTeam, startTime, stored.stage, stored.groupId);
             updatedMatch.setId(Long.parseLong(matchId));
             updatedMatch.results.addAll(stored.results);
         }
@@ -201,4 +179,10 @@ public class BaseController {
     }
 
 
+    public String populateUserView(Model uiModel) {
+        List<String> teams = groupRepository.allGroups().stream().flatMap(group -> group.teams.stream()).sorted().collect(toList());
+        uiModel.addAttribute("teams", teams);
+        uiModel.addAttribute("groups", groupRepository.allGroups());
+        return "user";
+    }
 }

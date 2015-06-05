@@ -1,7 +1,6 @@
 package com.jelmstrom.tips;
 
 
-import com.jelmstrom.tips.match.Match;
 import com.jelmstrom.tips.user.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,9 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
-import static com.jelmstrom.tips.match.Match.Stage.valueOf;
 
 @Controller
 @RequestMapping(value = "/authenticate")
@@ -30,7 +27,8 @@ public class AuthenticationController extends BaseController {
         if(user.isValid()){
             System.out.println("Valid token");
             request.getSession().setAttribute(SESSION_USER, user.id);
-            return getUser(uiModel, request);
+            setSessionUsers(request, uiModel);
+            return populateUserView(uiModel);
         } else {
             System.out.println("Unknown token");
             request.getSession().setAttribute(SESSION_USER, null);

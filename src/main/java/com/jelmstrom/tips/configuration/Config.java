@@ -11,35 +11,30 @@ import com.jelmstrom.tips.user.UserRepository;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 
 public class Config {
-    public static final String context = "vmtips";
-    public static final DateFormat dateFormat = new SimpleDateFormat("dd MM yyyy hh:mm");
+    public static final String context = "WorldCup";
+    public static String dateFormat = "yyyy-MM-dd HH:mm";
     public static final Date playoffStart;
     public static final Date startDate;
 
     static {
-        Date tempDate  = null;
-        Date tempPlayoffStart = null;
-        try {
-            tempDate = dateFormat.parse("12 06 2015 17:00");
-            tempPlayoffStart = dateFormat.parse("28 06 2015 18:00");
-        } catch (ParseException pex){
-            System.out.println("failed to parse start date");
-        }
-        startDate = tempDate;
-        playoffStart = tempPlayoffStart;
+        startDate = date("2015-06-08 12:00");
+        playoffStart = date("2015-06-20 20:00");
     }
 
     private static NeoUserRepository neoUserRepository;
 
 
     public static void seed() throws ParseException {
-        NeoGroupRepository neoGroupRepository = new NeoGroupRepository("Champions League");
-        NeoMatchRepository matches = new NeoMatchRepository("Champions League");
+        NeoGroupRepository neoGroupRepository = new NeoGroupRepository(context);
+        NeoMatchRepository matches = new NeoMatchRepository(context);
         System.out.printf("Groups : %d\n", neoGroupRepository.allGroups().size());
         neoUserRepository = new NeoUserRepository("");
         if(!neoUserRepository.findAdminUser().isValid()){
@@ -47,8 +42,10 @@ public class Config {
         }
     }
 
-    public static Date date(String dateString) throws ParseException {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dateString);
+    public static Date date(String dateString)  {
+        LocalDateTime parse = LocalDateTime.parse(dateString, DateTimeFormatter.ofPattern(dateFormat));
+        return new Date(parse.atZone(ZoneId.of("Europe/Stockholm")).toInstant().toEpochMilli());
+
     }
 
 }

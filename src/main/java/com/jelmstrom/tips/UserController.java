@@ -1,12 +1,8 @@
 package com.jelmstrom.tips;
 
 
-import com.jelmstrom.tips.group.Group;
 import com.jelmstrom.tips.match.Match;
-import com.jelmstrom.tips.match.Result;
-import com.jelmstrom.tips.table.TableEntry;
-import com.jelmstrom.tips.table.TablePrediction;
-import com.jelmstrom.tips.twitter.Tweeter;
+import com.jelmstrom.tips.notification.Tweeter;
 import com.jelmstrom.tips.user.User;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Controller;
@@ -17,13 +13,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.thymeleaf.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static com.jelmstrom.tips.match.Match.Stage.*;
-import static java.util.stream.Collectors.toList;
 
 @SuppressWarnings("UnusedDeclaration")
 @Controller
@@ -48,7 +40,7 @@ public class UserController extends BaseController {
 
 
 
-    @RequestMapping(value = "/drop/{userId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/delete/{userId}", method = RequestMethod.POST)
     public String deleteUser(Model uiModel, @PathVariable String userId, HttpServletRequest request) {
         sweepstake.deleteUser(Long.parseLong(userId));
         return index(uiModel, request);
@@ -140,4 +132,17 @@ public class UserController extends BaseController {
                 , Boolean.valueOf(request.getParameter("enabled")));
         return showConfig(uiModel, request);
     }
+
+    @RequestMapping(value = "/user/{displayName}", method = RequestMethod.GET)
+    public String getUser(Model uiModel, @PathVariable String displayName, HttpServletRequest request) {
+        setSessionUsers(request, userRepository.findByDisplayName(displayName), uiModel);
+        return populateUserView(uiModel);
+    }
+
+    @RequestMapping(value = "/user", method = RequestMethod.GET)
+    public String getUser(Model uiModel, HttpServletRequest request) {
+        setSessionUsers(request, uiModel);
+        return populateUserView(uiModel);
+    }
+
 }

@@ -40,7 +40,7 @@
                                                 <label  class="label label-success" th:text="${match.id}"></label>
                                             </td>
                                             <td>
-                                                <label class="badge" th:text="${#dates.format(match.matchStart,'dd MMMM HH:mm')}"> start</label>
+                                                <input type="datetime" th:name="${match.id +'_startTime'}" th:value="${#dates.format(match.matchStart,'yyyy-MM-dd HH:mm')}"  title="format : 01 12 2015 20:00" />
                                             </td>
                                             <td>
                                                 <select th:name="${match.id + '_promoted'}" th:disabled="not ${playoffTreeEditable}">

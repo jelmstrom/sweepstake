@@ -7,6 +7,7 @@ import com.jelmstrom.tips.match.Match;
 import com.jelmstrom.tips.match.MatchRepository;
 import com.jelmstrom.tips.match.NeoMatchRepository;
 import com.jelmstrom.tips.match.Result;
+import com.jelmstrom.tips.notification.EmailNotification;
 import com.jelmstrom.tips.table.*;
 import com.jelmstrom.tips.table.NeoTablePredictionRepository;
 import com.jelmstrom.tips.table.TablePredictionRepository;

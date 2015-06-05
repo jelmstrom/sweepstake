@@ -1,9 +1,10 @@
-package com.jelmstrom.tips.user;
+package com.jelmstrom.tips.notification;
+
+import com.jelmstrom.tips.user.User;
 
 import javax.mail.Message;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
-import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -16,7 +17,7 @@ public class EmailNotification {
     private final InternetAddress internetAddress;
 
 
-    public EmailNotification()  {
+    public EmailNotification() {
 
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
@@ -45,20 +46,20 @@ public class EmailNotification {
             message.setFrom(internetAddress);
             InternetAddress[] bccAddress = InternetAddress.parse("johan.elmstrom@gmail.com");
             InternetAddress[] toAddress = InternetAddress.parse(user.email);
-            message.setRecipients(Message.RecipientType.TO,toAddress);
-            message.setRecipients(Message.RecipientType.BCC,bccAddress);
+            message.setRecipients(Message.RecipientType.TO, toAddress);
+            message.setRecipients(Message.RecipientType.BCC, bccAddress);
             message.setSubject("Uppdatering från VM tipset");
             message.setText("Hej " + user.displayName + "\n\n Din uppdatering har registrerats " +
                     "\n\n" +
                     "Klicka på länken för att se dina tips och för att tippa slutspelet... \n" +
                     "http://54.76.168.51:8080/authenticate/" + user.token +
                     "\n \n  " +
-                    "Mvh Admin \n\n bit.ly/vm_tips" ) ;
+                    "Mvh Admin \n\n bit.ly/vm_tips");
 
             //Transport.send(message);
 
-            System.out.println("Mail sent to " + user.email + " : " + user.token );
-        } catch (Exception ex){
+            System.out.println("Mail sent to " + user.email + " : " + user.token);
+        } catch (Exception ex) {
             System.out.println("Failed to sed message to " + user.displayName);
             throw new IllegalStateException("failed to send message ", ex);
         }
