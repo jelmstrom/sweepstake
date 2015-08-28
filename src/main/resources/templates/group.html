@@ -157,8 +157,12 @@
 
                 </th:block>
             </td>
+            <td>
 
-            <td th:text="${#dates.format(match.matchDate(),'dd MMMM yyyy HH:mm')}">start</td>
+                <input type="datetime-local" th:name="${match.id +'_startTime'}"
+                       th:value="${#dates.format(match.matchDate(),'yyyy-MM-dd''T''HH:mm')}" th:disabled="not ${activeUser.admin}" />
+            </td>
+
             <td th:text="${match.homeTeam}">home</td>
             <td>-</td>
             <td th:text="${match.awayTeam}">Away</td>

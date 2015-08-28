@@ -7,13 +7,11 @@ import com.jelmstrom.tips.user.User;
 import org.springframework.util.ObjectUtils;
 
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Optional;
 
 import static com.jelmstrom.tips.configuration.Config.STOCKHOLM;
-import static com.jelmstrom.tips.configuration.Config.startDate;
 import static com.jelmstrom.tips.match.Match.Stage.GROUP;
 
 public class Match implements Comparable<Match>{
@@ -155,7 +153,7 @@ public class Match implements Comparable<Match>{
             return true;
         } else if(user.isValid()){
             ZonedDateTime date = ZonedDateTime.now(STOCKHOLM);
-            return stage==GROUP?date.isBefore(startDate) : date.isBefore(matchStart);
+            return stage==GROUP?date.isBefore(Config.getStartDate()) : date.isBefore(matchStart);
         } else {
             return false;
         }
@@ -176,7 +174,7 @@ public class Match implements Comparable<Match>{
 
     @SuppressWarnings("UnusedDeclaration")
     public boolean isValid() {
-        return !(homeTeam.equals("") || awayTeam.equals("") || startDate == null || stage == null || groupId==null || groupId.equals(-1L) ) ;
+        return !(homeTeam.equals("") || awayTeam.equals("") || Config.getStartDate() == null || stage == null || groupId==null || groupId.equals(-1L) ) ;
     }
 
     @Override

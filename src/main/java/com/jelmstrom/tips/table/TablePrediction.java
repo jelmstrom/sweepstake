@@ -6,7 +6,6 @@ import com.jelmstrom.tips.user.User;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import static com.jelmstrom.tips.configuration.Config.STOCKHOLM;
@@ -85,7 +84,7 @@ public class TablePrediction {
 
     @SuppressWarnings("UnusedDeclaration")
     public boolean editable(User user){
-        return user.admin || ZonedDateTime.now(STOCKHOLM).isBefore(Config.startDate);
+        return user.admin || ZonedDateTime.now(STOCKHOLM).isBefore(Config.getStartDate());
     }
 
     @Override

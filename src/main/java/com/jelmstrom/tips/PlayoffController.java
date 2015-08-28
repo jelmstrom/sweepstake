@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.SortedMap;
 
@@ -37,7 +36,7 @@ public class PlayoffController extends BaseController {
         uiModel.addAttribute("groups", groupRepository.allGroups());
         List<String> teams = groupRepository.allGroups().stream().flatMap(group -> group.teams.stream()).sorted().collect(toList());
         uiModel.addAttribute("teams", teams);
-        uiModel.addAttribute("playoffTreeEditable", (sessionUser.admin || ZonedDateTime.now(Config.STOCKHOLM).isBefore(Config.playoffStart)));
+        uiModel.addAttribute("playoffTreeEditable", (sessionUser.admin || ZonedDateTime.now(Config.STOCKHOLM).isBefore(Config.getPlayoffStart())));
 
         return "playoff";
     }

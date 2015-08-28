@@ -114,6 +114,10 @@ public class BaseController {
     private Match updateMatchTeams(HttpServletRequest request, String matchId, Match stored) {
         Match updatedMatch;
         String homeTeam = request.getParameter(matchId + "_homeTeam");
+        if(homeTeam == null){
+            //This means a non-admin is updating
+            return stored;
+        }
         String awayTeam = request.getParameter(matchId + "_awayTeam");
         String dateString = request.getParameter(matchId + "_startTime");
 
@@ -133,8 +137,6 @@ public class BaseController {
         }
         return updatedMatch;
     }
-
-
 
     public void addResultToMatch(HttpServletRequest request, User user, Match match) {
         Result existingResult = match.resultFor(user.id);

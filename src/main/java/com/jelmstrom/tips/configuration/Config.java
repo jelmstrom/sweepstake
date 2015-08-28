@@ -26,12 +26,12 @@ public class Config {
     public static final String context = "WorldCup";
     public static final ZoneId STOCKHOLM = ZoneId.of("Europe/Stockholm");
     public static String dateFormat = "yyyy-MM-dd HH:mm";
-    public static final ZonedDateTime playoffStart;
-    public static final ZonedDateTime startDate;
+    private static ZonedDateTime playoffStart;
+    private static ZonedDateTime startDate;
 
     static {
-        startDate = date("2015-06-08 12:00");
-        playoffStart = date("2015-06-20 20:00");
+        startDate = date("2015-09-08 12:00");
+        playoffStart = date("2015-09-22 20:00");
     }
 
     private static NeoUserRepository neoUserRepository;
@@ -54,5 +54,13 @@ public class Config {
 
     public static ZonedDateTime getZonedDateTime(String dateString) {
         return of(LocalDateTime.parse(dateString, ofPattern("yyyy-MM-dd'T'HH:mm")), STOCKHOLM);
+    }
+
+    public static ZonedDateTime getPlayoffStart() {
+        return playoffStart;
+    }
+
+    public static ZonedDateTime getStartDate() {
+        return startDate;
     }
 }
