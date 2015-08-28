@@ -1,5 +1,6 @@
 package com.jelmstrom.tips;
 
+import com.jelmstrom.tips.configuration.Config;
 import com.jelmstrom.tips.group.Group;
 import com.jelmstrom.tips.group.GroupRepository;
 import com.jelmstrom.tips.group.NeoGroupRepository;
@@ -13,6 +14,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -39,7 +41,7 @@ public class AcceptanceTest {
 
     private Sweepstake sweepstake = new Sweepstake(TEST_REPO);
     private Match matchA1;
-    private Date matchStart = new Date();
+    private ZonedDateTime matchStart = ZonedDateTime.now(Config.STOCKHOLM);
     private User user;
     private User playoffUser;
     private User adminUser;

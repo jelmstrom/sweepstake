@@ -158,7 +158,7 @@
                 </th:block>
             </td>
 
-            <td th:text="${#dates.format(match.matchStart,'dd MMMM yyyy HH:mm')}">start</td>
+            <td th:text="${#dates.format(match.matchDate(),'dd MMMM yyyy HH:mm')}">start</td>
             <td th:text="${match.homeTeam}">home</td>
             <td>-</td>
             <td th:text="${match.awayTeam}">Away</td>

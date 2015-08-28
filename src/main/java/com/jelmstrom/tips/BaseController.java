@@ -14,10 +14,16 @@ import org.springframework.ui.Model;
 import org.thymeleaf.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static com.jelmstrom.tips.configuration.Config.STOCKHOLM;
+import static java.time.ZonedDateTime.*;
+import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.stream.Collectors.toList;
 
 public class BaseController {
@@ -110,13 +116,8 @@ public class BaseController {
         String homeTeam = request.getParameter(matchId + "_homeTeam");
         String awayTeam = request.getParameter(matchId + "_awayTeam");
         String dateString = request.getParameter(matchId + "_startTime");
-        Date startTime = null;
-        try {
-            startTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse(dateString);
-        } catch (ParseException e) {
-            System.out.println(dateString + " invalid. Use yyyy-MM-ddTHH:mm or use Chrome");
-        }
 
+        ZonedDateTime startTime = Config.getZonedDateTime(dateString);
         System.out.println(homeTeam + "Start time " + dateString) ;
          if(homeTeam.equals(stored.homeTeam) && awayTeam.equals(stored.awayTeam) && startTime.equals(stored.matchStart)
            ) {
@@ -132,6 +133,8 @@ public class BaseController {
         }
         return updatedMatch;
     }
+
+
 
     public void addResultToMatch(HttpServletRequest request, User user, Match match) {
         Result existingResult = match.resultFor(user.id);

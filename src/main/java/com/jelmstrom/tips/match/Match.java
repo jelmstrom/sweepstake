@@ -2,13 +2,17 @@ package com.jelmstrom.tips.match;
 
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.jelmstrom.tips.configuration.Config;
 import com.jelmstrom.tips.user.User;
 import org.springframework.util.ObjectUtils;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Optional;
 
+import static com.jelmstrom.tips.configuration.Config.STOCKHOLM;
 import static com.jelmstrom.tips.configuration.Config.startDate;
 import static com.jelmstrom.tips.match.Match.Stage.GROUP;
 
@@ -17,7 +21,7 @@ public class Match implements Comparable<Match>{
 
     public final String homeTeam;
     public final String awayTeam;
-    public final Date matchStart;
+    public final ZonedDateTime matchStart;
     public final Stage stage;
     @JsonManagedReference
     public final HashSet<Result> results;
@@ -34,11 +38,11 @@ public class Match implements Comparable<Match>{
     }
 
 
-    public Match(String homeTeam, String awayTeam, Date matchStart, Long groupId) {
+    public Match(String homeTeam, String awayTeam, ZonedDateTime matchStart, Long groupId) {
         this(homeTeam, awayTeam, matchStart, Stage.GROUP, groupId);
     }
 
-    public Match(String homeTeam, String awayTeam, Date matchStart, Stage stage, Long groupId) {
+    public Match(String homeTeam, String awayTeam, ZonedDateTime matchStart, Stage stage, Long groupId) {
         this.homeTeam = homeTeam;
         this.awayTeam = awayTeam;
         this.matchStart = matchStart;
@@ -141,13 +145,17 @@ public class Match implements Comparable<Match>{
        return matchStart.compareTo(o.matchStart);
     }
 
+    public Date matchDate(){
+        return new Date(matchStart.toInstant().toEpochMilli());
+    }
+
     @SuppressWarnings("UnusedDeclaration")
     public boolean editable(User user){
         if(user.admin){
             return true;
         } else if(user.isValid()){
-            Date date = new Date();
-            return stage==GROUP?date.before(startDate) : date.before(matchStart);
+            ZonedDateTime date = ZonedDateTime.now(STOCKHOLM);
+            return stage==GROUP?date.isBefore(startDate) : date.isBefore(matchStart);
         } else {
             return false;
         }

@@ -1,5 +1,6 @@
 package com.jelmstrom.tips;
 
+import com.jelmstrom.tips.configuration.Config;
 import com.jelmstrom.tips.group.Group;
 import com.jelmstrom.tips.group.GroupRepository;
 import com.jelmstrom.tips.group.NeoGroupRepository;
@@ -18,6 +19,7 @@ import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -51,7 +53,7 @@ public class IntegrationTest {
         user = userRepo.store(user);
         user2 = userRepo.store(user2);
         Group group = groupRepo.store(new Group("a", Collections.emptyList()));
-        Match match = new Match("TeamA", "TeamB", new Date(), group.getGroupId());
+        Match match = new Match("TeamA", "TeamB", ZonedDateTime.now(Config.STOCKHOLM), group.getGroupId());
         match = matchRepo.store(match);
         new Result(match, 2, 1, user.id);
         new Result(match, 2, 2, user2.id);
@@ -66,11 +68,11 @@ public class IntegrationTest {
         User user = new User("_display_", "_mail_", false, "_token");
         user = userRepo.store(user);
         Group group = groupRepo.store(new Group("a", Collections.emptyList()));
-        Match match = new Match("TeamA", "TeamB", new Date(), group.getGroupId());
+        Match match = new Match("TeamA", "TeamB", ZonedDateTime.now(Config.STOCKHOLM), group.getGroupId());
         match = matchRepo.store(match);
         new Result(match, 2, 2, user.id);
         new Result(match, 2, 2, user.id);
-        Match match2 = new Match("TeamA", "TeamB", new Date(), group.getGroupId());
+        Match match2 = new Match("TeamA", "TeamB", ZonedDateTime.now(Config.STOCKHOLM), group.getGroupId());
         new Result(match, 2, 1, user.id);
         new Result(match, 2, 2, user.id);
         matchRepo.store(match);
@@ -87,7 +89,7 @@ public class IntegrationTest {
         user = userRepo.store(user);
         user2 = userRepo.store(user2);
         Group group = groupRepo.store(new Group("a", Collections.emptyList()));
-        Match match = new Match("TeamA", "TeamB", new Date(), group.getGroupId());
+        Match match = new Match("TeamA", "TeamB", ZonedDateTime.now(Config.STOCKHOLM), group.getGroupId());
         match = matchRepo.store(match);
         new Result(match, 2, 1, user.id);
         matchRepo.store(match);

@@ -1,5 +1,6 @@
 package com.jelmstrom.tips;
 
+import com.jelmstrom.tips.configuration.Config;
 import com.jelmstrom.tips.group.Group;
 import com.jelmstrom.tips.group.GroupRepository;
 import com.jelmstrom.tips.group.NeoGroupRepository;
@@ -18,6 +19,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -136,17 +138,17 @@ public class Sweepstake {
 
     public List<Match> createLastSixteenStage() {
         Group lastSixteen = groupRepository.store(new Group("16", Collections.<String>emptyList(), Match.Stage.LAST_SIXTEEN));
-        Match match1 = matchRepository.store(new Match("", "", new Date() , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
-        Match match2 = matchRepository.store(new Match("", "", new Date() , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+        Match match1 = matchRepository.store(new Match("", "", ZonedDateTime.now(Config.STOCKHOLM) , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+        Match match2 = matchRepository.store(new Match("", "", ZonedDateTime.now(Config.STOCKHOLM) , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
 
-        Match match3 = matchRepository.store(new Match("", "", new Date() , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
-        Match match4 = matchRepository.store(new Match("", "", new Date() , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+        Match match3 = matchRepository.store(new Match("", "", ZonedDateTime.now(Config.STOCKHOLM) , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+        Match match4 = matchRepository.store(new Match("", "", ZonedDateTime.now(Config.STOCKHOLM) , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
 
-        Match match5 = matchRepository.store(new Match("", "", new Date(), Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
-        Match match6 = matchRepository.store(new Match("", "", new Date() , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+        Match match5 = matchRepository.store(new Match("", "", ZonedDateTime.now(Config.STOCKHOLM), Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+        Match match6 = matchRepository.store(new Match("", "", ZonedDateTime.now(Config.STOCKHOLM) , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
 
-        Match match7 = matchRepository.store(new Match("", "", new Date() , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
-        Match match8 = matchRepository.store(new Match("", "", new Date() , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+        Match match7 = matchRepository.store(new Match("", "", ZonedDateTime.now(Config.STOCKHOLM) , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
+        Match match8 = matchRepository.store(new Match("", "", ZonedDateTime.now(Config.STOCKHOLM) , Match.Stage.LAST_SIXTEEN, lastSixteen.getGroupId()));
 
         List<Match> quarterFinals=  matchRepository.stageMatches(QUARTER_FINAL);
         if(quarterFinals.isEmpty()){
@@ -168,11 +170,11 @@ public class Sweepstake {
 
     public List<Match> createQuarterFinalStage() {
         Group quarterFinals = groupRepository.store(new Group("QF", Collections.<String>emptyList(), Match.Stage.QUARTER_FINAL));
-        Match match1 = matchRepository.store(new Match("", "", new Date() , Match.Stage.QUARTER_FINAL, quarterFinals.getGroupId()));
-        Match match2 = matchRepository.store(new Match("", "", new Date() , Match.Stage.QUARTER_FINAL, quarterFinals.getGroupId()));
+        Match match1 = matchRepository.store(new Match("", "", ZonedDateTime.now(Config.STOCKHOLM) , Match.Stage.QUARTER_FINAL, quarterFinals.getGroupId()));
+        Match match2 = matchRepository.store(new Match("", "", ZonedDateTime.now(Config.STOCKHOLM) , Match.Stage.QUARTER_FINAL, quarterFinals.getGroupId()));
 
-        Match match3 = matchRepository.store(new Match("", "", new Date(), Match.Stage.QUARTER_FINAL, quarterFinals.getGroupId()));
-        Match match4 = matchRepository.store(new Match("", "", new Date() , Match.Stage.QUARTER_FINAL, quarterFinals.getGroupId()));
+        Match match3 = matchRepository.store(new Match("", "", ZonedDateTime.now(Config.STOCKHOLM), Match.Stage.QUARTER_FINAL, quarterFinals.getGroupId()));
+        Match match4 = matchRepository.store(new Match("", "", ZonedDateTime.now(Config.STOCKHOLM) , Match.Stage.QUARTER_FINAL, quarterFinals.getGroupId()));
 
         List<Match> semis =  matchRepository.stageMatches(SEMI_FINAL);
         if(semis.isEmpty()){
@@ -188,8 +190,8 @@ public class Sweepstake {
 
     public List<Match> createSemiFinalStage() {
         Group semis = groupRepository.store(new Group("Semi", Collections.<String>emptyList(), Match.Stage.SEMI_FINAL));
-        Match semi1 = matchRepository.store(new Match("", "", new Date() , Match.Stage.SEMI_FINAL, semis.getGroupId()));
-        Match semi2 = matchRepository.store(new Match("", "", new Date() , Match.Stage.SEMI_FINAL, semis.getGroupId()));
+        Match semi1 = matchRepository.store(new Match("", "", ZonedDateTime.now(Config.STOCKHOLM) , Match.Stage.SEMI_FINAL, semis.getGroupId()));
+        Match semi2 = matchRepository.store(new Match("", "", ZonedDateTime.now(Config.STOCKHOLM) , Match.Stage.SEMI_FINAL, semis.getGroupId()));
 
         List<Match> finalStage=  matchRepository.stageMatches(FINAL);
         if(finalStage.isEmpty()){
@@ -202,6 +204,6 @@ public class Sweepstake {
 
     public List<Match> createFinalStage() {
         Group finals = groupRepository.store(new Group("Final", Collections.<String>emptyList(), FINAL));
-        return Collections.singletonList(matchRepository.store(new Match("", "", new Date(), FINAL, finals.getGroupId())));
+        return Collections.singletonList(matchRepository.store(new Match("", "", ZonedDateTime.now(Config.STOCKHOLM), FINAL, finals.getGroupId())));
     }
 }

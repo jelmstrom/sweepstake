@@ -41,7 +41,7 @@
                                             </td>
                                             <td>
                                                 <input type="datetime-local" th:name="${match.id +'_startTime'}"
-                                                       th:value="${#dates.format(match.matchStart,'yyyy-MM-dd''T''HH:mm')}"/>
+                                                       th:value="${#dates.format(match.matchDate(),'yyyy-MM-dd''T''HH:mm')}"/>
                                             </td>
                                             <td>
                                                 <select th:name="${match.id + '_promoted'}" th:disabled="not ${playoffTreeEditable}">

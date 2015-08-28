@@ -1,5 +1,6 @@
 package com.jelmstrom.tips.match;
 
+import com.jelmstrom.tips.configuration.Config;
 import com.jelmstrom.tips.group.Group;
 import com.jelmstrom.tips.group.GroupRepository;
 import com.jelmstrom.tips.group.NeoGroupRepository;
@@ -12,6 +13,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -37,7 +39,7 @@ public class NeoMatchRepositoryTest {
     public void before(){
         user = userRepository.store(new User("test", "test", false, "dkjhskfhs"));
         group = groupRepository.store(new Group("A", Collections.emptyList()));
-        match = new Match("home", "away", new Date(), GROUP, group.getGroupId());
+        match = new Match("home", "away", ZonedDateTime.now(Config.STOCKHOLM), GROUP, group.getGroupId());
         neoMatchRepository.store(match);
     }
 
@@ -64,7 +66,7 @@ public class NeoMatchRepositoryTest {
     @Test
     public void updateMatchShouldUpdateExisting(){
         Group group = groupRepository.store(new Group("A", Collections.emptyList()));
-        Match m2 = new Match("home2", "away2", new Date(), GROUP, group.getGroupId());
+        Match m2 = new Match("home2", "away2", ZonedDateTime.now(Config.STOCKHOLM), GROUP, group.getGroupId());
         m2.setId(match.getId());
         neoMatchRepository.store(m2);
         List<Match> matches = neoMatchRepository.read();
@@ -74,7 +76,7 @@ public class NeoMatchRepositoryTest {
 
     @Test
     public void matchPredictionsShouldFindTwoResultsForUser(){
-        Match m2 = new Match("home2", "away2", new Date(), GROUP, group.getGroupId());
+        Match m2 = new Match("home2", "away2", ZonedDateTime.now(Config.STOCKHOLM), GROUP, group.getGroupId());
         m2 = neoMatchRepository.store(m2);
         User user = new NeoUserRepository("").store(new User("111", "111", false, "111"));
         Result result = new Result(m2, 2, 2, user.id);
@@ -89,7 +91,7 @@ public class NeoMatchRepositoryTest {
 
     @Test
     public void deleteMatchAndResults(){
-        Match m2 = new Match("home2", "away2", new Date(), GROUP, group.getGroupId());
+        Match m2 = new Match("home2", "away2", ZonedDateTime.now(Config.STOCKHOLM), GROUP, group.getGroupId());
         Result res = new Result(m2, 2, 2, user.id);
 
         assertThat(m2.results.size(), is(1));
@@ -110,7 +112,7 @@ public class NeoMatchRepositoryTest {
     public void createPlayoffMatch(){
         Group playoff = new Group("playoff", Collections.EMPTY_LIST);
         playoff = groupRepository.store(playoff);
-        Match match = new Match("", "", new Date(), LAST_SIXTEEN, playoff.getGroupId());
+        Match match = new Match("", "", ZonedDateTime.now(Config.STOCKHOLM), LAST_SIXTEEN, playoff.getGroupId());
         match = neoMatchRepository.store(match);
         assertThat(match.getId(), is(notNullValue()));
     }
@@ -119,7 +121,7 @@ public class NeoMatchRepositoryTest {
     public void getByStage(){
         Group playoff = new Group("playoff", Collections.EMPTY_LIST);
         playoff = groupRepository.store(playoff);
-        Match match = new Match("", "", new Date(), LAST_SIXTEEN, playoff.getGroupId());
+        Match match = new Match("", "", ZonedDateTime.now(Config.STOCKHOLM), LAST_SIXTEEN, playoff.getGroupId());
         match = neoMatchRepository.store(match);
         assertThat(match.getId(), is(notNullValue()));
         assertThat(neoMatchRepository.stageMatches(LAST_SIXTEEN).size(), is(1));
@@ -133,8 +135,8 @@ public class NeoMatchRepositoryTest {
         Group qf = new Group("playoff", Collections.EMPTY_LIST, Match.Stage.QUARTER_FINAL);
         ls = groupRepository.store(ls);
         qf = groupRepository.store(qf);
-        Match match = new Match("", "", new Date(), Match.Stage.LAST_SIXTEEN, ls.getGroupId());
-        Match matchQf = new Match("", "", new Date(), Match.Stage.QUARTER_FINAL, ls.getGroupId());
+        Match match = new Match("", "", ZonedDateTime.now(Config.STOCKHOLM), Match.Stage.LAST_SIXTEEN, ls.getGroupId());
+        Match matchQf = new Match("", "", ZonedDateTime.now(Config.STOCKHOLM), Match.Stage.QUARTER_FINAL, ls.getGroupId());
         match = neoMatchRepository.store(match);
         matchQf = neoMatchRepository.store(matchQf);
         neoMatchRepository.addRelation(match, "homeTeam", matchQf);

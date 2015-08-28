@@ -1,6 +1,7 @@
 package com.jelmstrom.tips;
 
 
+import com.jelmstrom.tips.configuration.Config;
 import com.jelmstrom.tips.group.Group;
 import com.jelmstrom.tips.match.Match;
 import com.jelmstrom.tips.table.TableEntry;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static java.util.stream.Collectors.toList;
@@ -71,13 +74,13 @@ public class GroupController extends BaseController {
         long group = Long.parseLong(groupId);
         String dateString = request.getParameter("matchDate");
         try {
-            Date startTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse(dateString);
+            ZonedDateTime startTime = Config.getZonedDateTime(dateString);
             Match newMatch = new Match(request.getParameter("homeTeam")
                     , request.getParameter("awayTeam")
                     , startTime
                     , group);
             matchRepository.store(newMatch);
-        } catch (ParseException e) {
+        } catch (Exception e) {
             uiModel.addAttribute("dateFormatError", dateString + " invalid. Use yyyy-MM-ddTHH:mm or use Chrome");
         }
 

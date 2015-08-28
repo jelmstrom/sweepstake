@@ -13,16 +13,21 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 
+import static java.time.ZonedDateTime.of;
+import static java.time.format.DateTimeFormatter.ofPattern;
+
 public class Config {
     public static final String context = "WorldCup";
+    public static final ZoneId STOCKHOLM = ZoneId.of("Europe/Stockholm");
     public static String dateFormat = "yyyy-MM-dd HH:mm";
-    public static final Date playoffStart;
-    public static final Date startDate;
+    public static final ZonedDateTime playoffStart;
+    public static final ZonedDateTime startDate;
 
     static {
         startDate = date("2015-06-08 12:00");
@@ -42,14 +47,12 @@ public class Config {
         }
     }
 
-    public static Date date(String dateString)  {
+    public static ZonedDateTime date(String dateString)  {
         LocalDateTime parse = LocalDateTime.parse(dateString, DateTimeFormatter.ofPattern(dateFormat));
-        return new Date(parse.atZone(ZoneId.of("Europe/Stockholm")).toInstant().toEpochMilli());
+        return parse.atZone(STOCKHOLM);
     }
 
-    public static Date date(String dateString, String pattern)  {
-        LocalDateTime parse = LocalDateTime.parse(dateString, DateTimeFormatter.ofPattern(dateFormat));
-        return new Date(parse.atZone(ZoneId.of("Europe/Stockholm")).toInstant().toEpochMilli());
+    public static ZonedDateTime getZonedDateTime(String dateString) {
+        return of(LocalDateTime.parse(dateString, ofPattern("yyyy-MM-dd'T'HH:mm")), STOCKHOLM);
     }
-
 }

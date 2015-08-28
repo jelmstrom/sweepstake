@@ -1,5 +1,6 @@
 package com.jelmstrom.tips.match;
 
+import com.jelmstrom.tips.configuration.Config;
 import com.jelmstrom.tips.persistence.NeoRepository;
 import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.*;
@@ -7,6 +8,9 @@ import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Traverser;
 import org.springframework.util.StringUtils;
 
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.StreamSupport;
 
@@ -42,7 +46,7 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
             if (!StringUtils.isEmpty(newMatch.homeTeam) || !matchNode.hasProperty("homeTeam")) {
                 matchNode.setProperty("homeTeam", newMatch.homeTeam);
             }
-            matchNode.setProperty("matchStart", newMatch.matchStart.getTime());
+            matchNode.setProperty("matchStart", newMatch.matchStart.format(DateTimeFormatter.ISO_ZONED_DATE_TIME));
             matchNode.setProperty("stage", newMatch.stage.toString());
             matchNode.setProperty("groupId", newMatch.groupId);
 
@@ -120,7 +124,7 @@ public class NeoMatchRepository extends NeoRepository implements MatchRepository
         Match match = new Match(
                 matchNode.getProperty("homeTeam").toString(),
                 matchNode.getProperty("awayTeam").toString(),
-                new Date(Long.parseLong(matchNode.getProperty("matchStart").toString())),
+                ZonedDateTime.parse(matchNode.getProperty("matchStart").toString(), DateTimeFormatter.ISO_ZONED_DATE_TIME),
                 Match.Stage.valueOf(matchNode.getProperty("stage").toString()),
                 Long.parseLong(matchNode.getProperty("groupId").toString()));
 

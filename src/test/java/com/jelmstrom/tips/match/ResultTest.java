@@ -1,8 +1,10 @@
 package com.jelmstrom.tips.match;
 
 
+import com.jelmstrom.tips.configuration.Config;
 import org.junit.Test;
 
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 import static com.jelmstrom.tips.match.Match.Stage.*;
@@ -79,7 +81,7 @@ public class ResultTest {
 
     @Test
     public void pointsForCorrectLast16GameShouldBe7(){
-        Match lsMatch = new Match("a", "b", new Date(), LAST_SIXTEEN, -1L);
+        Match lsMatch = new Match("a", "b", ZonedDateTime.now(Config.STOCKHOLM), LAST_SIXTEEN, -1L);
         lsMatch.setId(1L);
         lsMatch.setCorrectResult(new Result(lsMatch, 1, 2, 12345L, "b"));
         Result userResult = new Result(lsMatch, 1, 2, 54312L, "b");
@@ -88,7 +90,7 @@ public class ResultTest {
 
     @Test
     public void pointsForCorrectQuarterFinalGameShouldBe11(){
-        Match lsMatch = new Match("a", "b", new Date(), QUARTER_FINAL, -1L);
+        Match lsMatch = new Match("a", "b", ZonedDateTime.now(Config.STOCKHOLM), QUARTER_FINAL, -1L);
         lsMatch.setId(1L);
         lsMatch.setCorrectResult(new Result(lsMatch, 1, 2, 12345L, "b"));
         Result userResult = new Result(lsMatch, 1, 2, 54312L, "b");
@@ -97,7 +99,7 @@ public class ResultTest {
 
     @Test
     public void pointsForCorrectWinnerInQuarterFinalShouldBe4(){
-        Match lsMatch = new Match("a", "b", new Date(), QUARTER_FINAL, -1L);
+        Match lsMatch = new Match("a", "b", ZonedDateTime.now(Config.STOCKHOLM), QUARTER_FINAL, -1L);
         lsMatch.setId(1L);
         lsMatch.setCorrectResult(new Result(lsMatch, 1, 1, 12345L, "a"));
         Result userResult = new Result(lsMatch, 2, 0, 54312L, "a");
@@ -106,7 +108,7 @@ public class ResultTest {
 
     @Test
     public void pointsForCorrectWinnerInSemiFinalShouldBe8(){
-        Match lsMatch = new Match("a", "b", new Date(), SEMI_FINAL, -1L);
+        Match lsMatch = new Match("a", "b", ZonedDateTime.now(Config.STOCKHOLM), SEMI_FINAL, -1L);
         lsMatch.setId(1L);
         lsMatch.setCorrectResult(new Result(lsMatch, 1, 1, 12345L, "a"));
         Result userResult = new Result(lsMatch, 2, 0, 54321L, "a");
@@ -115,7 +117,7 @@ public class ResultTest {
 
     @Test
     public void pointsForCorrectSemiFinalShouldBe11(){
-        Match lsMatch = new Match("a", "b", new Date(), SEMI_FINAL, -1L);
+        Match lsMatch = new Match("a", "b", ZonedDateTime.now(Config.STOCKHOLM), SEMI_FINAL, -1L);
         lsMatch.setId(1L);
         lsMatch.setCorrectResult(new Result(lsMatch, 2, 0, 12345L, "a"));
         Result userResult = new Result(lsMatch, 2, 0, 54321L, "a");
@@ -124,7 +126,7 @@ public class ResultTest {
 
     @Test
     public void pointsForCorrectFinalShouldBe16(){
-        Match lsMatch = new Match("a", "b", new Date(), FINAL, -1L);
+        Match lsMatch = new Match("a", "b", ZonedDateTime.now(Config.STOCKHOLM), FINAL, -1L);
         lsMatch.setId(1L);
         lsMatch.setCorrectResult(new Result(lsMatch, 0, 0, 12345L, "a"));
         Result userResult = new Result(lsMatch, 2, 1, 54321L, "a");
@@ -133,7 +135,7 @@ public class ResultTest {
 
     @Test
     public void pointsForCorrectFinalShouldBe12(){
-        Match lsMatch = new Match("a", "b", new Date(), BRONZE, -1L);
+        Match lsMatch = new Match("a", "b", ZonedDateTime.now(Config.STOCKHOLM), BRONZE, -1L);
         lsMatch.setId(1L);
         lsMatch.setCorrectResult(new Result(lsMatch, 0, 0, 12345L, "a"));
         Result userResult = new Result(lsMatch, 2, 1, 54321L, "a");
