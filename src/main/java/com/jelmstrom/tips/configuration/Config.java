@@ -45,7 +45,11 @@ public class Config {
     public static Date date(String dateString)  {
         LocalDateTime parse = LocalDateTime.parse(dateString, DateTimeFormatter.ofPattern(dateFormat));
         return new Date(parse.atZone(ZoneId.of("Europe/Stockholm")).toInstant().toEpochMilli());
+    }
 
+    public static Date date(String dateString, String pattern)  {
+        LocalDateTime parse = LocalDateTime.parse(dateString, DateTimeFormatter.ofPattern(dateFormat));
+        return new Date(parse.atZone(ZoneId.of("Europe/Stockholm")).toInstant().toEpochMilli());
     }
 
 }

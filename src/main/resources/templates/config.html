@@ -8,21 +8,19 @@
     <link rel="stylesheet" href="http://getbootstrap.com/examples/dashboard/dashboard.css"/>
 
 </head>
-<body>
+<body >
 <div th:replace="fragments/header :: header">...</div>
 
 
 <div class="container">
     <div class="hero-unit">
-
         <p>
         <th:block th:if="${!stages.isEmpty()}">
             <form action="playoff/stage" method="post">
                 <select name="stage">
                     <option th:each="stage:${stages}"
                             th:value="${stage}"
-                            th:text="${stage}"
-                            >stages</option>
+                            th:text="${stage}">stages</option>
                 </select>
                 <button class="btn btn-sm btn-success" type="submit" name="action" value="update">Add Stage</button>
             </form>

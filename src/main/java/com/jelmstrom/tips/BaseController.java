@@ -14,6 +14,8 @@ import org.springframework.ui.Model;
 import org.thymeleaf.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static java.util.stream.Collectors.toList;
@@ -108,7 +110,13 @@ public class BaseController {
         String homeTeam = request.getParameter(matchId + "_homeTeam");
         String awayTeam = request.getParameter(matchId + "_awayTeam");
         String dateString = request.getParameter(matchId + "_startTime");
-        Date startTime = Config.date(dateString);
+        Date startTime = null;
+        try {
+            startTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse(dateString);
+        } catch (ParseException e) {
+            System.out.println(dateString + " invalid. Use yyyy-MM-ddTHH:mm or use Chrome");
+        }
+
         System.out.println(homeTeam + "Start time " + dateString) ;
          if(homeTeam.equals(stored.homeTeam) && awayTeam.equals(stored.awayTeam) && startTime.equals(stored.matchStart)
            ) {
